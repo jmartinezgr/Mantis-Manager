@@ -34,8 +34,7 @@ La falta de un sistema estructurado y centralizado para la gestión de mantenimi
 8. **Módulo de Gestión de Usuarios y Roles:**
    - Administra los permisos de acceso y roles de los diferentes tipos de usuarios, garantizando que cada uno solo tenga acceso a la información y funciones relevantes.
 
-9. **Módulo de Integración con IoT:**
-   - Permite la integración con dispositivos IoT para monitorear el estado de las máquinas en tiempo real, generando automáticamente tickets cuando se detectan anomalías o condiciones de operación no óptimas.
+  
 
 ## Requisitos No Funcionales
 
