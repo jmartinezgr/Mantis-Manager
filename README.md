@@ -52,11 +52,7 @@ Un operador de una máquina reporta un fallo crítico a través del sistema, gen
 
 ## Impacto Esperado
 
-La implementación de **Mantis Manager** reducirá significativamente el tiempo de inactividad de las máquinas, mejorará la eficiencia del área de mantenimiento y aumentará la productividad general de la empresa. Además, proporcionará una mayor organización, transparencia, y capacidad de toma de decisiones informadas basadas en datos históricos de mantenimiento.
+La implementación de **Mantis Manager** reducirá significativamente el tiempo de inactividad de las máquinas, mejorará la eficiencia del área de mantenimiento y aumentará la productividad general de la empresa. Además, proporcionará una mayor organización, transparencia, y capacidad de toma de decisiones informadas basadas en datos históricos de mantenimiento
 
-## Instalación
 
-1. Clona este repositorio:
-   ```bash
-   git clone https://github.com/tuusuario/mantis-manager.git
 
