@@ -1,53 +1,62 @@
-# Mantis-Manager
-Software de mantenimiento
-Mantis Manager
-Mantis Manager es un software de gestión de mantenimiento diseñado para optimizar la organización y eficiencia en la gestión de mantenimientos y reparaciones de máquinas en una empresa. Proporciona una plataforma centralizada para reportar, gestionar, y hacer seguimiento de los trabajos de mantenimiento, tanto preventivos como correctivos.
+# Mantis Manager
 
-Descripción del Problema
-Las empresas a menudo enfrentan problemas debido a la falta de organización en la gestión de los mantenimientos y reparaciones de sus máquinas. Esto puede provocar tiempos de respuesta prolongados y máquinas inactivas durante más tiempo del necesario, lo que afecta la producción y dificulta el aprovechamiento óptimo de los recursos.
+**Mantis Manager** es un software de gestión de mantenimiento diseñado para mejorar la organización y eficiencia en la gestión de mantenimientos y reparaciones de máquinas en una empresa. Este software proporciona una plataforma centralizada para reportar, gestionar, y hacer seguimiento de los trabajos de mantenimiento, tanto preventivos como correctivos.
 
-Visión General del Sistema
-Mantis Manager resuelve estos problemas proporcionando una plataforma centralizada para:
+## Descripción del Problema
 
-Reporte de incidentes: Los usuarios pueden generar tickets de manera rápida al identificar una necesidad de mantenimiento o reparación.
-Gestión de tickets: Los técnicos pueden gestionar y asignar tickets, priorizando problemas urgentes.
-Historial de mantenimientos: Un registro accesible de todas las intervenciones realizadas para facilitar auditorías y análisis de problemas recurrentes.
-Requisitos Funcionales
-Módulo de Reporte de Daños y Mantenimientos:
+La falta de un sistema estructurado y centralizado para la gestión de mantenimientos y reparaciones de máquinas puede llevar a tiempos de respuesta prolongados y periodos de inactividad no planificados. Esto no solo afecta la producción, sino que también dificulta el aprovechamiento óptimo de los recursos. **Mantis Manager** está diseñado para resolver estos problemas al proporcionar una solución integral para la gestión de mantenimientos.
 
-Permite a los usuarios generar tickets de forma sencilla con detalles como máquina afectada, descripción del problema y nivel de urgencia.
-Módulo de Gestión de Tickets:
+## Funcionalidades del Sistema
 
-Proporciona a los técnicos una lista de tickets abiertos que pueden ser filtrados por urgencia, tipo de problema, o máquina afectada. Los técnicos pueden asignarse tickets y llevar a cabo las reparaciones de forma eficiente.
-Módulo de Historial de Mantenimientos:
+### Módulos Principales
 
-Almacena un registro completo de todas las intervenciones realizadas, incluyendo detalles como técnico responsable, fechas de inicio y fin, y resultados obtenidos.
-Módulo de Planificación de Mantenimiento Preventivo:
+1. **Módulo de Reporte de Daños y Mantenimientos:**
+   - Permite a los usuarios generar tickets de mantenimiento de manera rápida y sencilla. Cada ticket incluye detalles como la máquina afectada, una descripción del problema y la urgencia del mantenimiento.
 
-Permite programar mantenimientos preventivos basados en el tiempo de uso de las máquinas, asegurando que el equipo se mantenga en condiciones óptimas y reduciendo la posibilidad de fallos inesperados.
-Módulo de Gestión de Inventario de Repuestos:
+2. **Módulo de Gestión de Tickets:**
+   - Los técnicos pueden ver una lista de todos los tickets abiertos, filtrarlos por urgencia, tipo de problema o máquina afectada, y asignarse los tickets que correspondan a su especialidad. Esto reduce el tiempo de respuesta y asegura que los problemas se aborden de manera eficiente.
 
-Lleva un control de los repuestos y materiales necesarios para el mantenimiento. Permite verificar la disponibilidad de piezas antes de asignar una orden de trabajo y envía alertas cuando el inventario está bajo.
-Módulo de Notificaciones y Alertas:
+3. **Módulo de Historial de Mantenimientos:**
+   - Proporciona un registro centralizado de todos los mantenimientos realizados, tanto preventivos como correctivos. Este historial incluye detalles como la intervención realizada, el técnico responsable, fechas de inicio y fin, y los resultados obtenidos.
 
-Notifica automáticamente a los técnicos y supervisores sobre la asignación de nuevos tickets, vencimientos de mantenimiento preventivo, y otros eventos críticos para asegurar que los tiempos de respuesta sean mínimos.
-Módulo de Reportes y Análisis:
+4. **Módulo de Planificación de Mantenimiento Preventivo:**
+   - Permite programar mantenimientos preventivos basados en el tiempo de uso de las máquinas o en intervalos de tiempo definidos, reduciendo la posibilidad de fallos inesperados.
 
-Genera reportes detallados sobre el rendimiento del mantenimiento, los tiempos de inactividad, los costos de reparaciones, y otros indicadores clave. Estos reportes ayudan a identificar áreas de mejora y a optimizar la gestión de mantenimiento.
-Módulo de Gestión de Usuarios y Roles:
+5. **Módulo de Gestión de Inventario de Repuestos:**
+   - Lleva un control del inventario de repuestos y materiales necesarios para el mantenimiento. Los usuarios pueden verificar la disponibilidad de piezas antes de asignar una orden de trabajo y recibir alertas cuando el inventario está bajo.
 
-Administra los permisos de acceso y roles de los diferentes tipos de usuarios, como técnicos, supervisores y administradores, garantizando que cada usuario solo tenga acceso a la información y funciones relevantes.
-Módulo de Integración con IoT:
+6. **Módulo de Notificaciones y Alertas:**
+   - Envía notificaciones automáticas a técnicos y supervisores sobre la asignación de nuevos tickets, vencimientos de mantenimiento preventivo, y otros eventos críticos.
 
-Permite la integración con dispositivos IoT que monitorean el estado de las máquinas en tiempo real, generando automáticamente tickets cuando se detectan anomalías o condiciones de operación no óptimas.
-Requisitos No Funcionales
-Escalabilidad:
+7. **Módulo de Reportes y Análisis:**
+   - Genera reportes detallados sobre el rendimiento del mantenimiento, los tiempos de inactividad, los costos de reparaciones, y otros indicadores clave de rendimiento.
 
-El sistema está diseñado para manejar un número creciente de usuarios y tickets conforme la empresa crezca.
-Usabilidad:
+8. **Módulo de Gestión de Usuarios y Roles:**
+   - Administra los permisos de acceso y roles de los diferentes tipos de usuarios, garantizando que cada uno solo tenga acceso a la información y funciones relevantes.
 
-La interfaz es intuitiva y permite a los usuarios generar y gestionar tickets sin necesidad de formación extensa.
-Seguridad:
+9. **Módulo de Integración con IoT:**
+   - Permite la integración con dispositivos IoT para monitorear el estado de las máquinas en tiempo real, generando automáticamente tickets cuando se detectan anomalías o condiciones de operación no óptimas.
 
-Los datos almacenados, especialmente los históricos, están protegidos contra accesos no autorizados, garantizando la confidencialidad e integridad de la información.
-Flujo de Interacción
+## Requisitos No Funcionales
+
+- **Escalabilidad:** Capacidad de manejar un número creciente de usuarios y tickets a medida que la empresa expanda sus operaciones.
+- **Usabilidad:** Interfaz intuitiva que permite a los usuarios generar y gestionar tickets sin necesidad de entrenamiento extenso.
+- **Seguridad:** Protección de datos contra accesos no autorizados, garantizando la confidencialidad e integridad de la información.
+
+## Flujo de Interacción
+
+
+## Escenario de Uso
+
+Un operador de una máquina reporta un fallo crítico a través del sistema, generando un ticket que detalla el problema. Un técnico asignado recibe una notificación, se encarga de la reparación en menos de una hora, y documenta la intervención. La máquina vuelve a estar operativa, minimizando el impacto en la producción.
+
+## Impacto Esperado
+
+La implementación de **Mantis Manager** reducirá significativamente el tiempo de inactividad de las máquinas, mejorará la eficiencia del área de mantenimiento y aumentará la productividad general de la empresa. Además, proporcionará una mayor organización, transparencia, y capacidad de toma de decisiones informadas basadas en datos históricos de mantenimiento.
+
+## Instalación
+
+1. Clona este repositorio:
+   ```bash
+   git clone https://github.com/tuusuario/mantis-manager.git
+
