@@ -5,6 +5,8 @@ from rich.panel import Panel
 
 from auth.auth_service import login
 
+import time
+
 console = Console()
 
 def clear_screen():
@@ -26,9 +28,11 @@ def login_menu():
     
     if try_login[0]:
         console.print("[bold green]Login exitoso[/bold green]")
+        time.sleep(1.5)
         return True
     else:
         console.print(f"[bold red]{try_login[1]}[/bold red]")
+        time.sleep(2)
         return False
 
 if __name__ == "__main__":
