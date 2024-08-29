@@ -28,11 +28,35 @@ class TicketRepository:
     @classmethod
     def get_ticket_by_id(cls, ticket_id):
         """
-        Obtiene un ticket por ID desde un diccionario de tickets (para propósito de ejemplo).
-        En una implementación real, podrías obtener desde una base de datos.
+        Obtiene un ticket por ID desde la base de datos.
+
+        :param ticket_id: ID del ticket a buscar.
+        :return: Una lista con los datos del ticket si se encuentra, de lo contrario, None.
         """
-        # Aquí podrías implementar la lógica para obtener un ticket desde un diccionario o base de datos
-        pass
+        cursor = cls.get_cursor()
+
+        try:
+            cursor.execute('SELECT * FROM tickets WHERE id = ?', (ticket_id,))
+            row = cursor.fetchone()
+
+            if row:
+                return Ticket(
+                id=row[0],                # ID del ticket
+                title=None,
+                status=row[1],            # Estado del ticket
+                description=row[2],       # Descripción del ticket
+                reporter=row[3],          # ID del reportero
+                assigned_to=row[4],       # ID del encargado (puede ser None)
+                fecha_creacion=row[5],    # Fecha de creación
+                fecha_cierre=row[6]       # Fecha de cierre (puede ser None)
+            )
+            else:
+                return None  # Retornar None si no se encuentra el ticket
+
+        except sqlite3.Error as e:
+            print(f"Error al obtener el ticket: {e}")
+            return None
+
 
     @classmethod
     def print_all_tickets(cls):
@@ -71,8 +95,17 @@ class TicketRepository:
         Elimina un ticket del repositorio (para propósito de ejemplo).
         En una implementación real, podrías eliminar desde una base de datos.
         """
-        # Aquí podrías implementar la lógica para eliminar desde un diccionario o base de datos
-        pass
+        cursor = cls.get_cursor()
+        connection = cls.get_connection()
+        cursor.execute('DELETE FROM tickets WHERE id = ?', (ticket_id,))
+        connection.commit()
+
+        # Verificar si se eliminó algún registro
+        if cursor.rowcount > 0:
+            return True
+        else:
+            print(f"Ticket ID {ticket_id} no encontrado.")
+            return False
 
     @classmethod
     def create_ticket(cls, title, description, reporter):
@@ -100,8 +133,35 @@ class TicketRepository:
 
         except sqlite3.Error as e:
             print(f"Error al crear el ticket: {e}")
+    
 
-    
-   
-    
-    
+    @classmethod
+    def update_ticket(cls, ticket):
+        cursor = cls.get_cursor()
+        try:
+            # Actualizamos todos los campos relevantes del ticket
+            cursor.execute('''
+                UPDATE tickets
+                SET estado = ?, descripcion = ?, id_creador = ?, id_cierre_usuario = ?, fecha_creacion = ?, fecha_cierre = ?
+                WHERE id = ?
+            ''', (
+                ticket.status,          # Estado del ticket
+                ticket.description,     # Descripción del ticket
+                ticket.reporter,        # ID del creador del ticket (reporter)
+                ticket.assigned_to,     # ID del encargado (si aplica)
+                ticket.fecha_creacion,  # Fecha de creación del ticket
+                ticket.fecha_cierre,    # Fecha de cierre del ticket (si aplica)
+                ticket.id               # ID del ticket a actualizar
+            ))
+
+            cls.connection.commit()
+
+            if cursor.rowcount > 0:
+                return True
+            else:
+                print(f"No se encontró el ticket con ID {ticket.id} para actualizar.")
+                return False
+
+        except sqlite3.Error as e:
+            print(f"Error al actualizar el ticket: {e}")
+            return False
