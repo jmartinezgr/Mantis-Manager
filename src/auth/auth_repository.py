@@ -1,4 +1,4 @@
-from ..infrastructure.database.connection import Connection 
+from infrastructure.database.connection import Connection
 import password_manager
 
 class Auth_Repository:

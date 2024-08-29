@@ -1,5 +1,6 @@
 from tickets.ticket_service import TicketService
 from  tickets.ticket_repository import TicketRepository as RP
+
 def print_menu():
     print("\n--- Sistema de Tickets ---")
     print("1. Crear Ticket")
