@@ -5,9 +5,10 @@ def print_menu():
     print("1. Crear Ticket")
     print("2. Ver Ticket")
     print("3. Actualizar Estado del Ticket")
-    print("4. Eliminar Ticket")
-    print("5. Listar Tickets")
-    print("6. Salir")
+    print("4. Asignar Ticket")
+    print("5. Eliminar Ticket")
+    print("6. Listar Tickets")
+    print("7. Salir")
 
 def create_ticket(service):
     titulo = input("titulo ")
@@ -48,6 +49,14 @@ def list_tickets(service):
     else:
         print("No hay tickets registrados.")
 
+def ticket_assign(service):
+    ticket_id = int(input("ID del ticket a asignar: "))
+    assigned_to = input("Usuario a asignar: ")
+    if service.assign_ticket(ticket_id, assigned_to):
+        print(f"Ticket {ticket_id} asignado a {assigned_to}.")
+    else:
+        print("No se pudo asignar el ticket.")
+
 def ticket_interface():
     repository= RP()
     service = TicketService(repository)
@@ -61,10 +70,12 @@ def ticket_interface():
         elif choice == '3':
             update_ticket(service)
         elif choice == '4':
-            delete_ticket(service)
+            ticket_assign(service)
         elif choice == '5':
-            list_tickets(service)
+            delete_ticket(service)
         elif choice == '6':
+            list_tickets(service)
+        elif choice == '7':
             print("Saliendo del sistema.")
             break
         else:
