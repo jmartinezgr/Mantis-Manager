@@ -265,4 +265,3 @@ class Contrasena:
 #Caso de uso
 """jefe=Jefe_Desarrollo()
 jefe.crear_usuario(123,"operario de maquina")"""
-
