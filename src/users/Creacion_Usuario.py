@@ -4,7 +4,7 @@ import sqlite3
 
 class Personal_Empresa: 
     def __init__(self): 
-        self.__nombre=""
+        self.__nombre=None
         self.__id=None 
         self.__fecha_vinculacion=None
         self.__contrasena=None
