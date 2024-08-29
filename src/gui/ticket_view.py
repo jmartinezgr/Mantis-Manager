@@ -87,6 +87,8 @@ def ticket_interface():
             ticket_assign(service)
         elif choice == '5':
             delete_ticket(service)
+            
+        elif choice == '6':
             print_menu_ticket()
             choice = input("Seleccione una opción: ")
             if choice == '1':
@@ -95,9 +97,6 @@ def ticket_interface():
                 list_tickets_by_reporter(service)
             else:
                 print("Opción no válida. Intente nuevamente.")
-            
-        elif choice == '6':
-            list_tickets(service)
         elif choice == '7':
             print("Saliendo del sistema.")
             break
