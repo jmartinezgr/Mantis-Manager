@@ -1,7 +1,11 @@
+from infrastructure.database.connection import Connection
+import sqlite3
+from datetime import datetime
 from tickets.ticket_entity import Ticket
 class TicketRepository:
     def __init__(self):
         self.tickets = {}
+        
 
     def save_ticket(self, ticket):
         self.tickets[ticket["ticket_id"]] = ticket
@@ -41,24 +45,36 @@ class TicketRepository:
         return False
     
     
-    def create_ticket(self, title,description,reporter):
-        new_ticket=Ticket(title, description, reporter)
-        ticket_id = new_ticket.id
+    def create_ticket(self, title, description, reporter):
+        # Crear un objeto Ticket
+        new_ticket = Ticket(title, description, reporter)
         
-        # Crear un diccionario con la información del ticket
-        ticket_data = {
-            "ticket_id": ticket_id,
-            "title": new_ticket.title,
-            "description": new_ticket.description,
-            "assigned_to": getattr(new_ticket, 'assigned_to', None),  # Asignado a (si existe)
-            "reporter": new_ticket.reporter,
-            "estatus": new_ticket.status
-        }
+        # Obtener la conexión y el cursor
+        cursor = Connection.get_cursor()
+        connection = Connection.get_connection()
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         
-        # Guardar el ticket en el diccionario de tickets
-        self.tickets[ticket_id] = ticket_data
+
+
+        try:
+            # Insertar el ticket en la base de datos
+            cursor.execute('''
+            INSERT INTO tickets (estado, descripcion, id_creador, fecha_creacion, fecha_cierre)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (new_ticket.status, new_ticket.description, new_ticket.reporter, now, None))
+            
+            # Obtener el ID del ticket recién creado
+            new_ticket.id = cursor.lastrowid
+
+            # Confirmar los cambios
+            connection.commit()
+            print("ticket creado y guardado")
+
+            
+            
+            
         
-        print(f"Ticket ID {ticket_id} creado con éxito.")
-        
+        except sqlite3.Error as e:
+            print(f"Error al crear el ticket: {e}")
     
     

@@ -48,12 +48,10 @@ cursor.execute('''
         estado TEXT NOT NULL,
         descripcion TEXT NOT NULL,
         id_creador INTEGER NOT NULL,
-        id_encargado INTEGER,
         id_cierre_usuario INTEGER,
         fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         fecha_cierre TIMESTAMP,
         FOREIGN KEY (id_creador) REFERENCES usuarios(id),
-        FOREIGN KEY (id_encargado) REFERENCES usuarios(id),
         FOREIGN KEY (id_cierre_usuario) REFERENCES usuarios(id)
     )
 ''')

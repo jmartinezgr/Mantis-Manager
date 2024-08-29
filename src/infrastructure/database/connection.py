@@ -27,7 +27,10 @@ class Connection:
     def get_cursor(cls):
         connection = cls.get_connection()
         return connection.cursor()
-
+   
+    
+    
+    
     """
     @classmethod
     def get_connection(cls):
