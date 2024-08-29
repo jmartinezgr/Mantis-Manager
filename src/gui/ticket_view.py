@@ -86,8 +86,7 @@ def ticket_interface():
         elif choice == '4':
             ticket_assign(service)
         elif choice == '5':
-            delete_ticket(service)
-            
+            delete_ticket(service)    
         elif choice == '6':
             print_menu_ticket()
             choice = input("Seleccione una opción: ")
