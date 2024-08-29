@@ -165,3 +165,35 @@ class TicketRepository:
         except sqlite3.Error as e:
             print(f"Error al actualizar el ticket: {e}")
             return False
+        
+    @classmethod
+    def print_all_tickets_by_reporter(cls, reporter):
+        cursor = cls.get_cursor()
+        connection = cls.get_connection()
+
+        try:
+            cursor.execute('''
+                SELECT id, estado, descripcion, id_creador, id_cierre_usuario, fecha_creacion, fecha_cierre
+                FROM tickets
+                WHERE id_creador = ?
+            ''', (reporter,))
+            tickets = cursor.fetchall()
+
+            if not tickets:
+                print(f"No hay tickets creados por {reporter}.")
+                return
+
+            for ticket in tickets:
+                ticket_id, estado, descripcion, id_creador, id_cierre_usuario, fecha_creacion, fecha_cierre = ticket
+
+                print(f"Ticket ID: {ticket_id}")
+                print(f"  Estado: {estado}")
+                print(f"  Descripción: {descripcion}")
+                print(f"  ID Creador: {id_creador}")
+                print(f"  ID Cierre Usuario: {id_cierre_usuario if id_cierre_usuario else 'No asignado'}")
+                print(f"  Fecha de Creación: {fecha_creacion}")
+                print(f"  Fecha de Cierre: {fecha_cierre if fecha_cierre else 'No cerrado'}")
+                print("-" * 40)
+
+        except sqlite3.Error as e:
+            print(f"Error al consultar los tickets: {e}")

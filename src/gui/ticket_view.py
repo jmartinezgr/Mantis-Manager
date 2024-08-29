@@ -10,6 +10,12 @@ def print_menu():
     print("6. Listar Tickets")
     print("7. Salir")
 
+def print_menu_ticket():
+    print("\n--- Sistema de visualizar Tickets ---")
+    print("1. Ver Ticket por id") 
+    print("2. Ver Ticket por reportero")
+    
+
 def create_ticket(service):
     titulo = input("titulo ")
     descripcion = input("descripción: ")
@@ -56,6 +62,14 @@ def ticket_assign(service):
         print(f"Ticket {ticket_id} asignado a {assigned_to}.")
     else:
         print("No se pudo asignar el ticket.")
+def list_tickets_by_reporter(service):
+    reporter = input("Nombre del reportero: ")
+    tickets = service.list_tickets_by_reporter(reporter)
+    if tickets:
+        for ticket in tickets:
+            print(ticket)
+    else:
+        print(f"No hay tickets registrados por {reporter}.")
 
 def ticket_interface():
     repository= RP()
@@ -73,6 +87,15 @@ def ticket_interface():
             ticket_assign(service)
         elif choice == '5':
             delete_ticket(service)
+            print_menu_ticket()
+            choice = input("Seleccione una opción: ")
+            if choice == '1':
+                view_ticket(service)
+            elif choice == '2':
+                list_tickets_by_reporter(service)
+            else:
+                print("Opción no válida. Intente nuevamente.")
+            
         elif choice == '6':
             list_tickets(service)
         elif choice == '7':

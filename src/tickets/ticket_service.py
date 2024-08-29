@@ -82,6 +82,15 @@ class TicketService:
             return True
         else:
             return False
+    
+    def list_tickets_by_reporter(self, reporter):
+        """
+        Muestra todos los tickets en el repositorio que fueron reportados por un usuario.
+
+        :param reporter: Nombre del reportero.
+        :return: Una lista de todos los objetos Ticket.
+        """
+        return TKR.print_all_tickets_by_reporter(reporter)
    
     
     
