@@ -13,9 +13,15 @@ structure = {
         "gui": ["main_window.py", "ticket_view.py", "user_management_view.py"],
         "common": ["entity_base.py", "value_object_base.py", "utilities.py"],
         "interfaces": ["i_ticket_repository.py", "i_user_repository.py", "i_report_repository.py", "i_auth_repository.py"],
-        "infrastructure": ["mantis_db.py", "logging_service.py", "email_notification_service.py"]
+        "infrastructure": {
+            "database": {
+                "migrations": ["__init__.py", "migration_script.py", "001_initial_schema.py", "002_add_user_roles.py"],
+                "create_database.py": None
+            },
+            "logging_service.py": None,
+            "email_notification_service.py": None
+        }
     },
-    "migrations": ["__init__.py", "migration_script.py", "001_initial_schema.py", "002_add_user_roles.py"],
     "tests": ["test_create_ticket.py", "test_update_ticket_status.py", "test_login_service.py"],
     "docs": ["architecture.md", "api_reference.md", "user_manual.md"],
     "config": ["settings.py", "logging.conf"],
@@ -36,10 +42,9 @@ def create_structure(base_path, structure):
                 file_path = os.path.join(path, file_name)
                 with open(file_path, 'w') as file:
                     pass  # Crea un archivo vacío
-        else:
+        elif content is None:
             # Crea un archivo en el nivel base
-            file_path = os.path.join(base_path, name)
-            with open(file_path, 'w') as file:
+            with open(path, 'w') as file:
                 pass  # Crea un archivo vacío
 
 # Ejecuta el script para crear la estructura
