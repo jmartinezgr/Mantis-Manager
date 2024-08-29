@@ -1,5 +1,3 @@
-# src/main.py
-
 from tickets.ticket_repository import TicketRepository
 from tickets.update_ticket_status import update_ticket_status
 

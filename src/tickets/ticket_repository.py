@@ -1,5 +1,3 @@
-# src/tickets/ticket_repository.py
-
 class TicketRepository:
     def __init__(self):
         self.tickets = {}

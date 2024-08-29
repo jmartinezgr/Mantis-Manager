@@ -1,5 +1,3 @@
-# src/tickets/ticket_service.py
-
 #from datetime import datetime
 from tickets.ticket_repository import TicketRepository
 
