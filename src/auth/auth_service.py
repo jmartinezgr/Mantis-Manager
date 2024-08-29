@@ -9,7 +9,8 @@ def login(username: str, password: str):
     response = auth_repo.verify_user(username, password)  # Llamar al método con la instancia
 
     # Aquí llamamos al repositorio de autenticación para verificar el usuario
-    if response["error"] is None:
+
+    if  isinstance(response, tuple):
         return (True, "Login exitoso")
     else:
         if response["error"] == "Usuario no encontrado":

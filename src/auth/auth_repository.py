@@ -22,7 +22,7 @@ class Auth_Repository:
         if user is None:
             return {"error": "Usuario no encontrado"}
         
-        hashed_password = user["contrasena"]
+        hashed_password = user[6]
         if not check_password(hashed_password, password):
             return {"error": "Contraseña incorrecta"}   
         
