@@ -1,3 +1,6 @@
 
 id,Titulo,Descripcion,Estatus,Reportador
 1,Error en la pagina,La pagina no carga,Pendiente,Juan
+
+2,Error en la página,La página no carga,Pendiente,Juan
+3,Error en el servidor,El servidor no responde,Pendiente,Pedro
