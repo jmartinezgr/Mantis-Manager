@@ -1,11 +1,15 @@
 #from datetime import datetime
 from tickets.ticket_repository import TicketRepository
+from tickets.ticket_entity import Ticket
 
 class TicketService:
     def __init__(self, ticket_repository):
         self.ticket_repository = ticket_repository
-
     
+    def create_ticket(self,titulo, description,reporter ):
+        self.ticket_repository.create_ticket(titulo, description,reporter)
+        
+        
     def update_ticket_status(self, id, nuevo_estado, user):
         ticket = self.ticket_repository.get_ticket_by_id(id) #Buscar el id del tiquet en el repositorio
         
@@ -24,6 +28,38 @@ class TicketService:
         else:
             print(f"Error: Ticket {id} no encontrado.")
         return False
+        
+
+
+    
+    
+    
+    def get_ticket(self, ticket_id):
+        """
+        Obtiene un ticket por su ID.
+
+        :param ticket_id: ID del ticket a buscar.
+        :return: El objeto Ticket si se encuentra, de lo contrario, None.
+        """
+        return self.ticket_repository.get_ticket_by_id(ticket_id)
+
+    def delete_ticket(self, ticket_id):
+        """
+        Elimina un ticket del repositorio.
+
+        :param ticket_id: ID del ticket a eliminar.
+        :return: True si el ticket se eliminó, False si no se encontró.
+        """
+
+    def list_tickets(self):
+        """
+        Muestra todos los tickets en el repositorio.
+
+        :return: Una lista de todos los objetos Ticket.
+        """
+        return self.ticket_repository.print_all_tickets()
+   
+    
     
 
 
