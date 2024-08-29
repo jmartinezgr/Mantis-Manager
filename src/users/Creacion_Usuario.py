@@ -1,4 +1,6 @@
 import re
+import bcrypt
+import sqlite3
 
 class Personal_Empresa: 
     def __init__(self): 
@@ -88,7 +90,13 @@ class Jefe_Desarrollo(Personal_Empresa):
         else: 
             nuevo_usuario = Personal_Empresa()  
         
-        self.listar_usuario(nuevo_usuario)
+        #Crear contraseña
+        txt=input("Ingrese contraseña: ")
+        pwd=Contrasena(txt)
+        contrasena=pwd.guardar_contrasena(nuevo_usuario)
+        encript=pwd.encriptar_contrasena()
+        
+        self.listar_usuario(nuevo_usuario,contrasena,encript)
         print("Usuario {} agregado exitosamente con el rol de {}.".format(nuevo_usuario.getId(),nuevo_usuario.getRol()))   
     
     
@@ -110,12 +118,17 @@ class Jefe_Desarrollo(Personal_Empresa):
         print("Usuario '{}' no encontrado.".format(id))
 
 
-    def listar_usuario(self,usuario): 
+    def listar_usuario(self,usuario,contrasena,encript): 
         """Guarda usuario en usuarios.txt."""
 
+        miConexion=sqlite3.connect("mantis")
+        miCursor=miConexion.cursor()
+        miConexion.close()
+        
         archivo=open("usuarios.txt","a")
-        archivo.write(str(usuario.getId())+" - "+usuario.getRol()) 
+        archivo.write(str(usuario.getId())+" - "+usuario.getRol()+" - " +contrasena+" - "+str(encript))
         archivo.close()
+
     
     def modificar_usuario(self): 
         pass
@@ -196,7 +209,7 @@ class Contrasena:
 
     def verifica_contrasena(self):
         """Verifica que la contraseña contenga: (4-8 caracteres entre los cuales: Mayúsculas, Minúsculas y Números)"""
-        # Lista de los caracteres de la contraseña (sin necesidad de split)
+        # Lista de los caracteres de la contraseña 
         longitud_valida = 4 <= len(self.__contrasena) <= 8
         
         # Acumulador de requisitos no cumplidos
@@ -220,23 +233,35 @@ class Contrasena:
         
         return acumulador == 0  # Devuelve True si todos los criterios están cumplidos, False de lo contrario
 
+
     def criterios_faltantes(self, criterio):
         """Agrega a una lista (atributo de clase) los criterios faltantes de la contraseña"""
         if criterio not in Contrasena.criterios:  # Evita agregar duplicados
             Contrasena.criterios.append(criterio)
 
-    def guardar_contrasena(self):
+    def guardar_contrasena(self,usuario):
         """Guarda contraseña si y solo si la contraseña es válida. De lo contrario vuelve a pedir contraseña""" 
         while True:
             if self.verifica_contrasena(): 
                 print("Contraseña guardada exitosamente.")
+                usuario.setContrasena(self.__contrasena)
+                return self.__contrasena
+        
+
                 break
             else: 
                 print("Tu contraseña no cumple los siguientes requisitos: {}".format(Contrasena.criterios))
                 self.__contrasena = input("INGRESA OTRA CONTRASEÑA: ")
                 Contrasena.criterios.clear()  # Limpiar criterios después de un intento fallido
 
+    def encriptar_contrasena(self): 
+        txt=self.__contrasena
+        pwd=txt.encode("utf-8")
+        sal=bcrypt.gensalt()
+        encript=bcrypt.hashpw(pwd,sal)
+        return encript
+            
+#Caso de uso
+"""jefe=Jefe_Desarrollo()
+jefe.crear_usuario(123,"operario de maquina")"""
 
-jefe=Jefe_Desarrollo()
-
-jefe.crear_usuario(123,"operario de maquina")
