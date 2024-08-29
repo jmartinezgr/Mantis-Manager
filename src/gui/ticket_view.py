@@ -1,13 +1,22 @@
 from tickets.ticket_service import TicketService
 from  tickets.ticket_repository import TicketRepository as RP
+
 def print_menu():
     print("\n--- Sistema de Tickets ---")
     print("1. Crear Ticket")
     print("2. Ver Ticket")
     print("3. Actualizar Estado del Ticket")
-    print("4. Eliminar Ticket")
-    print("5. Listar Tickets")
-    print("6. Salir")
+    print("4. Asignar Ticket")
+    print("5. Eliminar Ticket")
+    print("6. Listar Tickets")
+    print("7. Salir")
+
+def print_menu_ticket():
+    print("\n--- Sistema de visualizar Tickets ---")
+    print("1. Ver Ticket por id") 
+    print("2. Ver Ticket por reportero")
+    print("3.Ver ticket por estado")
+    
 
 def create_ticket(service):
     titulo = input("titulo ")
@@ -48,6 +57,31 @@ def list_tickets(service):
     else:
         print("No hay tickets registrados.")
 
+def ticket_assign(service):
+    ticket_id = int(input("ID del ticket a asignar: "))
+    assigned_to = input("Usuario a asignar: ")
+    if service.assign_ticket(ticket_id, assigned_to):
+        print(f"Ticket {ticket_id} asignado a {assigned_to}.")
+    else:
+        print("No se pudo asignar el ticket.")
+def list_tickets_by_reporter(service):
+    reporter = input("Nombre del reportero: ")
+    tickets = service.list_tickets_by_reporter(reporter)
+    if tickets:
+        for ticket in tickets:
+            print(ticket)
+    else:
+        print(f"No hay tickets registrados por {reporter}.")
+
+def list_tickets_by_status(service):
+    status = input("Estado del ticket: ")
+    tickets = service.list_tickets_by_status(status)
+    if tickets:
+        for ticket in tickets:
+            print(ticket)
+    else:
+        print(f"No hay tickets con estado {status}.")
+
 def ticket_interface():
     repository= RP()
     service = TicketService(repository)
@@ -61,10 +95,21 @@ def ticket_interface():
         elif choice == '3':
             update_ticket(service)
         elif choice == '4':
-            delete_ticket(service)
+            ticket_assign(service)
         elif choice == '5':
-            list_tickets(service)
+            delete_ticket(service)    
         elif choice == '6':
+            print_menu_ticket()
+            choice = input("Seleccione una opción: ")
+            if choice == '1':
+                view_ticket(service)
+            elif choice == '2':
+                list_tickets_by_reporter(service)
+            elif choice == '3':
+                list_tickets_by_status(service)
+            else:
+                print("Opción no válida. Intente nuevamente.")
+        elif choice == '7':
             print("Saliendo del sistema.")
             break
         else:

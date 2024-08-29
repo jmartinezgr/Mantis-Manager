@@ -72,6 +72,34 @@ class TicketService:
         :return: Una lista de todos los objetos Ticket.
         """
         return TKR.print_all_tickets()
+
+    def assign_ticket(self, ticket_id, assigned_to):
+        ticket = TKR.get_ticket_by_id(ticket_id)
+
+        if ticket:
+            ticket.assigned_to = assigned_to
+            TKR.update_ticket(ticket)
+            return True
+        else:
+            return False
+    
+    def list_tickets_by_reporter(self, reporter):
+        """
+        Muestra todos los tickets en el repositorio que fueron reportados por un usuario.
+
+        :param reporter: Nombre del reportero.
+        :return: Una lista de todos los objetos Ticket.
+        """
+        return TKR.print_all_tickets_by_reporter(reporter)
+    
+    def list_tickets_by_status(self, status):
+        """
+        Muestra todos los tickets en el repositorio con un estado específico.
+
+        :param status: Estado del ticket.
+        :return: Una lista de todos los objetos Ticket.
+        """
+        return TKR.print_all_tickets_by_status(status)
    
     
     
