@@ -11,7 +11,11 @@ class Auth_Repository:
         
     def verify_user(self, username:str, password:str)  -> dict:
         # Intentar ejecutar la consulta para verificar al usuario
-        self.cursor.execute(self._SELECT_USER, (username,))
+        try:
+            self.cursor.execute(self._SELECT_USER, (username,))
+        except Exception as e:
+            print("Error al consultar la base de datos:e ", e)
+            return {"error": f"Error al consultar la base de datos: {str(e)}"}
         
         user = self.cursor.fetchone()
         
