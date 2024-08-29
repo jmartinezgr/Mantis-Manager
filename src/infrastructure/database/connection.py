@@ -16,7 +16,7 @@ class Connection:
     def get_connection(cls):
         if cls._connection is None:
             try:
-                cls._connection = sqlite3.connect(cls._DATABASE)
+                cls._connection = sqlite3.connect(cls._DATABASE_PATH)
                 return cls._connection
             except Exception as e:
                 print(f"An error occurred while obtaining the database connection: {e}")
