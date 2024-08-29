@@ -1,5 +1,5 @@
 #from datetime import datetime
-from tickets.ticket_repository import TicketRepository
+from tickets.ticket_repository import TicketRepository as TKR
 from tickets.ticket_entity import Ticket
 
 class TicketService:
@@ -7,18 +7,18 @@ class TicketService:
         self.ticket_repository = ticket_repository
     
     def create_ticket(self,titulo, description,reporter ):
-        self.ticket_repository.create_ticket(titulo, description,reporter)
+        TKR.create_ticket(titulo, description,reporter)
         
         
     def update_ticket_status(self, id, nuevo_estado, user):
-        ticket = self.ticket_repository.get_ticket_by_id(id) #Buscar el id del tiquet en el repositorio
+        ticket = TKR.get_ticket_by_id(id) #Buscar el id del tiquet en el repositorio
         
         if ticket:
             if nuevo_estado in ["Nuevo", "Asignado", "En proceso", "En espera", "Escalado", "Resuelto", "Cancelado"]:
                 if user.rol in ["Administrador", "Mantenimiento"] and (user.username == ticket["assigned_to"] or user.rol == "Administrador"):
                     ticket["estatus"] = nuevo_estado
                     #ticket["status_history"].append((nuevo_estado, datetime.now()))
-                    self.ticket_repository.save_ticket(ticket)
+                    TKR.save_ticket(ticket)
                     print(f"Ticket {id} ha cambiado de estado exitosamente.")
                     return True
                 else:
@@ -41,7 +41,7 @@ class TicketService:
         :param ticket_id: ID del ticket a buscar.
         :return: El objeto Ticket si se encuentra, de lo contrario, None.
         """
-        return self.ticket_repository.get_ticket_by_id(ticket_id)
+        return TKR.get_ticket_by_id(ticket_id)
 
     def delete_ticket(self, ticket_id):
         """
@@ -57,7 +57,7 @@ class TicketService:
 
         :return: Una lista de todos los objetos Ticket.
         """
-        return self.ticket_repository.print_all_tickets()
+        return TKR.print_all_tickets()
    
     
     
