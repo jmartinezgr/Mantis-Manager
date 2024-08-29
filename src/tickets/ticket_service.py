@@ -91,6 +91,15 @@ class TicketService:
         :return: Una lista de todos los objetos Ticket.
         """
         return TKR.print_all_tickets_by_reporter(reporter)
+    
+    def list_tickets_by_status(self, status):
+        """
+        Muestra todos los tickets en el repositorio con un estado específico.
+
+        :param status: Estado del ticket.
+        :return: Una lista de todos los objetos Ticket.
+        """
+        return TKR.print_all_tickets_by_status(status)
    
     
     

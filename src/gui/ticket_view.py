@@ -14,6 +14,7 @@ def print_menu_ticket():
     print("\n--- Sistema de visualizar Tickets ---")
     print("1. Ver Ticket por id") 
     print("2. Ver Ticket por reportero")
+    print("3.Ver ticket por estado")
     
 
 def create_ticket(service):
@@ -94,6 +95,8 @@ def ticket_interface():
                 view_ticket(service)
             elif choice == '2':
                 list_tickets_by_reporter(service)
+            elif choice == '3':
+                list_tickets_by_status(service)
             else:
                 print("Opción no válida. Intente nuevamente.")
         elif choice == '7':
