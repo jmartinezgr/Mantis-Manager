@@ -2,9 +2,9 @@ import re
 
 class Personal_Empresa: 
     def __init__(self): 
-        self.__nombre=None
+        self.__nombre=""
         self.__id=None 
-        self.__fehca_vinculacion=None
+        self.__fecha_vinculacion=None
         self.__contrasena=None
         self.__rol=None
         self.__direccion=None
@@ -25,7 +25,7 @@ class Personal_Empresa:
         self.__id=id
     
     def getFechavinculacion(self): 
-        return self.__fehca_vinculacion
+        return self.__fecha_vinculacion
     
     def setFechavinculacion(self,fecha): 
         self.__fehca_vinculacion=fecha
@@ -69,11 +69,11 @@ class Jefe_Desarrollo(Personal_Empresa):
     
     def __init__(self): 
         self.__usuarios=[]
-        super().__init__(self)
+        super().__init__()
 
     def crear_usuario(self,id, rol): 
         """Agrega un nuevo usuario a la lista."""
-        clase=self.asignar_rol()   #Identifica el rol del nuevo usuario
+        clase=self.asignar_rol(rol)   #Identifica el rol del nuevo usuario
         #Crea usario de acuerdo a rol
         if (clase.lower()=="operario de maquina"): 
             nuevo_usuario=Operario_Maquinaria()   
@@ -114,7 +114,8 @@ class Jefe_Desarrollo(Personal_Empresa):
         """Guarda usuario en usuarios.txt."""
 
         archivo=open("usuarios.txt","a")
-        archivo.write(usuario.getNombre()," - ",usuario.getId(),"\n") 
+        archivo.write(str(usuario.getId())+" - "+usuario.getRol()) 
+        archivo.close()
     
     def modificar_usuario(self): 
         pass
@@ -148,8 +149,7 @@ class Operario_Maquinaria(Personal_Empresa):
         self.__horario=None
         self.__maquinas_asignadas=None
         self.__horario=None 
-        super.__init__(self)
-        
+        super().__init__()        
     def getHorario(self): 
         return self.__horario()
     
@@ -237,3 +237,6 @@ class Contrasena:
                 Contrasena.criterios.clear()  # Limpiar criterios después de un intento fallido
 
 
+jefe=Jefe_Desarrollo()
+
+jefe.crear_usuario(123,"operario de maquina")
