@@ -8,7 +8,7 @@ def main():
             usuario_logueado = login_menu()
         
         if usuario_logueado:
-            print("\n--- Menú Principal ---")
+            print("\n--- Menú Principal-Gestión de mantenimiento  ---")
             print("1. Gestión de Tickets")
             print("2. Salir")
             
