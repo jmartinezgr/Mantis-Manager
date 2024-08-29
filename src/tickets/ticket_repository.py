@@ -129,7 +129,7 @@ class TicketRepository:
 
             # Confirmar los cambios
             connection.commit()
-            print("Ticket creado y guardado")
+            print(f"Ticket creado y guardado con id: { new_ticket.id}")
 
         except sqlite3.Error as e:
             print(f"Error al crear el ticket: {e}")

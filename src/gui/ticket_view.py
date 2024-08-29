@@ -23,7 +23,7 @@ def create_ticket(service):
     descripcion = input("descripción: ")
     reportero = input("reportero ") 
     ticket = service.create_ticket(titulo, descripcion, reportero)
-    print(f"Ticket creado: {ticket}")
+    
 
 def view_ticket(service):
     ticket_id = int(input("ID del ticket a buscar: "))
