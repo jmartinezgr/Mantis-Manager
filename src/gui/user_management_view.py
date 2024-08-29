@@ -19,8 +19,9 @@ def login_menu():
     console.print(Panel.fit("[bold blue]Bienvenido a Mantis Manager[/bold blue]\n[italic white]Por favor, ingrese sus credenciales para continuar.[/italic white]"))
 
     username = Prompt.ask("[bold]Nombre de usuario[/bold]", console=console)
-    password = Prompt.ask("[bold]Contraseña[/bold]", console=console, password=True)
+    password = Prompt.ask("[bold]Contraseña[/bold]", console=console)
     
+
     try_login = login(username, password)
     
     if try_login[0]:

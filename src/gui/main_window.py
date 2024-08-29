@@ -1,10 +1,8 @@
 from gui.ticket_view import ticket_interface
-from user_management_view import login_menu
-
-
-usuario_logueado = None
+from .user_management_view import login_menu
 
 def main():
+    usuario_logueado = None
     while True:
         if usuario_logueado is None or usuario_logueado is False:
             usuario_logueado = login_menu()

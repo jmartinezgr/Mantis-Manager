@@ -12,7 +12,7 @@ def check_password(hashed:str, password:str) -> bool:
 
 if __name__ == "__main__":
     # Ejemplo de uso
-    password = "mi_contraseña_segura"
+    password = "1018224606"
     hashed_password = hash_password(password)
     print(f"Contraseña hasheada: {hashed_password}")    
 
