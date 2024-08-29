@@ -72,6 +72,15 @@ def list_tickets_by_reporter(service):
     else:
         print(f"No hay tickets registrados por {reporter}.")
 
+def list_tickets_by_status(service):
+    status = input("Estado del ticket: ")
+    tickets = service.list_tickets_by_status(status)
+    if tickets:
+        for ticket in tickets:
+            print(ticket)
+    else:
+        print(f"No hay tickets con estado {status}.")
+
 def ticket_interface():
     repository= RP()
     service = TicketService(repository)
