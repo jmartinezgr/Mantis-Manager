@@ -1,4 +1,13 @@
-import os
+from users.Creacion_Usuario import *
+def create_user():
+    user = User()
+    user.set_name(input("Nombre: "))
+    user.set_last_name(input("Apellido: "))
+    user.set_email(input("Correo: "))
+    user.set_password(input("Contraseña: "))
+    user.set_role(input("Rol: "))
+    user.set_id(input("ID: "))
+    return userimport os
 from rich.console import Console
 from rich.prompt import Prompt
 from rich.panel import Panel
