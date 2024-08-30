@@ -1,4 +1,4 @@
-from users.Creacion_Usuario import Jefe_Desarrollo, Personal_Empresa
+from users.create_user import Jefe_Desarrollo
 def create_user():
     nombre = input("Nombre del usuario: ")
     id = input("Identificación del usuario: ")
