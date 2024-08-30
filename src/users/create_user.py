@@ -75,21 +75,25 @@ class Jefe_Desarrollo(Personal_Empresa):
 
     def crear_usuario(self,nombre,id,rol): 
         """Agrega un nuevo usuario a la lista."""
-        clase=self.asignar_rol(rol)   #Identifica el rol del nuevo usuario
         #Crea usario de acuerdo a rol
-        if (clase.lower()=="operario de maquina"): 
+    
+        if (rol=="Operario Maquinaria"):   
             nuevo_usuario=Operario_Maquinaria()   
+            nuevo_usuario.setNombre(nombre)
+            nuevo_usuario.setId(id)
+            nuevo_usuario.setRol(rol)
+            self.__usuarios.append(nuevo_usuario)
+        elif (rol=="Empleado Mantenimiento"): 
+            nuevo_usuario=Empleado_Mantenimiento()
             nuevo_usuario.setId(id)
             nuevo_usuario.setNombre(nombre)
             nuevo_usuario.setRol(rol)
             self.__usuarios.append(nuevo_usuario)
-        elif (clase.lower()=="empleado de mantenimiento"): 
-            nuevo_usuario=Empleado_Mantenimiento()
-            nuevo_usuario.setId(id)
-            nuevo_usuario.setNombre(nombre)
-            self.__usuarios.append(nuevo_usuario)
-        else: 
+        elif (rol=="Personal Empresa"): 
             nuevo_usuario = Personal_Empresa()  
+            nuevo_usuario.setNombre(nombre)
+            nuevo_usuario.setId(id)
+            self.__usuarios.append(nuevo_usuario)
         
         #Crear contraseña
         txt=input("3. Crea contraseña: ")
@@ -97,8 +101,8 @@ class Jefe_Desarrollo(Personal_Empresa):
         contrasena=pwd.guardar_contrasena(nuevo_usuario)
         encript=pwd.encriptar_contrasena()
         
-        self.listar_usuario(nuevo_usuario,contrasena,encript)
-        print("Usuario {} agregado exitosamente con el rol de {}.".format(nuevo_usuario.getId(),nuevo_usuario.getRol()))   
+        self.listar_usuario(nuevo_usuario)
+        print("Usuario ({}) agregado exitosamente con el id ({}) y rol ({}).".format(nuevo_usuario.getNombre(),nuevo_usuario.getId(),nuevo_usuario.getRol()))   
     
     def buscar_usuario(self, id):
         """Busca un usuario por Id."""
@@ -118,7 +122,7 @@ class Jefe_Desarrollo(Personal_Empresa):
         print("Usuario '{}' no encontrado.".format(id))
 
 
-    def listar_usuario(self,usuario,contrasena,encript): 
+    def listar_usuario(self,usuario): 
         """Guarda usuario en usuarios.txt."""
 
         miConexion=sqlite3.connect("mantis")
@@ -126,7 +130,7 @@ class Jefe_Desarrollo(Personal_Empresa):
         miConexion.close()
         
         archivo=open("usuarios.txt","a")
-        archivo.write(str(usuario.getId())+" - "+usuario.getRol()+" - " +contrasena+" - "+str(encript))
+        archivo.write(usuario.getNombre()+" - " +str(usuario.getId())+" - "+usuario.getRol()+" - "+usuario.getContrasena()+"\n")
         archivo.close()
 
     
@@ -135,7 +139,6 @@ class Jefe_Desarrollo(Personal_Empresa):
         
     def asignar_rol(self,rol): 
         """Realiza identificacion de rol"""
-
         if rol==1: 
             return "Operario Maquinaria"
         elif rol==2:
@@ -187,7 +190,7 @@ class Empleado_Mantenimiento(Personal_Empresa):
         self.__especialidad=None
         self.__certficados=[]
         self.__horario=None
-        super.__init__(self) 
+        super().__init__() 
 
         
     
@@ -261,7 +264,4 @@ class Contrasena:
         sal=bcrypt.gensalt()
         encript=bcrypt.hashpw(pwd,sal)
         return encript
-            
-#Caso de uso
-"""jefe=Jefe_Desarrollo()
-jefe.crear_usuario(123,"operario de maquina")"""
+          

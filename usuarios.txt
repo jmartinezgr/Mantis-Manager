@@ -1,0 +1,3 @@
+ NOMBRE   -     ID      -    ROL    -  CONTRASEÑA
+Jhorlan - 12345 - Operario Maquinaria - Jhoo23
+Nicolas - 3455 - Empleado Mantenimiento - Jhh4

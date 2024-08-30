@@ -1,5 +1,5 @@
 from gui.ticket_view import ticket_interface
-from gui.user_management_view import create_user
+from gui.create_user_view import create_user_interface
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
         if choice == '1':
             ticket_interface()
         elif choice == '2':
-            create_user()
+            create_user_interface()
         elif choice == '3':
             print("Saliendo del sistema.")
             break
