@@ -10,8 +10,13 @@ def imprimirMenu():
     print("2. Crear usuario Empleado Mantenimiento")
     print("3. Crear usuario Personal Empresa")
     print("4. Salir")
-    n=int(input(" "))
-    return n
+    while (True): 
+        try:    
+            n=int(input(" "))
+            return n
+        except ValueError: 
+            print("La opcion ingresada no es correcta, !!Intentalo de nuevo!!")
+    
 
 def menu_informacion(): 
     print("\nMenu_Informacion")
@@ -29,7 +34,10 @@ def create_user_interface():
     while (True):
         jefe=Jefe_Desarrollo()
         n=imprimirMenu()
+        
+
         rol=jefe.asignar_rol(n)
+        
         if n==1 or n==2 or n==3: 
             formulario_informacion()
             print("Criterios de Contraseña: \n        (---4<= caracteres <=8---)\n        (--Almenos una mayuscula---)\n        (---Alemenos una minuscula---)\n        (---Almentos un numero---)")
@@ -41,3 +49,4 @@ def create_user_interface():
             
         else:
             print("Opción no válida. Intente nuevamente.")
+        

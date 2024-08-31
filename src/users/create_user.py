@@ -98,8 +98,9 @@ class Jefe_Desarrollo(Personal_Empresa):
         #Crear contraseña
         txt=input("3. Crea contraseña: ")
         pwd=Contrasena(txt)
+        nuevo_usuario.setContrasena(pwd)
         contrasena=pwd.guardar_contrasena(nuevo_usuario)
-        encript=pwd.encriptar_contrasena()
+        pwd.encriptar_contrasena()
         
         self.listar_usuario(nuevo_usuario)
         print("Usuario ({}) agregado exitosamente con el id ({}) y rol ({}).".format(nuevo_usuario.getNombre(),nuevo_usuario.getId(),nuevo_usuario.getRol()))   
@@ -128,9 +129,8 @@ class Jefe_Desarrollo(Personal_Empresa):
         miConexion=sqlite3.connect("mantis")
         miCursor=miConexion.cursor()
         miConexion.close()
-        
         archivo=open("usuarios.txt","a")
-        archivo.write(usuario.getNombre()+" - " +str(usuario.getId())+" - "+usuario.getRol()+" - "+usuario.getContrasena()+"\n")
+        archivo.write(usuario.getNombre()+" - " +str(usuario.getId())+" - "+usuario.getRol()+" - "+usuario.getContrasena().getContrasena_guardada()+" - "+str(usuario.getContrasena().getEncriptacion())+"\n")
         archivo.close()
 
     
@@ -191,8 +191,6 @@ class Empleado_Mantenimiento(Personal_Empresa):
         self.__certficados=[]
         self.__horario=None
         super().__init__() 
-
-        
     
     def anadir_certificacion(self,certificdo): 
         self.__certficados.append(certificdo)
@@ -210,6 +208,7 @@ class Contrasena:
     def __init__(self, contrasena):
         """Constructor que inicializa la contraseña."""
         self.__contrasena = contrasena
+        self.__encriptacion=None
 
     def verifica_contrasena(self):
         """Verifica que la contraseña contenga: (4-8 caracteres entre los cuales: Mayúsculas, Minúsculas y Números)"""
@@ -248,11 +247,9 @@ class Contrasena:
         while True:
             if self.verifica_contrasena(): 
                 print("Contraseña guardada exitosamente.")
-                usuario.setContrasena(self.__contrasena)
-                return self.__contrasena
+                self.__encriptacion=self.encriptar_contrasena()
+                return True
         
-
-                break
             else: 
                 print("Tu contraseña no cumple los siguientes requisitos: {}".format(Contrasena.criterios))
                 self.__contrasena = input("INGRESA OTRA CONTRASEÑA: ")
@@ -265,3 +262,8 @@ class Contrasena:
         encript=bcrypt.hashpw(pwd,sal)
         return encript
           
+    def getContrasena_guardada(self): 
+        return self.__contrasena
+    
+    def getEncriptacion(self): 
+        return self.__encriptacion
