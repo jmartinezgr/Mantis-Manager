@@ -1,4 +1,0 @@
-Title: Bug in login page
-Description: Unable to login with valid credentials
-Reporter: John Doe
-
