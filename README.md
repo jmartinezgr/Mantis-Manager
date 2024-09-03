@@ -53,5 +53,13 @@ Un operador de una máquina reporta un fallo crítico a través del sistema, gen
 
 La implementación de **Mantis Manager** reducirá significativamente el tiempo de inactividad de las máquinas, mejorará la eficiencia del área de mantenimiento y aumentará la productividad general de la empresa. Además, proporcionará una mayor organización, transparencia, y capacidad de toma de decisiones informadas basadas en datos históricos de mantenimiento
 
+## Desarrolladores encargados
+
+Andres Felipe Guido
+Juan José Martinez
+Paula Misas Marin
+Jhorlan Ortega
+David
+
 
 
