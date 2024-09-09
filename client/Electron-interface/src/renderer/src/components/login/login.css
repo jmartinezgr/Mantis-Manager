@@ -54,8 +54,8 @@
   }
   
   .login-form__title {
-    color: #1C160C;
-    font-size: 32px;
+    color: hsl(38, 58%, 34%);
+    font-size: 24px;
     font-weight: bold;
     padding-bottom: 10px;
   }
