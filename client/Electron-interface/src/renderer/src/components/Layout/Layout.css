@@ -1,0 +1,218 @@
+/* App.css */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  white-space: nowrap;
+  border-bottom: 1px solid #F4EFE6;
+  padding: 0.75rem 2.5rem; /* px-10 y py-3 en Tailwind CSS */
+}
+
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  margin-right: 15px;
+  width: 40px;
+  height: 40px;
+  background-color: #007bff;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: bold;
+}
+h2.custom-heading {
+  color: #1C160C; /* Color del texto */
+  font-size: 1.125rem; /* text-lg en Tailwind CSS, que es 18px */
+  font-weight: bold; /* font-bold en Tailwind CSS */
+  line-height: 1.25; /* leading-tight en Tailwind CSS, que es aproximadamente 1.25 */
+  letter-spacing: -0.015em; /* tracking-[-0.015em] en Tailwind CSS */
+}
+
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-links {
+  display: flex;
+  flex: 1; /* flex-1 en Tailwind CSS */
+  justify-content: flex-end; /* justify-end en Tailwind CSS */
+  gap: 2rem; 
+  text-decoration: none;
+
+}
+.inner-container {
+  display: flex;
+  align-items: center; /* items-center en Tailwind CSS */
+  gap: 2.25rem; /* gap-9 en Tailwind CSS, que es 36px */
+}
+.custom-text {
+  color: #1C160C; /* Color del texto */
+  font-size: 0.875rem; /* text-sm en Tailwind CSS, que es 14px */
+  font-weight: 500; /* font-medium en Tailwind CSS */
+  line-height: 1.5; /* leading-normal en Tailwind CSS, que es aproximadamente 1.5 */
+}
+
+.buttons{
+  display:flex;
+  gap:2rem
+}
+.icon-button {
+  display: flex;
+  max-width: 480px; /* max-w-[480px] en Tailwind CSS */
+  cursor: pointer; /* cursor-pointer en Tailwind CSS */
+  align-items: center; /* items-center en Tailwind CSS */
+  justify-content: center; /* justify-center en Tailwind CSS */
+  overflow: hidden; /* overflow-hidden en Tailwind CSS */
+  border-radius: 9999px; /* rounded-full en Tailwind CSS para bordes totalmente redondeados */
+  height: 2.5rem; /* h-10 en Tailwind CSS, que es 40px */
+  background-color: #F4EFE6; /* bg-[#F4EFE6] en Tailwind CSS */
+  color: #1C160C; /* text-[#1C160C] en Tailwind CSS */
+  gap: 0.5rem; /* gap-2 en Tailwind CSS, que es 8px */
+  font-size: 0.875rem; /* text-sm en Tailwind CSS, que es 14px */
+  font-weight: bold; /* font-bold en Tailwind CSS */
+  line-height: 0.6; /* leading-normal en Tailwind CSS, que es aproximadamente 1.5 */
+  letter-spacing: 0.015em; /* tracking-[0.015em] en Tailwind CSS */
+  min-width: 0; /* min-w-0 en Tailwind CSS */
+  padding: 0 0.625rem; /* px-2.5 en Tailwind CSS, que es 10px */
+}
+
+.icon-button:hover {
+  color: #007bff;
+  transform: scale(1.1);
+}
+
+.profile-pic {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #ddd;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar {
+  width: 270px;
+  background-color: #ffffff;
+  border-right: 2px solid #e0e0e0;
+  padding: 20px;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sidebar-header-info {
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-header-icon {
+  width: 60px;
+  height: 60px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 50%;
+  margin-right: 15px;
+  border: 2px solid #ddd;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-header-text h1 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+  font-weight: 600;
+}
+
+.sidebar-header-text p {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar-item:hover {
+  background-color: #f1f1f1;
+}
+
+.icon {
+  margin-right: 15px;
+  color: #333;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #ffffff;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 20px;
+  justify-content: space-between;
+  padding-left: 5rem;
+  padding-right: 5rem;
+}
+
+.tab-button {
+  background: #ffffff;
+  border:  #ffffff;
+  padding: 12px 24px;
+  margin-right: 10px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: Arial, sans-serif;
+}
+
+.tab-button:hover {
+  background-color: #007bff;
+  color: #ffffff;
+}
+
+.content-box {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
