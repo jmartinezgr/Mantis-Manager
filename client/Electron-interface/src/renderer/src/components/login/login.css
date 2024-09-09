@@ -1,0 +1,126 @@
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    height: 40px;
+    background-color: #1AE56E;
+    color: #1C160C;
+    padding: 0 10px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #F4EFE6;
+    padding: 10px 20px;
+  }
+  
+  .header__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .header__icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .header__title {
+    color: #1C160C;
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .header__right {
+    display: flex;
+    gap: 10px;
+  }
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    width: 100%;
+    padding: 20px;
+  }
+  
+  .login-form__title {
+    color: #1C160C;
+    font-size: 32px;
+    font-weight: bold;
+    padding-bottom: 10px;
+  }
+  
+  .login-form__input-group {
+    margin-bottom: 20px;
+  }
+  
+  .login-form__label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .login-form__input {
+    height: 15px;
+    padding: 15px;
+    border: 1px solid #E9DFCE;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+  }
+  
+  .login-form__input--username {
+    color: red; /* Cambia este color si es necesario */
+  }
+  
+  .login-form__input--password {
+    color: #1C160C;
+  }
+  
+  .login-form__button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    background-color: #1AE56E;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 9999px;
+    border: none;
+    cursor: pointer;
+    padding: 0 20px;
+  }
+  
+  .login-form__footer {
+    color: #A18249;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .login-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffff;
+    font-family: "Plus Jakarta Sans", "Noto Sans", sans-serif;
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  .login-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }  
