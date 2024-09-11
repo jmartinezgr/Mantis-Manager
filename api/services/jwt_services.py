@@ -16,7 +16,7 @@ from config.settings import get_secret_key
 
 SECRET_KEY = get_secret_key()
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE = timedelta(minutes=10)
+ACCESS_TOKEN_EXPIRE = timedelta(seconds=30)
 REFRESH_TOKEN_EXPIRE = timedelta(days=1)
 
 # Crear token de acceso
@@ -74,12 +74,22 @@ def verify_access_token(token: str) -> dict:
         )
         # Verifica que el token sea de tipo access
         if jwt.get_unverified_header(token)['type'] != "access":
-            raise HTTPException(status_code=401, detail="Token inválido")
+            raise HTTPException(status_code=401, detail={
+                "message":"El token no es de acceso",
+                "code": "token/invalid_token"
+                }
+            )
+
         return payload  
     except jwt.ExpiredSignatureError:
         # Si el token ha expirado lanza una excepción HTTP 401
-        raise HTTPException(status_code=401, detail="Token expirado")
-    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401,detail={
+                "message":"El token ha expirado",
+                "code": "token/expired_token"
+                }
+            )
+        
+    except jwt.InvalidTokenError as e:
         # Si el token es inválido lanza una excepción HTTP 401
         raise HTTPException(status_code=401, detail="Token inválido")
     
@@ -136,12 +146,20 @@ def verify_refresh_token(token: str) -> dict:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         # Verifica que el token sea de tipo refresh
         if jwt.get_unverified_header(token)['type'] != "refresh":
-            raise HTTPException(status_code=401, detail="Refresh token inválido")
+            raise HTTPException(status_code=401, detail=
+                                {
+                                    "message":"El token no es de refresco",
+                                    "code": "token/invalid_token"
+                                })
         return payload
     except jwt.ExpiredSignatureError:
         # Si el token ha expirado lanza una excepción HTTP 401
-        raise HTTPException(status_code=401, detail="Refresh token expirado")
-    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail={
+                "message":"El token ha expirado",
+                "code": "token/expired_token"
+                }
+            )
+    except jwt.InvalidTokenError as e:
         # Si el token es inválido lanza una excepción HTTP 401
         raise HTTPException(status_code=401, detail="Refresh token inválido")
     
