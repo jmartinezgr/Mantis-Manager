@@ -1,3 +1,4 @@
+// ticketContext.jsx
 import React, { createContext, useState, useContext } from "react";
 
 // Crear el contexto
@@ -7,6 +8,12 @@ const TicketContext = createContext();
 export const TicketProvider = ({ children }) => {
   const [ticketsData, setTicketsData] = useState({ "En cola": [], "En proceso": [], "Terminados": [] });
   const [showGenerarTickets, setShowGenerarTickets] = useState(false);
+  const [history, setHistory] = useState([]);
+
+  const recordHistory = (ticketId, action) => {
+    const date = new Date().toLocaleDateString();
+    setHistory(prevHistory => [...prevHistory, { date, ticketId, action }]);
+  };
 
   const fetchTickets = async () => {
     try {
@@ -37,12 +44,14 @@ export const TicketProvider = ({ children }) => {
     const updatedData = { ...ticketsData };
     updatedData["En cola"].push(newTicket);
     await updateTicketsData(updatedData);
+    recordHistory(newTicket.id, 'Creado');
   };
 
   const handleCancel = async (ticketId, tab) => {
     const updatedData = { ...ticketsData };
     updatedData[tab] = updatedData[tab].filter(ticket => ticket.id !== ticketId);
     await updateTicketsData(updatedData);
+    recordHistory(ticketId, 'Cancelado');
   };
 
   const handleEdit = async (editedTicket) => {
@@ -53,6 +62,7 @@ export const TicketProvider = ({ children }) => {
       );
     });
     await updateTicketsData(updatedData);
+    recordHistory(editedTicket.id, 'Editado');
   };
 
   const toggleGenerarTickets = () => {
@@ -70,7 +80,8 @@ export const TicketProvider = ({ children }) => {
       handleCancel,
       handleEdit,
       showGenerarTickets,
-      toggleGenerarTickets
+      toggleGenerarTickets,
+      history
     }}>
       {children}
     </TicketContext.Provider>
@@ -79,4 +90,5 @@ export const TicketProvider = ({ children }) => {
 
 // Hook para usar el contexto en componentes funcionales
 export const useTicketContext = () => useContext(TicketContext);
+
 

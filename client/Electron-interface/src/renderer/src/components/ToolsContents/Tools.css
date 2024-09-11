@@ -1,4 +1,4 @@
-/* Estilos generales para centrar el formulario */
+
 .ticket-container {
     position: fixed;
     top: 0;
@@ -8,17 +8,17 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.6); /* Fondo semitransparente */
+    background-color: rgba(0, 0, 0, 0.6); 
     z-index: 1000;
   }
   
   .ticket-form {
-    background-color: #fff; /* Fondo blanco para el formulario */
+    background-color: #fff; 
     padding: 30px;
     border-radius: 10px;
     width: 400px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para el formulario */
-    position: relative; /* Relativo para posicionar la "X" */
+    position: relative; 
   }
   
   .ticket-title {

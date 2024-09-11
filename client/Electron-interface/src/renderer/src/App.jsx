@@ -1,5 +1,5 @@
 import React from 'react';
-import Login from './components/login/login'; // Asegúrate de que la ruta sea correcta
+import Login from './components/login/login'; 
 import Layout from'./components/Layout/layout'
 const App = () => {
   return (<Layout/>)

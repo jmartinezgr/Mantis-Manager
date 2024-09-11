@@ -4,7 +4,7 @@ import './Tools.css';
 
 const GenerarTickets = ({ CerrarHerramienta }) => {
   const [ticket, setTicket] = useState({
-    title: "",        // Campo añadido para título
+    title: "",        
     description: "",
     persona: "",
     date: "",
@@ -25,12 +25,12 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
   const generarTicket = () => {
     const newTicket = {
       id: Date.now(),
-      title: ticket.title,          // Asegúrate de que el título se está enviando
+      title: ticket.title,        
       description: ticket.description,
       date: ticket.date,
       priority: ticket.prioridad,
-      person: ticket.persona,       // Propiedad corregida
-      machine: ticket.maquina,      // Propiedad corregida
+      person: ticket.persona,       
+      machine: ticket.maquina,      
       color: "#ffcc00",
     };
 
@@ -90,7 +90,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
         <select
           id="prioridad"
           name="prioridad"
-          value={ticket.prioridad}     // Asegurarte de que el select está controlado
+          value={ticket.prioridad}     
           onChange={handleInputChange}
         >
           <option value="Alta">Alta</option>
