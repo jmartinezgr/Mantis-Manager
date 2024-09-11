@@ -37,7 +37,14 @@ def create_acess_token(data: dict) -> str:
     # Agrega la fecha de expiración al token
     to_encode.update({"exp": expire})
     # Codifica el token
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM, headers={"type":"access"})
+    encoded_jwt = jwt.encode(
+        to_encode, 
+        SECRET_KEY, 
+        algorithm=ALGORITHM, 
+        headers={
+            "type":"access"
+        }
+    )
     
     return encoded_jwt
 
@@ -60,7 +67,11 @@ def verify_access_token(token: str) -> dict:
     # Verifica el token
     try:
         # Decodifica el token
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, 
+            SECRET_KEY, 
+            algorithms=[ALGORITHM]
+        )
         # Verifica que el token sea de tipo access
         if jwt.get_unverified_header(token)['type'] != "access":
             raise HTTPException(status_code=401, detail="Token inválido")
@@ -93,7 +104,14 @@ def create_refresh_token(data: dict) -> str:
     # Agrega la fecha de expiración al token
     to_encode.update({"exp": expire})
     # Codifica el token
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM,headers={"type":"refresh"})
+    encoded_jwt = jwt.encode(
+        to_encode, 
+        SECRET_KEY, 
+        algorithm=ALGORITHM,
+        headers={
+            "type":"refresh"
+            }
+    )
     
     return encoded_jwt
 
