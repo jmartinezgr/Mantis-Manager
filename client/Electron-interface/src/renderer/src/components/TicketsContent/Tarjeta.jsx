@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import './Tickets.css';
 
-const TicketCard = ({ ticket, onCancel, onEdit }) => {
+const TicketCard = ({ ticket, onCancel, onEdit,tab }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedTicket, setEditedTicket] = useState(ticket);
 
@@ -74,7 +74,7 @@ const TicketCard = ({ ticket, onCancel, onEdit }) => {
           <p><strong>Prioridad:</strong> {ticket.priority}</p>
           <p><strong>Máquina:</strong> {ticket.machine}</p>
           <div className="ticket-card" style={{ backgroundColor: ticket.color }}></div>
-          <button className="cancel-button" onClick={() => onCancel(ticket.id)}>
+          <button className="cancel-button" onClick={() => onCancel(ticket.id,tab)}>
             Cancelar solicitud
           </button>
           <button className="edit-button" onClick={() => setIsEditing(true)}>
