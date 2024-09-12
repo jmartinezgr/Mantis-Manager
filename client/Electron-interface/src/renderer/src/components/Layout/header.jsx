@@ -56,7 +56,7 @@ const Header = ({ onTabChange }) => {
           {/* Settings Dropdown */}
           {isSettingsOpen && (
             
-              <Ajustes/>
+              <Ajustes />
               
           )}
 
