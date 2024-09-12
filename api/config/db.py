@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
-from settings import get_database_url
+from .settings import get_database_url
 
 engine = create_engine(
                     get_database_url(),  # URL de conexión
@@ -8,6 +8,8 @@ engine = create_engine(
                     pool_size=10,  # Número de conexiones en el pool
                     max_overflow=20  # Número máximo de conexiones adicionales
                 )
+
+print(f"Conectando a la base de datos: {get_database_url()}")
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
