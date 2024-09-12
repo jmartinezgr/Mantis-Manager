@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import TicketsBoard from '../TicketsContent/TicketBoard'
+import Ajustes from '../settings/ajustes'
+import Maquina from '../Maquina/maquina'
+
 
 const MainContent = ({activeTab}) => {
   // Estado para controlar qué contenido se muestra
@@ -17,9 +20,9 @@ const MainContent = ({activeTab}) => {
       </div>
       <div className="content-box">
         {activeTab === 'board' && <p>board</p>}
-        {activeTab === 'maquinas' && <p>maquinas</p>}
+        {activeTab === 'maquinas' && <Maquina />}
         {activeTab === 'tickets' && <TicketsBoard/>}
-        {activeTab === 'settings' && <p>settings</p>}
+        
         
       
       </div>

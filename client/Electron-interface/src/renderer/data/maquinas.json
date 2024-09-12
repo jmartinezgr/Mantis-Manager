@@ -1,0 +1,95 @@
+[
+    {
+      "name": "Máquina de Tejer A",
+      "model": "T1000",
+      "type": "Tejedora",
+      "capacity": "50 m/h",
+      "status": "Operativa",
+      "parts": [
+        {
+          "partName": "Motor",
+          "partDescription": "Motor principal de alta eficiencia.",
+          "inventory": [
+            { "itemName": "Motor Standard", "quantity": 5, "location": "Almacén A" },
+            { "itemName": "Motor Avanzado", "quantity": 2, "location": "Almacén B" }
+          ]
+        },
+        {
+          "partName": "Rodillos",
+          "partDescription": "Rodillos para el paso del tejido.",
+          "inventory": [
+            { "itemName": "Rodillo Tipo 1", "quantity": 10, "location": "Almacén C" }
+          ]
+        },
+        {
+          "partName": "Panel de Control",
+          "partDescription": "Panel para ajustar las configuraciones de la máquina.",
+          "inventory": [
+            { "itemName": "Panel Básico", "quantity": 3, "location": "Almacén D" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Máquina de Tejer B",
+      "model": "T2000",
+      "type": "Tejedora",
+      "capacity": "75 m/h",
+      "status": "En Mantenimiento",
+      "parts": [
+        {
+          "partName": "Motor",
+          "partDescription": "Motor actualizado con tecnología avanzada.",
+          "inventory": [
+            { "itemName": "Motor Avanzado", "quantity": 4, "location": "Almacén E" }
+          ]
+        },
+        {
+          "partName": "Rodillos",
+          "partDescription": "Rodillos de mayor diámetro para mejor rendimiento.",
+          "inventory": [
+            { "itemName": "Rodillo Tipo 2", "quantity": 6, "location": "Almacén F" }
+          ]
+        },
+        {
+          "partName": "Panel de Control",
+          "partDescription": "Panel con pantalla táctil para fácil manejo.",
+          "inventory": [
+            { "itemName": "Panel Táctil", "quantity": 2, "location": "Almacén G" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Máquina de Cortar C",
+      "model": "C3000",
+      "type": "Cortadora",
+      "capacity": "100 m/h",
+      "status": "Operativa",
+      "parts": [
+        {
+          "partName": "Cuchilla",
+          "partDescription": "Cuchilla de acero inoxidable para cortes precisos.",
+          "inventory": [
+            { "itemName": "Cuchilla de Acero", "quantity": 8, "location": "Almacén H" }
+          ]
+        },
+        {
+          "partName": "Guía de Corte",
+          "partDescription": "Guía ajustable para diferentes tamaños de tejido.",
+          "inventory": [
+            { "itemName": "Guía Ajustable", "quantity": 5, "location": "Almacén I" }
+          ]
+        },
+        {
+          "partName": "Motor",
+          "partDescription": "Motor robusto para cortes rápidos y eficientes.",
+          "inventory": [
+            { "itemName": "Motor Robusto", "quantity": 3, "location": "Almacén J" }
+          ]
+        }
+      ]
+    }
+  ]
+  
+  
