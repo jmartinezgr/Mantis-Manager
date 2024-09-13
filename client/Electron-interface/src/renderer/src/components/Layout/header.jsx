@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
 import { HiCog, HiBell, HiSearch } from 'react-icons/hi';
-import Ajustes from '../settings/ajustes'
+import Ajustes from '../settings/ajustes';
 
+/**
+ * Componente de encabezado de la aplicación.
+ * @param {Object} props - Props del componente.
+ * @param {Function} props.onTabChange - Función para manejar el cambio de pestaña que repercuten en el componente main content.
+ * @returns {React.ReactElement} - Elemento de encabezado.
+ */
 const Header = ({ onTabChange }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  /**
+   * Alterna la visibilidad del menú de ajustes.
+   */
   const toggleSettings = () => {
     setIsSettingsOpen(!isSettingsOpen);
   };
@@ -55,15 +64,13 @@ const Header = ({ onTabChange }) => {
 
           {/* Settings Dropdown */}
           {isSettingsOpen && (
-            
-              <Ajustes />
-              
+            <Ajustes />
           )}
 
           {/* Profile Picture */}
           <div
             className="w-10 h-10 rounded-full bg-cover bg-center"
-            style={{ backgroundImage: 'url("https://cdn.usegalileo.ai/stability/5981c65c-0a74-4c3e-9fe9-c35dfc3942a0.png")' }}
+            style={{ backgroundImage: 'url("https://cdn.usegalileo.io/avatars/1.png")' }}
           ></div>
         </div>
       </div>
@@ -72,6 +79,7 @@ const Header = ({ onTabChange }) => {
 };
 
 export default Header;
+
 
 
 

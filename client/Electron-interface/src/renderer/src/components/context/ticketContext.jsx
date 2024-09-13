@@ -1,9 +1,8 @@
-// ticketContext.jsx
 import React, { createContext, useState, useContext } from "react";
 
 // Crear el contexto
 /**
- * Contexto para manejar el estado y funciones relacionadas con los tickets.
+ * Contexto para manejar el estado y funciones relacionadas con los tickets así centralizar más el codigo .
  * @type {React.Context}
  */
 const TicketContext = createContext();
@@ -86,8 +85,8 @@ export const TicketProvider = ({ children }) => {
   const handleCancel = async (ticketId, tab) => {
     const updatedData = { ...ticketsData };
     updatedData[tab] = updatedData[tab].filter(ticket => ticket.id !== ticketId);
-    await updateTicketsData(updatedData);
-    recordHistory(ticketId, 'Cancelado');
+    await updateTicketsData(updatedData);//actualiza el ticket
+    recordHistory(ticketId, 'Cancelado');// se añade la operacion al historial
   };
 
   /**
@@ -134,8 +133,16 @@ export const TicketProvider = ({ children }) => {
 
 /**
  * Hook para usar el contexto de tickets en componentes funcionales.
- * @returns {Object} - El valor del contexto que incluye el estado y las funciones.
+ * @returns {Object} - El valor del contexto que incluye:
+ *   - `ticketsData`: Datos actuales de los tickets, organizados en las categorías 'En cola', 'En proceso', 'Terminados'.
+ *   - `handleAddTicket`: Función para añadir un nuevo ticket.
+ *   - `handleCancel`: Función para cancelar un ticket basado en su ID y la pestaña en la que se encuentra.
+ *   - `handleEdit`: Función para editar un ticket.
+ *   - `showGenerarTickets`: Estado booleano que indica si el formulario de generación de tickets está visible o no.
+ *   - `toggleGenerarTickets`: Función para alternar la visibilidad del formulario de generación de tickets.
+ *   - `history`: Historial de acciones realizadas sobre tickets, con fecha, ID del ticket y acción realizada.
  */
 export const useTicketContext = () => useContext(TicketContext);
+
 
 

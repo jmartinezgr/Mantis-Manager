@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useTicketContext } from "../context/ticketContext";
 
+// Componente GenerarTickets para crear un nuevo ticket
 const GenerarTickets = ({ CerrarHerramienta }) => {
+  // Estado local para gestionar los datos del nuevo ticket
   const [ticket, setTicket] = useState({
     title: "",        
     description: "",
@@ -11,8 +13,10 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
     maquina: "",
   });
 
+  // Obtiene la función para agregar un ticket desde el contexto
   const { handleAddTicket } = useTicketContext();
 
+  // Maneja los cambios en los campos del formulario se va actualizando  y sse cambia con el ultimo valor dado 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTicket({
@@ -21,25 +25,28 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
     });
   };
 
+  // Genera un nuevo ticket y lo envía al contexto
   const generarTicket = () => {
     const newTicket = {
-      id: Date.now(),
+      id: Date.now(), // Asigna un ID único basado en la fecha actual
       title: ticket.title,        
       description: ticket.description,
       date: ticket.date,
       priority: ticket.prioridad,
       person: ticket.persona,       
       machine: ticket.maquina,      
-      color: "#ffcc00",
+      color: "#ffcc00", // Color predeterminado para el ticket
     };
 
-    handleAddTicket(newTicket);
-    CerrarHerramienta();
+    handleAddTicket(newTicket); // Agrega el nuevo ticket usando la función del contexto
+    CerrarHerramienta(); // Cierra el formulario después de generar el ticket
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+      {/* Contenedor del formulario de generación de tickets */}
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        {/* Botón para cerrar el formulario */}
         <button
           className="text-red-600 font-bold text-xl mb-4 focus:outline-none"
           onClick={CerrarHerramienta}
@@ -49,6 +56,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
 
         <h1 className="text-2xl font-bold mb-4 text-gray-800">Generar Ticket</h1>
 
+        {/* Campo para el título del ticket */}
         <div className="mb-4">
           <label htmlFor="title" className="block text-sm font-medium text-gray-700">
             Título:
@@ -64,6 +72,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
           />
         </div>
 
+        {/* Campo para la máquina asociada al ticket */}
         <div className="mb-4">
           <label htmlFor="maquina" className="block text-sm font-medium text-gray-700">
             Máquina:
@@ -79,6 +88,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
           />
         </div>
 
+        {/* Campo para la persona que hace la petición */}
         <div className="mb-4">
           <label htmlFor="persona" className="block text-sm font-medium text-gray-700">
             Persona que hace la petición:
@@ -94,6 +104,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
           />
         </div>
 
+        {/* Campo para la descripción del ticket */}
         <div className="mb-4">
           <label htmlFor="description" className="block text-sm font-medium text-gray-700">
             Descripción:
@@ -108,6 +119,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
           />
         </div>
 
+        {/* Campo para la prioridad del ticket */}
         <div className="mb-4">
           <label htmlFor="prioridad" className="block text-sm font-medium text-gray-700">
             Prioridad:
@@ -125,6 +137,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
           </select>
         </div>
 
+        {/* Campo para la fecha del ticket */}
         <div className="mb-4">
           <label htmlFor="date" className="block text-sm font-medium text-gray-700">
             Fecha:
@@ -139,6 +152,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
           />
         </div>
 
+        {/* Botón para generar el ticket */}
         <button
           onClick={generarTicket}
           className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"

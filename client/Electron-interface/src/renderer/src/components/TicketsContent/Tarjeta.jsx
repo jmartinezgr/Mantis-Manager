@@ -1,10 +1,29 @@
 import React, { useState } from "react";
 import './Tickets.css'; // Asegúrate de que aquí solo se mantengan los estilos que Tailwind no cubre.
 
+/**
+ * Componente TicketCard que muestra y gestiona tickets individuales.
+ *
+ * @param {Object} props - Las propiedades para el componente.
+ * @param {Object} props.ticket - El objeto de datos del ticket.
+ * @param {Function} props.onCancel - Función para manejar la cancelación del ticket.
+ * @param {Function} props.onEdit - Función para manejar la edición del ticket.
+ * @param {string} props.tab - La pestaña o sección actual donde se muestra el ticket.
+ *
+ * @returns {JSX.Element} El componente TicketCard renderizado.
+ */
 const TicketCard = ({ ticket, onCancel, onEdit, tab }) => {
+  // Estado para gestionar si el ticket está en modo edición
   const [isEditing, setIsEditing] = useState(false);
+
+  // Estado para gestionar los datos del ticket mientras se edita
   const [editedTicket, setEditedTicket] = useState(ticket);
 
+  /**
+   * Maneja los cambios en los campos de entrada durante la edición del ticket.
+   * 
+   * @param {Object} e - El objeto del evento.
+   */
   const handleEditChange = (e) => {
     const { name, value } = e.target;
     setEditedTicket({
@@ -13,16 +32,22 @@ const TicketCard = ({ ticket, onCancel, onEdit, tab }) => {
     });
   };
 
+  /**
+   * Maneja el envío del formulario de edición del ticket.
+   * 
+   * @param {Object} e - El objeto del evento.
+   */
   const handleEditSubmit = (e) => {
     e.preventDefault();
-    onEdit(editedTicket);
-    setIsEditing(false);
+    onEdit(editedTicket); // Llama a la función onEdit con los datos actualizados del ticket
+    setIsEditing(false);  // Sale del modo de edición
   };
 
   return (
     <div className={`ticket-card border-4 rounded-lg shadow-lg p-6 mb-4 transition-transform transform hover:scale-105`}
          style={{ borderColor: ticket.color }}>
       <h3 className="text-2xl font-bold text-gray-700 mb-4">Ticket {ticket.id}</h3>
+      
       {isEditing ? (
         <form onSubmit={handleEditSubmit} className="space-y-4">
           <div>
@@ -121,4 +146,5 @@ const TicketCard = ({ ticket, onCancel, onEdit, tab }) => {
 };
 
 export default TicketCard;
+
 
