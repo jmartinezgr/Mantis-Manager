@@ -3,12 +3,31 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --color-primary: #007bff;
+  --color-background: #f0f2f5;
+  --color-border: #F4EFE6;
+  --color-text: #1C160C;
+  --color-secondary: #F4EFE6;
+  --color-hover: #007bff;
+  --color-shadow: rgba(0, 0, 0, 0.2);
+  --color-sidebar-border: #e0e0e0;
+  --color-sidebar-item-hover: #f1f1f1;
+  --color-content-background: #ffffff;
+  --color-content-shadow: rgba(0, 0, 0, 0.05);
+  --color-tab-button-background: #007bff;
+  --color-tab-button-border: #007bff;
+  --color-tab-button-hover: #0056b3;
+  --color-tab-button-text: #ffffff;
+  --color-content-box-border: #ddd;
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f0f2f5;
+  background-color: var(--color-background);
 }
 
 .main-container {
@@ -21,10 +40,9 @@
   align-items: center;
   justify-content: space-between;
   white-space: nowrap;
-  border-bottom: 1px solid #F4EFE6;
-  padding: 0.75rem 2.5rem; /* px-10 y py-3 en Tailwind CSS */
+  border-bottom: 1px solid var(--color-border);
+  padding: 0.75rem 2.5rem;
 }
-
 
 .header-left {
   display: flex;
@@ -36,7 +54,7 @@
   margin-right: 15px;
   width: 40px;
   height: 40px;
-  background-color: #007bff;
+  background-color: var(--color-primary);
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -45,14 +63,14 @@
   font-size: 18px;
   font-weight: bold;
 }
-h2.custom-heading {
-  color: #1C160C; /* Color del texto */
-  font-size: 1.125rem; /* text-lg en Tailwind CSS, que es 18px */
-  font-weight: bold; /* font-bold en Tailwind CSS */
-  line-height: 1.25; /* leading-tight en Tailwind CSS, que es aproximadamente 1.25 */
-  letter-spacing: -0.015em; /* tracking-[-0.015em] en Tailwind CSS */
-}
 
+h2.custom-heading {
+  color: var(--color-text);
+  font-size: 1.125rem;
+  font-weight: bold;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
 
 .header-right {
   display: flex;
@@ -62,50 +80,52 @@ h2.custom-heading {
 
 .nav-links {
   display: flex;
-  flex: 1; /* flex-1 en Tailwind CSS */
-  justify-content: flex-end; /* justify-end en Tailwind CSS */
-  gap: 2rem; 
+  flex: 1;
+  justify-content: flex-end;
+  gap: 2rem;
   text-decoration: none;
-
 }
+
 .inner-container {
   display: flex;
-  align-items: center; /* items-center en Tailwind CSS */
-  gap: 2.25rem; /* gap-9 en Tailwind CSS, que es 36px */
-}
-.custom-text {
-  color: #1C160C; /* Color del texto */
-  font-size: 0.875rem; /* text-sm en Tailwind CSS, que es 14px */
-  font-weight: 500; /* font-medium en Tailwind CSS */
-  line-height: 1.5; /* leading-normal en Tailwind CSS, que es aproximadamente 1.5 */
+  align-items: center;
+  gap: 2.25rem;
 }
 
-.buttons{
-  display:flex;
-  gap:2rem
+.custom-text {
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
 }
+
+.buttons {
+  display: flex;
+  gap: 2rem;
+}
+
 .icon-button {
   display: flex;
-  max-width: 480px; /* max-w-[480px] en Tailwind CSS */
-  cursor: pointer; /* cursor-pointer en Tailwind CSS */
-  align-items: center; /* items-center en Tailwind CSS */
-  justify-content: center; /* justify-center en Tailwind CSS */
-  overflow: hidden; /* overflow-hidden en Tailwind CSS */
-  border-radius: 9999px; /* rounded-full en Tailwind CSS para bordes totalmente redondeados */
-  height: 2.5rem; /* h-10 en Tailwind CSS, que es 40px */
-  background-color: #F4EFE6; /* bg-[#F4EFE6] en Tailwind CSS */
-  color: #1C160C; /* text-[#1C160C] en Tailwind CSS */
-  gap: 0.5rem; /* gap-2 en Tailwind CSS, que es 8px */
-  font-size: 0.875rem; /* text-sm en Tailwind CSS, que es 14px */
-  font-weight: bold; /* font-bold en Tailwind CSS */
-  line-height: 0.6; /* leading-normal en Tailwind CSS, que es aproximadamente 1.5 */
-  letter-spacing: 0.015em; /* tracking-[0.015em] en Tailwind CSS */
-  min-width: 0; /* min-w-0 en Tailwind CSS */
-  padding: 0 0.625rem; /* px-2.5 en Tailwind CSS, que es 10px */
+  max-width: 480px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 9999px;
+  height: 2.5rem;
+  background-color: var(--color-secondary);
+  color: var(--color-text);
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  line-height: 0.6;
+  letter-spacing: 0.015em;
+  min-width: 0;
+  padding: 0 0.625rem;
 }
 
 .icon-button:hover {
-  color: #007bff;
+  color: var(--color-hover);
   transform: scale(1.1);
 }
 
@@ -116,15 +136,15 @@ h2.custom-heading {
   background-size: cover;
   background-position: center;
   border: 2px solid #ddd;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 4px var(--color-shadow);
 }
 
 .sidebar {
   width: 270px;
-  background-color: #ffffff;
-  border-right: 2px solid #e0e0e0;
+  background-color: var(--color-content-background);
+  border-right: 2px solid var(--color-sidebar-border);
   padding: 20px;
-  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 4px var(--color-shadow);
 }
 
 .sidebar-header {
@@ -146,7 +166,7 @@ h2.custom-heading {
   border-radius: 50%;
   margin-right: 15px;
   border: 2px solid #ddd;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 4px var(--color-shadow);
 }
 
 .sidebar-header-text h1 {
@@ -172,7 +192,7 @@ h2.custom-heading {
 }
 
 .sidebar-item:hover {
-  background-color: #f1f1f1;
+  background-color: var(--color-sidebar-item-hover);
 }
 
 .icon {
@@ -183,10 +203,9 @@ h2.custom-heading {
 .main-content {
   flex: 1;
   padding: 20px;
-  background-color: #ffffff;
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+  background-color: var(--color-content-background);
+  box-shadow: inset 0 0 10px var(--color-content-shadow);
   border-radius: 8px;
-  
 }
 
 .tabs {
@@ -198,8 +217,8 @@ h2.custom-heading {
 }
 
 .tab-button {
-  background: #ffffff;
-  border:  #ffffff;
+  background: var(--color-tab-button-background);
+  border: var(--color-tab-button-border);
   padding: 12px 24px;
   margin-right: 10px;
   cursor: pointer;
@@ -209,14 +228,14 @@ h2.custom-heading {
 }
 
 .tab-button:hover {
-  background-color: #007bff;
-  color: #ffffff;
+  background-color: var(--color-tab-button-hover);
+  color: var(--color-tab-button-text);
 }
 
 .content-box {
   padding: 20px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-content-box-border);
   border-radius: 8px;
-  background-color: #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: var(--color-content-background);
+  box-shadow: 0 2px 4px var(--color-shadow);
 }
