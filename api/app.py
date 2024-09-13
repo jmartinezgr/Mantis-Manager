@@ -6,6 +6,7 @@ from schemas.auth_schema import LoginData
 from config.db import get_db
 from models.user_model import User
 from sqlalchemy.orm import Session
+from services.jwt_services import create_acess_token, create_refresh_token
 
 app = FastAPI(
     title="MANTIS MANAGER API",
@@ -32,7 +33,7 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == data.username).first()
 
     if not user or not user.verify_password(data.password):
-        raise JSONResponse(status_code=400, detail="Credenciales incorrectas")
+        raise JSONResponse(status_code=400, content={"error":"Credenciales incorrectas"})
 
     user_data = {
         "id": user.id,
@@ -44,11 +45,21 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
         "role_id": user.role_id
     }
 
+    token_info = {
+        "sub": user.id,
+        "scopes": user.role_id
+    }
+    
+    access_token = create_acess_token(data=token_info)
+    refresh_token = create_refresh_token(data=token_info)
+
     return JSONResponse(status_code=200 ,content={
         "message": "Te has logueado correctamente",
-        "data" : user_data
+        "data" : user_data,
+        "access_token": access_token,
+        "refresh_token": refresh_token
     })
-    
+      
 @app.get("/register")
 async def register():
     return {"message": "Ruta pública: register"}    

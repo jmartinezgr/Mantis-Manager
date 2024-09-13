@@ -9,8 +9,6 @@ engine = create_engine(
                     max_overflow=20  # Número máximo de conexiones adicionales
                 )
 
-print(f"Conectando a la base de datos: {get_database_url()}")
-
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

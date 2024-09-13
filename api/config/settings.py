@@ -5,7 +5,7 @@ import os
 load_dotenv()
 def get_database_url() -> str:
     # Obtiene la URL de la base de datos
-    base_dir = os.getenv('DATABASE_URL', 'test.db')
+    base_dir = os.getenv('MYSQL_URL', 'test.db')
 
     # Si la base de datos es de prueba
     if base_dir == 'test.db':
@@ -18,7 +18,7 @@ def get_database_url() -> str:
         return database_url
     else:
         # Si la base de datos es de producción
+        base_dir.replace('mysql://', 'mysql+pymysql://')
         return base_dir
-    
 def get_secret_key() -> str:
     return os.getenv('SECRET_KEY')

@@ -16,7 +16,7 @@ from config.settings import get_secret_key
 
 SECRET_KEY = get_secret_key()
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE = timedelta(seconds=30)
+ACCESS_TOKEN_EXPIRE = timedelta(minutes=15)
 REFRESH_TOKEN_EXPIRE = timedelta(days=1)
 
 # Crear token de acceso
