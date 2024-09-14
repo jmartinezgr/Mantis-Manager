@@ -16,7 +16,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
   // Obtiene la función para agregar un ticket desde el contexto
   const { handleAddTicket } = useTicketContext();
 
-  // Maneja los cambios en los campos del formulario se va actualizando  y sse cambia con el ultimo valor dado 
+  // Maneja los cambios en los campos del formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setTicket({
@@ -45,14 +45,16 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       {/* Contenedor del formulario de generación de tickets */}
-      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+      <div className="bg-white pl-6 pr-6 pt-3 pb-6 rounded-lg shadow-lg w-full max-w-md">
         {/* Botón para cerrar el formulario */}
-        <button
-          className="text-red-600 font-bold text-xl mb-4 focus:outline-none"
-          onClick={CerrarHerramienta}
-        >
-          X
-        </button>
+        <div className="flex justify-end">
+          <button
+            className="text-red-600 font-bold text-xl mb-4 focus:outline-none"
+            onClick={CerrarHerramienta}
+          >
+            X
+          </button>
+        </div>
 
         <h1 className="text-2xl font-bold mb-4 text-gray-800">Generar Ticket</h1>
 

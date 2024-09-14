@@ -1,5 +1,7 @@
 // src/components/login/loginForm.jsx
 import React, { useState } from 'react';
+// Importamos los íconos de Heroicons (Hi) desde React Icons
+import { HiEye, HiEyeOff } from 'react-icons/hi';
 
 /**
  * Componente LoginForm: Representa el formulario de inicio de sesión.
@@ -10,6 +12,7 @@ const LoginForm = ({ onLogin }) => {
   // Define los estados para almacenar el nombre de usuario y la contraseña ingresados por el usuario.
   const [username, setUsername] = useState(''); // Estado para el nombre de usuario
   const [password, setPassword] = useState(''); // Estado para la contraseña
+  const [showPassword, setShowPassword] = useState(false); // Estado para alternar entre mostrar/ocultar la contraseña
 
   /**
    * Función handleSubmit: Se encarga de manejar el envío del formulario.
@@ -32,6 +35,14 @@ const LoginForm = ({ onLogin }) => {
     }
   };
 
+  /**
+   * Función togglePasswordVisibility: Alterna el estado showPassword
+   * para mostrar o esconder la contraseña.
+   */
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="bg-white p-8 rounded-lg shadow-s max-w-sm mx-auto">
       <h1 className="text-2xl font-semibold mb-6 text-center text-gray-700">Iniciar Sesión</h1>
@@ -51,19 +62,32 @@ const LoginForm = ({ onLogin }) => {
             />
           </label>
         </div>
-        <div>
+        <div className="relative">
           <label htmlFor="password" className="block text-sm font-medium text-gray-600">
             Contraseña
             {/* Campo de entrada para la contraseña */}
             <input
               id="password"
-              type="password"
+              type={showPassword ? 'text' : 'password'} // Cambiamos el tipo según el estado showPassword
               placeholder="Contraseña"
               value={password}
               onChange={(e) => setPassword(e.target.value)} // Actualiza el estado cuando el usuario escribe
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10" // Añadimos padding para el icono
             />
           </label>
+          {/* Ícono para alternar la visibilidad de la contraseña */}
+          <button
+            type="button"
+            onClick={togglePasswordVisibility} // Cambia el estado showPassword al hacer clic
+            className="absolute inset-y-0 right-0 pr-3 pt-5 flex items-center text-sm leading-5"
+          >
+            {/* Muestra el ícono de ojo o de ojo con barra según el estado showPassword */}
+            {showPassword ? (
+              <HiEyeOff className="h-5 w-5 text-gray-500" /> // Ícono para ocultar contraseña
+            ) : (
+              <HiEye className="h-5 w-5 text-gray-500" /> // Ícono para mostrar contraseña
+            )}
+          </button>
         </div>
         {/* Botón para enviar el formulario */}
         <button

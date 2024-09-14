@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate para la redirección
+import { useAuth } from '../context/authContext'; // Importamos el hook de autenticación
 
 const Perfil = () => {
   const [name, setName] = useState('Juan Pérez');
@@ -6,15 +8,25 @@ const Perfil = () => {
   const [password, setPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const{logout}=useAuth();
+
+  const navigate = useNavigate(); // Hook para redirección
 
   const handleSave = () => {
     // Aquí puedes agregar la lógica para guardar los cambios
     alert('Cambios guardados');
   };
 
+  const handleLogout = () => {
+    // Aquí puedes agregar la lógica para cerrar sesión
+    // Ejemplo: limpiar el contexto de autenticación o las credenciales del usuario
+    // Luego redirigir a la página de inicio de sesión
+    navigate('/login');
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+    <div className="min-h-screen bg-white p-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-lg p-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Gestión de Perfil</h1>
         
         <section className="mb-8">
@@ -81,9 +93,16 @@ const Perfil = () => {
         
         <button
           onClick={handleSave}
-          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300"
+          className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-300 mr-4"
         >
           Guardar Cambios
+        </button>
+        
+        <button
+          onClick={()=>{logout()}}
+          className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition duration-300"
+        >
+          Cerrar Sesión
         </button>
       </div>
     </div>
@@ -91,3 +110,4 @@ const Perfil = () => {
 };
 
 export default Perfil;
+
