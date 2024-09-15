@@ -16,7 +16,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         """Verifica el token de acceso."""
         
         # Lista de rutas públicas que no requieren autenticación
-        public_routes = ["/refresh", "/login", "/register", "/docs", "/openapi.json", "/"]  
+        public_routes = ["/token/refresh", "/login", "/register", "/docs", "/openapi.json", "/"]  
         
         # Verificar si la ruta actual está en la lista de rutas públicas
         if request.url.path in public_routes:
