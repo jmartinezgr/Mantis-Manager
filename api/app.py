@@ -18,7 +18,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 app = FastAPI(
     title="MANTIS MANAGER API",
     description="Servicios para la gestión de mantenimiento de Balalika S.A",
-    version="0.1"
+    version="0.2"
 )
 
 # Agregar el middleware de autenticación
