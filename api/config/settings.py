@@ -20,5 +20,7 @@ def get_database_url() -> str:
         # Si la base de datos es de producción
         base_dir.replace('mysql://', 'mysql+pymysql://')
         return base_dir
+    
+    
 def get_secret_key() -> str:
     return os.getenv('SECRET_KEY')

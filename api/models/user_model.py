@@ -2,11 +2,13 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from config.db import Base, engine
+from passlib.context import CryptContext
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class User(Base):
     __tablename__ = 'user'
     id = Column(String, primary_key=True)
-    username = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
@@ -16,7 +18,7 @@ class User(Base):
     role = relationship("Role", back_populates="user")
     
     def verify_password(self, password):
-        return self.password == password
+        return pwd_context.verify(password, self.password)
     
 class Role(Base):
     __tablename__ = 'role'

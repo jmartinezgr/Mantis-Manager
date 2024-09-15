@@ -1,43 +1,61 @@
 from fastapi import FastAPI, Request, Depends
-from fastapi.security import HTTPBearer
 from fastapi.responses import JSONResponse
-from middlewares.auth_midddleware import AuthMiddleware
-from schemas.auth_schema import LoginData
-from config.db import get_db
-from models.user_model import User
+from fastapi.security import HTTPBearer
+
+from passlib.context import CryptContext
 from sqlalchemy.orm import Session
+
+from config.db import get_db
+from middlewares.auth_midddleware import AuthMiddleware
+from models.user_model import User, Role
+from schemas.auth_schema import LoginData, RegisterData
 from services.jwt_services import create_acess_token, create_refresh_token
 
+# Crear un objeto de contexto de cifrado con bcrypt
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Crear la instancia principal de FastAPI
 app = FastAPI(
     title="MANTIS MANAGER API",
     description="Servicios para la gestión de mantenimiento de Balalika S.A",
     version="0.1"
 )
+
+# Agregar el middleware de autenticación
 app.add_middleware(AuthMiddleware)
 
 # Definir el esquema de seguridad Bearer Token
 bearer_scheme = HTTPBearer()
 
-# Rutas de ejemplo
+# Ruta protegida con token
 @app.get("/protected")
 async def protected_route(req: Request, dependencies=Depends(bearer_scheme)):
-    payload = req.state.user
-    return JSONResponse(status_code=200 ,content={
-        "message": f"Accediste a una ruta protegida con el token",
+    """
+    Ruta protegida que requiere autenticación con un token.
+    """
+    payload = req.state.user  # Obtener el usuario del token
+    return JSONResponse(status_code=200, content={
+        "message": "Accediste a una ruta protegida con el token",
         "user": payload
     })
 
+# Ruta para iniciar sesión
 @app.post("/login")
 async def login(data: LoginData, db: Session = Depends(get_db)):
-    
-    user = db.query(User).filter(User.username == data.username).first()
+    """
+    Autenticar al usuario y generar tokens de acceso y refresco.
+    """
+    user = db.query(User).filter(User.id == data.id).first()
 
+    # Verificar si el usuario existe y si la contraseña es correcta
     if not user or not user.verify_password(data.password):
-        raise JSONResponse(status_code=400, content={"error":"Credenciales incorrectas"})
+        return JSONResponse(status_code=400, content={
+            "error": "Credenciales incorrectas"
+        })
 
+    # Datos del usuario autenticado
     user_data = {
         "id": user.id,
-        "username": user.username,
         "first_name": user.first_name,
         "last_name": user.last_name,
         "email": user.email,
@@ -45,21 +63,70 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
         "role_id": user.role_id
     }
 
-    token_info = {
-        "sub": user.id,
-        "scopes": user.role_id
-    }
-    
+    # Crear tokens de acceso y refresco
+    token_info = {"sub": user.id, "scopes": user.role_id}
     access_token = create_acess_token(data=token_info)
     refresh_token = create_refresh_token(data=token_info)
 
-    return JSONResponse(status_code=200 ,content={
+    # Respuesta con el token y datos del usuario
+    return JSONResponse(status_code=200, content={
         "message": "Te has logueado correctamente",
-        "data" : user_data,
+        "data": user_data,
         "access_token": access_token,
         "refresh_token": refresh_token
     })
-      
-@app.get("/register")
-async def register():
-    return {"message": "Ruta pública: register"}    
+
+# Ruta para registrar un nuevo usuario
+@app.post("/register")
+async def register(data: RegisterData, db: Session = Depends(get_db)):
+    """
+    Registrar un nuevo usuario en el sistema y generar tokens.
+    """
+    # Verificar si el usuario ya existe
+    user = db.query(User).filter(User.id == data.id).first()
+    if user:
+        return JSONResponse(status_code=400, content={
+            "error": "El usuario ya existe"
+        })
+
+    # Verificar si el rol existe
+    role_id = db.query(Role).filter(Role.name == data.role).first()
+    if not role_id:
+        return JSONResponse(status_code=400, content={
+            "error": "El rol no existe"
+        })
+
+    # Crear el nuevo usuario con los datos proporcionados
+    new_user = User(
+        id=data.id,
+        password=pwd_context.hash(data.password),  # Hashear la contraseña
+        first_name=data.first_name,
+        last_name=data.last_name,
+        email=data.email,
+        phone=data.phone,
+        role_id=role_id.id
+    )
+
+    # Guardar el usuario en la base de datos
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    # Crear tokens de acceso y refresco para el nuevo usuario
+    access_token = create_acess_token(data={"sub": new_user.id, "scopes": new_user.role_id})
+    refresh_token = create_refresh_token(data={"sub": new_user.id, "scopes": new_user.role_id})
+
+    # Respuesta con el token y datos del nuevo usuario
+    return JSONResponse(status_code=200, content={
+        "detail": "Usuario creado correctamente",
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "data": {
+            "id": new_user.id,
+            "first_name": new_user.first_name,
+            "last_name": new_user.last_name,
+            "email": new_user.email,
+            "phone": new_user.phone,
+            "role_id": new_user.role_id
+        }
+    })
