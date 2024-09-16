@@ -13,7 +13,17 @@ tokens_router = APIRouter(tags=["Tokens"])
 @tokens_router.post("/token/refresh")
 async def refresh_token(req: Request, dependencies=Depends(bearer_scheme)):
     """
-    Refresca los tokens JWT si el refresh token es válido.
+    Renovar un token de acceso con un token de refresco.
+    
+    Este endpoint permite a un usuario sin autenticar renovar un token de acceso con un token de refresco.
+    Esto se logra verificando el token de refresco y generando un nuevo token de acceso y refresco.
+
+    Parámetros:
+    - req: Solicitud HTTP con el token de refresco en el encabezado de autorización.
+    - dependencies: Dependencia de autenticación con token
+
+    Retorna:
+    - Mensaje de éxito y los nuevos tokens de acceso y refresco.
     """
     
     try:

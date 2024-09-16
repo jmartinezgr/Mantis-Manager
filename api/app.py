@@ -9,8 +9,14 @@ from routers.user_image_router import user_image_router
 # Crear la instancia principal de FastAPI
 app = FastAPI(
     title="MANTIS MANAGER API",
-    description="Servicios para la gestión de mantenimiento de Balalika S.A",
-    version="0.2"
+    description=(
+        "Mantis Manager API proporciona un conjunto de servicios avanzados para gestionar "
+        "el mantenimiento de equipos y recursos dentro de la empresa Balalika S.A. "
+        "Este sistema facilita la creación, seguimiento y administración de tickets de mantenimiento, "
+        "incluyendo la gestión de usuarios, autenticación segura, y carga y acceso de imágenes de perfil. "
+        "Es compatible con futuras ampliaciones hacia aplicaciones móviles y otros sistemas externos."
+    ),
+    version="0.5"
 )
 
 # Agregar el middleware de autenticación
@@ -26,7 +32,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # O especifica los orígenes permitidos
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

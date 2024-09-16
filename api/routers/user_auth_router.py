@@ -19,7 +19,17 @@ user_auth_router = APIRouter(tags=["Users Authentification"])
 @user_auth_router.post("/login")
 async def login(data: LoginData, db: Session = Depends(get_db)):
     """
-    Autenticar al usuario y generar tokens de acceso y refresco.
+    Iniciar sesión en el sistema y generar tokens de acceso y refresco.
+    
+    Este endpoint permite a un usuario sin autenticar subir iniciar sesion en el sistema.
+    Esto se logra verificando las credenciales del usuario y generando tokens de acceso y refresco.
+
+    Parámetros:
+    - data: Datos de inicio de sesión (ID y contraseña).
+    - db: Sesión de la base de datos. (Dependencia)
+
+    Retorna:
+    - Mensaje de éxito, los datos del usuario y los tokens de acceso y refresco.
     """
     user = db.query(User).filter(User.id == data.id).first()
 
@@ -56,7 +66,18 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
 @user_auth_router.post("/register")
 async def register(data: RegisterData, db: Session = Depends(get_db)):
     """
-    Registrar un nuevo usuario en el sistema y generar tokens.
+    Registrarse en el sistema y generar tokens de acceso y refresco.
+    
+    Este endpoint permite a un usuario sin autenticar registrarse en el sistema.
+    Esto se logra verificando si el usuario ya existe, creando un nuevo usuario y 
+    generando tokens de acceso y refresco.
+
+    Parámetros:
+    - data: Datos de registro del usuario. (ID, contraseña, nombre, apellido, email, teléfono y rol).
+    - db: Sesión de la base de datos. (Dependencia)
+
+    Retorna:
+    - Mensaje de éxito, los datos del usuario y los tokens de acceso y refresco.
     """
     # Verificar si el usuario ya existe
     user = db.query(User).filter(User.id == data.id).first()
