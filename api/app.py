@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from middlewares.auth_midddleware import AuthMiddleware
 from middlewares.logger_middleware import LogRequestsMiddleware
@@ -28,11 +29,9 @@ app.include_router(user_auth_router)
 app.include_router(tokens_router)   
 app.include_router(user_image_router)
 
-from fastapi.middleware.cors import CORSMiddleware
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
