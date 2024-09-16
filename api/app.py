@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
 from middlewares.auth_midddleware import AuthMiddleware
+from middlewares.logger_middleware import LogRequestsMiddleware
 from routers.user_auth_router import user_auth_router
 from routers.tokens_router import tokens_router
 
@@ -13,5 +14,8 @@ app = FastAPI(
 
 # Agregar el middleware de autenticación
 app.add_middleware(AuthMiddleware)
+app.add_middleware(LogRequestsMiddleware)
+
+# Agregar los routers
 app.include_router(user_auth_router)
 app.include_router(tokens_router)   
