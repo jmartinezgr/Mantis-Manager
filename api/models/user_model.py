@@ -14,6 +14,7 @@ class User(Base):
     last_name = Column(String, nullable=False)
     email = Column(String, nullable=False)
     phone = Column(String, nullable=False)
+    image_field = Column(String, nullable=True, default=None)
     role_id = Column(Integer, ForeignKey('role.id'))
     role = relationship("Role", back_populates="user")
     
