@@ -6,6 +6,10 @@ from middlewares.logger_middleware import LogRequestsMiddleware
 from routers.user_auth_router import user_auth_router
 from routers.tokens_router import tokens_router
 from routers.user_image_router import user_image_router
+from models.create_tables import create_tables
+
+#Crear las tablas en la base de datos
+create_tables()
 
 # Crear la instancia principal de FastAPI
 app = FastAPI(
