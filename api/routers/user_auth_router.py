@@ -31,7 +31,7 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
     Retorna:
     - Mensaje de éxito, los datos del usuario y los tokens de acceso y refresco.
     """
-    user = db.query(User).filter(User.id == data.id).first()
+    user = db.query(User).filter(User.email == data.email).first()
 
     # Verificar si el usuario existe y si la contraseña es correcta
     if not user or not user.verify_password(data.password):
@@ -67,41 +67,29 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
 async def register(data: RegisterData, db: Session = Depends(get_db)):
     """
     Registrarse en el sistema y generar tokens de acceso y refresco.
-    
-    Este endpoint permite a un usuario sin autenticar registrarse en el sistema.
-    Esto se logra verificando si el usuario ya existe, creando un nuevo usuario y 
-    generando tokens de acceso y refresco.
-
-    Parámetros:
-    - data: Datos de registro del usuario. (ID, contraseña, nombre, apellido, email, teléfono y rol).
-    - db: Sesión de la base de datos. (Dependencia)
-
-    Retorna:
-    - Mensaje de éxito, los datos del usuario y los tokens de acceso y refresco.
     """
-    # Verificar si el usuario ya existe
-    user = db.query(User).filter(User.id == data.id).first()
-    if user:
+    # Verificar si el email ya está registrado
+    existing_user = db.query(User).filter(User.email == data.email).first()
+    if existing_user:
         return JSONResponse(status_code=400, content={
-            "error": "El usuario ya existe"
+            "error": "El email ya está registrado"
         })
 
     # Verificar si el rol existe
-    role_id = db.query(Role).filter(Role.name == data.role).first()
-    if not role_id:
+    role = db.query(Role).filter(Role.name == data.role).first()
+    if not role:
         return JSONResponse(status_code=400, content={
             "error": "El rol no existe"
         })
 
     # Crear el nuevo usuario con los datos proporcionados
     new_user = User(
-        id=data.id,
-        password=pwd_context.hash(data.password),  # Hashear la contraseña
+        password=pwd_context.hash(data.password),
         first_name=data.first_name,
         last_name=data.last_name,
         email=data.email,
         phone=data.phone,
-        role_id=role_id.id
+        role_id=role.id
     )
 
     # Guardar el usuario en la base de datos

@@ -3,9 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from middlewares.auth_midddleware import AuthMiddleware
 from middlewares.logger_middleware import LogRequestsMiddleware
+
+
 from routers.user_auth_router import user_auth_router
 from routers.tokens_router import tokens_router
 from routers.user_image_router import user_image_router
+from routers.ticket_router import ticket_router
+from routers.machine_router import machine_router
+
 from models.create_tables import create_tables
 
 #Crear las tablas en la base de datos
@@ -32,6 +37,8 @@ app.add_middleware(LogRequestsMiddleware)
 app.include_router(user_auth_router)
 app.include_router(tokens_router)   
 app.include_router(user_image_router)
+app.include_router(ticket_router) 
+app.include_router(machine_router)   
 
 app.add_middleware(
     CORSMiddleware,
