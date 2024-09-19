@@ -5,7 +5,7 @@ from datetime import datetime
 class TicketData(BaseModel):
     description: str
     state: str
-    machine_id: str
+    machine_serial: str
     created_by: str
     assigned_to: Optional[str] = None
     created_at: datetime
@@ -18,11 +18,11 @@ class TicketData(BaseModel):
         return v
     
 
-class TicketCreate(TicketData):
+class TicketCreate(BaseModel):
     description: str
     machine_id: str
     created_by: str
-    assigned_to: Optional[str] = None
+    #assigned_to: Optional[str] = None
 
 class TicketUpdate(BaseModel):
     description: Optional[str] = None
