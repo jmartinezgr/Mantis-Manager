@@ -20,6 +20,26 @@ def get_db():
     finally:
         db.close()
      
+def init_roles():
+    # La importación de Role ocurre aquí dentro de la función, para evitar la importación circular
+    from models.user_model import Role  
+    session = SessionLocal()
+    try:
+        roles = ["Jefe de Desarrollo", "Operario de Mantenimiento", "Operario de Maquinaria", "Jefe de Mantenimiento"]
+        for role_name in roles:
+            existing_role = session.query(Role).filter_by(name=role_name).first()
+            if not existing_role:
+                new_role = Role(name=role_name)
+                session.add(new_role)
+                print(f"Rol '{role_name}' agregado a la base de datos.")
+        session.commit()
+    except Exception as e:
+        print(f"Error al inicializar roles: {e}")
+        session.rollback()
+    finally:
+        session.close()
+
+
 if __name__ == "__main__":    
     from sqlalchemy import text
 
