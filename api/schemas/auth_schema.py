@@ -1,16 +1,14 @@
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, validator
 
 class LoginData(BaseModel):
     email: str
     password: str
     
 
-from pydantic import BaseModel, EmailStr
-
 class RegisterData(BaseModel):
     first_name: str
     last_name: str
-    email: EmailStr
+    email: str
     phone: int
     password: str
     role: str
