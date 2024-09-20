@@ -3,9 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-
-import logging
-
+from fastapi.security import HTTPBearer
 
 from config.db import get_db
 from models.ticket_model import Ticket
@@ -13,16 +11,15 @@ from models.machine_model import Machine
 from models.user_model import User, Role
 from schemas.ticket_schema import TicketCreate, TicketUpdate, TicketData
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
+bearer_scheme = HTTPBearer()
 
 # Crear un router para los tickets
 ticket_router = APIRouter(tags=["Tickets"])
 
 # Crear un ticket (POST)
 @ticket_router.post("/tickets", response_model=TicketData)
-async def create_ticket(request: Request, ticket: TicketCreate, db: Session = Depends(get_db)):
+async def create_ticket(request: Request, ticket: TicketCreate, db: Session = Depends(get_db),
+                        dependencies=Depends(bearer_scheme)):
     """
     Crea un nuevo ticket con el estado predeterminado 'pendiente'.
     
@@ -69,7 +66,7 @@ async def create_ticket(request: Request, ticket: TicketCreate, db: Session = De
 
 
 @ticket_router.get("/tickets/{ticket_id}", response_model=TicketData)
-async def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
+async def get_ticket(ticket_id: int, db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
     """
     Obtiene un ticket por su ID.
     
@@ -98,7 +95,7 @@ async def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
 
 # Actualizar un ticket (PATCH)
 @ticket_router.patch("/tickets/{ticket_id}", response_model=TicketData)
-async def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db: Session = Depends(get_db)):
+async def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db: Session = Depends(get_db),dependencies=Depends(bearer_scheme)):
     """
     Actualiza un ticket por su ID.
     
@@ -143,10 +140,6 @@ async def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db: Session
             ticket.state = "asignado"
         ticket.assigned_to = employer.id
     
-    
-    # Registrar el valor de assigned_to antes de devolver la respuesta
-    logger.info(f"El valor de 'assigned_to' es: {ticket.assigned_to}")
-
     db.commit()
     db.refresh(ticket)
 
@@ -163,7 +156,7 @@ async def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db: Session
     )
 
 @ticket_router.get("/historial", response_model=List[TicketData])
-async def get_finalized_tickets(db: Session = Depends(get_db)):
+async def get_finalized_tickets(db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
     """
     Obtiene el historial, con todos los tickets de estado "finalizado".
     
@@ -194,7 +187,7 @@ async def get_finalized_tickets(db: Session = Depends(get_db)):
     ]
 
 @ticket_router.get("/seguimiento", response_model=List[TicketData])
-async def get_my_tickets(request: Request, db: Session = Depends(get_db)):
+async def get_my_tickets(request: Request, db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
     """
     Obtiene todos los tickets creados por el usuario autenticado para 
     asi poder hacer un seguimiento a los tickets creados
