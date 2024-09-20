@@ -23,4 +23,7 @@ def get_database_url() -> str:
     
     
 def get_secret_key() -> str:
-    return os.getenv('SECRET_KEY')
+    secret_key = os.getenv('SECRET_KEY')
+    if not secret_key:
+        raise ValueError("problema con el JWT.")
+    return secret_key
