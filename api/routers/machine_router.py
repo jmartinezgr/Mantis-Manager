@@ -16,7 +16,7 @@ async def create_machine(machine: MachineCreate, db: Session = Depends(get_db)):
     El jefe de nuevos desarrollos podrá crear una nueva maquina.
     
     Parámetros:
-    - machine: Datos de la máquina a crear.
+    - machine: Datos de la máquina a crear(tipo, marca, serial, acción).
     - db: Sesión de la base de datos (dependencia).
     
     Retorna:
@@ -74,7 +74,7 @@ async def update_machine(machine_id: str, machine_data: MachineUpdate, db: Sessi
     
     Parámetros:
     - machine_id: ID de la máquina a actualizar.
-    - machine_data: Datos a actualizar.
+    - machine_data: Datos a actualizar (tipo, marca, serial, acción).
     
     Retorna:
     - Datos de la máquina actualizada.

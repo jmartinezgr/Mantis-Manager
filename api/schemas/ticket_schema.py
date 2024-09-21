@@ -5,10 +5,12 @@ from datetime import datetime
 class TicketData(BaseModel):
     description: str
     state: str
+    priority: str
     machine_serial: str
     created_by: int
     assigned_to: Optional[int] = None
     created_at: datetime
+    deadline: Optional[datetime]
 
     @validator('state')
     def state_must_be_valid(cls, v):
@@ -20,7 +22,8 @@ class TicketData(BaseModel):
 
 class TicketCreate(BaseModel):
     description: str
-    machine: str  
+    machine: str
+    priority: str
 
 class TicketUpdate(BaseModel):
     description: Optional[str] = None

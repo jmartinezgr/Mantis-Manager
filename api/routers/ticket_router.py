@@ -1,3 +1,4 @@
+from datetime import timedelta, datetime
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
@@ -13,13 +14,13 @@ from models.machine_model import Machine
 from models.user_model import User, Role
 from schemas.ticket_schema import TicketCreate, TicketUpdate, TicketData
 
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 # Crear un router para los tickets
 ticket_router = APIRouter(tags=["Tickets"])
-
 # Crear un ticket (POST)
 @ticket_router.post("/tickets", response_model=TicketData)
 async def create_ticket(request: Request, ticket: TicketCreate, db: Session = Depends(get_db)):
@@ -33,38 +34,49 @@ async def create_ticket(request: Request, ticket: TicketCreate, db: Session = De
     Retorna:
     - Datos del ticket creado.
     """
-    # Verificar si la máquina con el serial proporcionado existe
     machine = db.query(Machine).filter(Machine.serial == ticket.machine).first()
     
     if not machine:
         raise HTTPException(status_code=400, detail="La máquina con el serial proporcionado no existe.")
     
-    # Obtener el usuario autenticado desde el token (almacenado en request.state.user)
-    user_info = request.state.user  # Extraemos el payload del token
-    user_id = user_info.get("sub")  # Asegúrate de que el campo "sub" sea el ID del usuario
+    user_info = request.state.user  
+    user_id = user_info.get("sub")  
+    
+    # Establecer el deadline basado en la prioridad
+    if ticket.priority == 'baja':
+        deadline = datetime.now() + timedelta(weeks=1) 
+    elif ticket.priority == 'media':
+        deadline = datetime.now() + timedelta(days=3) 
+    elif ticket.priority == 'alta':
+        deadline = datetime.now() + timedelta(days=1)
+    else:
+        raise HTTPException(status_code=400, detail="Prioridad no válida.")
     
     # Crear el ticket si la máquina existe
     new_ticket = Ticket(
         description=ticket.description,
-        state="pendiente",  # Estado predeterminado a 'pendiente'
-        machine_id=machine.id,  # Asignamos el ID de la máquina existente
-        created_by=user_id,  # Tomamos el user_id del token
-        created_at=func.now()  # Se usa func.now() para el timestamp
+        state="pendiente",  
+        machine_id=machine.id,  
+        priority=ticket.priority,
+        created_by=user_id, 
+        created_at=func.now(),  
+        deadline=deadline
     )
 
     db.add(new_ticket)
     db.commit()
     db.refresh(new_ticket)
     
-    # Devolver la respuesta usando TicketData
     return TicketData(
         id=new_ticket.id,
         description=new_ticket.description,
         state=new_ticket.state,
-        machine_serial=machine.serial,  # Devolvemos el serial de la máquina
+        priority=new_ticket.priority,  
+        machine_serial=machine.serial,  
         created_by=new_ticket.created_by,
         assigned_to=new_ticket.assigned_to,
-        created_at=new_ticket.created_at
+        created_at=new_ticket.created_at,
+        deadline=new_ticket.deadline 
     )
 
 
@@ -90,10 +102,12 @@ async def get_ticket(ticket_id: int, db: Session = Depends(get_db)):
         id=ticket.id,
         description=ticket.description,
         state=ticket.state,
+        priority=ticket.priority,
         machine_serial=ticket.machine.serial,  
         created_by=ticket.created_by,
         assigned_to=ticket.assigned_to,
-        created_at=ticket.created_at
+        created_at=ticket.created_at,
+        deadline=ticket.deadline
     )
 
 # Actualizar un ticket (PATCH)
@@ -156,11 +170,13 @@ async def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db: Session
         id=ticket.id,
         description=ticket.description,
         state=ticket.state,
+        priority=ticket.priority,
         machine_serial=ticket.machine.serial,  
         created_by=ticket.created_by,
         assigned_to=ticket.assigned_to,
-        created_at=ticket.created_at
-    )
+        created_at=ticket.created_at,
+        deadline=ticket.deadline
+        )
 
 @ticket_router.get("/historial", response_model=List[TicketData])
 async def get_finalized_tickets(db: Session = Depends(get_db)):
@@ -182,13 +198,15 @@ async def get_finalized_tickets(db: Session = Depends(get_db)):
     # Devolver los tickets filtrados
     return [
         TicketData(
-            id=ticket.id,
-            description=ticket.description,
-            state=ticket.state,
-            machine_serial=ticket.machine.serial,  
-            created_by=ticket.created_by,
-            assigned_to=ticket.assigned_to,
-            created_at=ticket.created_at
+        id=ticket.id,
+        description=ticket.description,
+        state=ticket.state,
+        priority=ticket.priority,
+        machine_serial=ticket.machine.serial,  
+        created_by=ticket.created_by,
+        assigned_to=ticket.assigned_to,
+        created_at=ticket.created_at,
+        deadline=ticket.deadline
         )
         for ticket in tickets
     ]
@@ -222,13 +240,17 @@ async def get_my_tickets(request: Request, db: Session = Depends(get_db)):
     # Devolver los tickets encontrados
     return [
         TicketData(
-            id=ticket.id,
-            description=ticket.description,
-            state=ticket.state,
-            machine_serial=ticket.machine.serial,  
-            created_by=ticket.created_by,
-            assigned_to=ticket.assigned_to,
-            created_at=ticket.created_at
-        )
+        id=ticket.id,
+        description=ticket.description,
+        state=ticket.state,
+        priority=ticket.priority,
+        machine_serial=ticket.machine.serial,  
+        created_by=ticket.created_by,
+        assigned_to=ticket.assigned_to,
+        created_at=ticket.created_at,
+        deadline=ticket.deadline
+    )
         for ticket in tickets
     ]
+
+

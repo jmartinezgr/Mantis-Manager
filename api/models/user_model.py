@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from config.db import Base, engine
@@ -22,6 +22,7 @@ class User(Base):
     
     created_tickets = relationship("Ticket", foreign_keys=[Ticket.created_by], back_populates="creator")
     assigned_tickets = relationship("Ticket", foreign_keys=[Ticket.assigned_to], back_populates="assignee")
+
     
     def verify_password(self, password):
         return pwd_context.verify(password, self.password)

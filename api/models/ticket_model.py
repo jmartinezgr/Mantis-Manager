@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func
+from sqlalchemy import Column, Integer, String, DateTime, func, Enum 
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from config.db import Base, engine
@@ -8,8 +8,10 @@ class Ticket(Base):
     __tablename__ = 'ticket'
     id = Column(Integer, primary_key=True, autoincrement=True)
     description = Column(String, nullable=False)
-    state = Column(String, nullable=False)  # Estado del ticket (pendiente, asignado, en progreso, finalizado)
+    state = Column(String, default='pendiente', nullable=False)  # Estado del ticket (pendiente, asignado, en progreso, finalizado)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    priority = Column(Enum('alta', 'media', 'baja', name='ticket_priority'), nullable=False)
+    deadline = Column(DateTime, nullable=True)
     
     # Relación con la tabla Machine
     machine_id = Column(Integer, ForeignKey('machine.id'), nullable=False)
