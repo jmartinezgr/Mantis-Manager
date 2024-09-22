@@ -1,42 +1,37 @@
-// src/components/login/Login.jsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from './header';
 import LoginForm from './loginForm';
-import { useAuth } from '../context/authContext'; // Importamos el hook de autenticación
+import { useAuth } from '../context/authContext';
 
-/**
- * Componente Login: Muestra la pantalla de inicio de sesión.
- * Utiliza el contexto de autenticación para manejar el proceso de login.
- */
 const Login = () => {
-  // Obtenemos la función login desde el contexto de autenticación.
-  const { login } = useAuth(); 
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  /**
-   * Función handleLogin: Se encarga de manejar el proceso de inicio de sesión.
-   * 
-   * @param {string} username - Nombre de usuario ingresado por el usuario.
-   * @param {string} password - Contraseña ingresada por el usuario.
-   * 
-   * Llama a la función login del contexto y maneja posibles errores.
-   */
   const handleLogin = async (username, password) => {
     try {
-      // Intenta iniciar sesión utilizando el contexto de autenticación.
-      await login(username, password); 
+      await login(username, password);
     } catch (error) {
-      // Muestra un mensaje de error si el login falla.
-      alert(error.message); 
+      alert(error.message);
     }
+  };
+
+  const handleSignUp = () => {
+    navigate('/signup'); // Navega a la página de registro
   };
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-white p-4">
-      <Header /> {/* Componente del encabezado */}
+      <Header />
       <div className="mt-5 w-full max-w-md">
-        {/* Componente del formulario de inicio de sesión, pasamos handleLogin como prop */}
         <LoginForm onLogin={handleLogin} />
       </div>
+      <button
+        onClick={handleSignUp}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+      >
+        Registrarse
+      </button>
       <footer className="mt-8 text-center text-gray-700">
         <p className="text-sm">
           ¿Problemas con el inicio de sesión? Contacta a nuestro equipo de soporte.
@@ -53,3 +48,4 @@ const Login = () => {
 };
 
 export default Login;
+
