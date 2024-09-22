@@ -1,15 +1,17 @@
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from middlewares.auth_midddleware import AuthMiddleware
 from middlewares.logger_middleware import LogRequestsMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
-
 from routers.user_auth_router import user_auth_router
 from routers.tokens_router import tokens_router
 from routers.user_image_router import user_image_router
 from routers.ticket_router import ticket_router
 from routers.machine_router import machine_router
+from routers.web_sockets_router import ws_router, manager
 
 from models.create_tables import create_tables
 from config.db import init_roles  
@@ -38,6 +40,7 @@ app.include_router(tokens_router)
 app.include_router(user_image_router)
 app.include_router(ticket_router)
 app.include_router(machine_router)
+app.include_router(ws_router)
 
 # Configuración de CORS
 app.add_middleware(
@@ -60,8 +63,6 @@ def ejecutar_actualizacion():
         print(f"Error en ejecutar_actualizacion: {e}")
 
 scheduler.add_job(ejecutar_actualizacion, 'interval', seconds=20)
-print(scheduler.get_jobs())  # Esto imprimirá una lista de los trabajos activos
-scheduler.start()
 
 @app.on_event("shutdown")
 def shutdown_event():
@@ -71,3 +72,14 @@ def shutdown_event():
 @app.on_event("startup")
 def startup_event():
     init_roles()
+    
+#Codigo para probar el envio de mensajes
+async def probar():
+    await manager.send_message("Hola", 1)
+    print("Mensaje enviado")
+
+def ejecutar_probar():
+    asyncio.run(probar()) 
+
+scheduler.add_job(ejecutar_probar, 'interval', seconds=1) 
+scheduler.start()
