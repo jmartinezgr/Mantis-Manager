@@ -16,7 +16,6 @@ with SessionLocal() as session:
         # Eliminar la tabla User si existe
         session.execute(text("DROP TABLE IF EXISTS user"))
         session.commit()  # Confirmar los cambios
-        print("Tabla User eliminada.")
     except Exception as e:
         session.rollback()
         print(f"Error eliminando la tabla User: {e}")
@@ -24,6 +23,5 @@ with SessionLocal() as session:
 # Recrear la tabla User
 try:
     Base.metadata.create_all(bind=engine)
-    print("Tabla User recreada.")
 except Exception as e:
     print(f"Error recreando la tabla User: {e}")

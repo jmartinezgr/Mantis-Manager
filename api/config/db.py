@@ -31,7 +31,6 @@ def init_roles():
             if not existing_role:
                 new_role = Role(name=role_name)
                 session.add(new_role)
-                print(f"Rol '{role_name}' agregado a la base de datos.")
         session.commit()
     except Exception as e:
         print(f"Error al inicializar roles: {e}")
@@ -52,7 +51,6 @@ if __name__ == "__main__":
             # Iterar sobre los resultados
             rows = result.fetchall()
             if rows:
-                print("Conexión exitosa: Se encontraron datos en la tabla.")
                 for row in rows:
                     print(row)
             else:

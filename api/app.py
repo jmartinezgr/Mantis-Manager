@@ -54,10 +54,8 @@ app.add_middleware(
 scheduler = BackgroundScheduler()
 
 def ejecutar_actualizacion():
-    print("Se está ejecutando la actualización de prioridades y deadlines")
     try:
         db = next(get_db())
-        print("Conexión a la base de datos obtenida")
         actualizar_prioridad_y_deadline(db)
     except Exception as e:
         print(f"Error en ejecutar_actualizacion: {e}")
