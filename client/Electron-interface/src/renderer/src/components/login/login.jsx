@@ -17,7 +17,7 @@ const Login = () => {
   };
 
   const handleSignUp = () => {
-    navigate('/signup'); // Navega a la página de registro
+    navigate('/signup'); 
   };
 
   return (

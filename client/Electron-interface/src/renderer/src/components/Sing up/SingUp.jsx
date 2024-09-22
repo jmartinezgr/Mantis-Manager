@@ -1,18 +1,18 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './singUpHeader'; // Asegúrate de que la importación sea correcta
-import SignUpForm from './SingUpFomr'; // Asegúrate de que la importación sea correcta
+import Header from './singUpHeader'; 
+import SignUpForm from './SingUpFomr'; 
 import { useAuth } from '../context/authContext'; // Si tienes un contexto de autenticación
 
 const SignUp = () => {
     const navigate = useNavigate();
-    const { register } = useAuth(); // Si tienes un método de registro
+    const { register } = useAuth(); 
 
     const handleSignUp = async (data) => {
         try {
             await register(data.email, data.password);
             console.log('Usuario registrado:', data);
-            // Aquí puedes agregar lógica adicional después del registro
+            // adicional después del registro
         } catch (error) {
             alert(error.message);
         }

@@ -15,7 +15,7 @@ const SignUpForm = ({ onSubmit, onGoBack }) => {
             return;
         }
 
-        // Limpiar el error y enviar los datos
+        
         setError('');
         onSubmit({ email, password });
     };
