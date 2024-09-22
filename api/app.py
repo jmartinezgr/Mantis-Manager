@@ -73,13 +73,19 @@ def shutdown_event():
 def startup_event():
     init_roles()
     
+import json
 #Codigo para probar el envio de mensajes
 async def probar():
-    await manager.send_message("Hola", 1)
+    message = {
+        "ticket_id": 123,
+        "status": "En Proceso",
+        "message": "El estado de tu ticket ha cambiado."
+    }
+    await manager.send_message(json.dumps(message), 1)
     print("Mensaje enviado")
 
 def ejecutar_probar():
     asyncio.run(probar()) 
 
-scheduler.add_job(ejecutar_probar, 'interval', seconds=1) 
+#scheduler.add_job(ejecutar_probar, 'interval', seconds=10) 
 scheduler.start()

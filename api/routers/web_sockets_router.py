@@ -1,6 +1,7 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, APIRouter, Depends, HTTPException
 from typing import List, Dict
 from services.jwt_services import verify_access_token
+import json
 
 ws_router = APIRouter()
 
@@ -34,6 +35,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int):
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.send_message(f"Mensaje recibido: {data}", user_id=user_id)
+            print(f"Mensaje recibido: {json.dumps(data)}")
+            await manager.send_message(json.dumps(data), user_id=user_id)
     except WebSocketDisconnect:
         manager.disconnect(websocket, user_id=user_id)
