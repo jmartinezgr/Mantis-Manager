@@ -1,5 +1,3 @@
-import asyncio
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -11,7 +9,7 @@ from routers.tokens_router import tokens_router
 from routers.user_image_router import user_image_router
 from routers.ticket_router import ticket_router
 from routers.machine_router import machine_router
-from routers.web_sockets_router import ws_router, manager
+from routers.web_sockets_router import ws_router
 
 from models.create_tables import create_tables
 from config.db import init_roles  
@@ -71,19 +69,4 @@ def shutdown_event():
 def startup_event():
     init_roles()
     
-import json
-#Codigo para probar el envio de mensajes
-async def probar():
-    message = {
-        "ticket_id": 123,
-        "status": "En Proceso",
-        "message": "El estado de tu ticket ha cambiado."
-    }
-    await manager.send_message(json.dumps(message), 1)
-    print("Mensaje enviado")
-
-def ejecutar_probar():
-    asyncio.run(probar()) 
-
-#scheduler.add_job(ejecutar_probar, 'interval', seconds=10) 
 scheduler.start()

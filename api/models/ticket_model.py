@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, Enum 
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
-from config.db import Base, engine
+from config.db import Base
 
 # Tabla Ticket
 class Ticket(Base):
