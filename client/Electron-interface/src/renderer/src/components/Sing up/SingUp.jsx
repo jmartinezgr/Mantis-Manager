@@ -1,8 +1,9 @@
+// src/components/SignUp.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from './singUpHeader'; 
 import SignUpForm from './SingUpFomr'; 
-import { useAuth } from '../context/authContext'; // Si tienes un contexto de autenticación
+import { useAuth } from '../context/authContext';
 
 const SignUp = () => {
     const navigate = useNavigate();
@@ -10,11 +11,14 @@ const SignUp = () => {
 
     const handleSignUp = async (data) => {
         try {
-            await register(data.email, data.password);
+            await register(data.first_name, data.last_name, data.email, data.phone, data.password, data.role);
+
             console.log('Usuario registrado:', data);
-            // adicional después del registro
+            // Redirigir o realizar otra acción después del registro
+            navigate('/'); // Redirigir a la página principal o a donde desees
         } catch (error) {
             alert(error.message);
+            console.log(data)
         }
     };
 
@@ -53,4 +57,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-

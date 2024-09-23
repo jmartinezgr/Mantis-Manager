@@ -78,8 +78,12 @@ async def register(data: RegisterData, db: Session = Depends(get_db)):
     # Verificar si el rol existe
     role = db.query(Role).filter(Role.name == data.role).first()
     if not role:
+        available_roles = db.query(Role).all()
+        available_role_names = [r.name for r in available_roles]
         return JSONResponse(status_code=400, content={
-            "error": "El rol no existe"
+            "error": "El rol no existe",
+            "provided_role": data.role,
+            "available_roles": available_role_names
         })
 
     # Crear el nuevo usuario con los datos proporcionados

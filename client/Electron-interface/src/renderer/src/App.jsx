@@ -2,7 +2,7 @@ import React from 'react';
 import { AuthProvider, useAuth } from './components/context/authContext';
 import Login from './components/login/login';
 import Layout from './components/Layout/Layout';
-import SignUp from './components/Sing up/SingUp'; // Importa SignUp
+import SignUp from './components/Sing up/SingUp';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 
 const AppContent = () => {
@@ -10,8 +10,8 @@ const AppContent = () => {
 
   return (
     <Routes>
-      <Route path="/" element={isAuthenticated ? <Layout /> : <Login />} />
-      <Route path="/signup" element={<SignUp />} /> {/* Ruta de registro */}
+      <Route path="*" element={isAuthenticated ? <Layout /> : <Login />} /> {/* Cambia a "path='*'" */}
+      <Route path="/signup" element={<SignUp />} />
     </Routes>
   );
 };

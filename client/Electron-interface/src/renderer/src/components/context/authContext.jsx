@@ -1,59 +1,65 @@
 // src/components/context/authContext.js
 import React, { createContext, useState, useContext } from 'react';
 
-// Crear el contexto de autenticación
 const AuthContext = createContext();
 
-/**
- * Componente AuthProvider: Proveedor del contexto de autenticación.
- * Este componente envuelve a otros componentes y les proporciona acceso al estado de autenticación.
- * 
- * @param {object} children - Los componentes hijos que serán envueltos por el proveedor.
- */
 export const AuthProvider = ({ children }) => {
-  // Estado local que gestiona si el usuario está autenticado o no.
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  /**
-   * Función login: Simula un proceso de autenticación de usuario.
-   * 
-   * @param {string} username - Nombre de usuario (se omite en este ejemplo).
-   * @param {string} password - Contraseña del usuario (se omite en este ejemplo).
-   * 
-   * Esta función podría incluir la lógica para verificar credenciales de usuario contra un backend.
-   * Si las credenciales son válidas, se actualiza el estado de autenticación a `true`.
-   */
   const login = (username, password) => {
-    // Aquí podrías agregar la lógica de autenticación, como hacer una llamada a una API para verificar las credenciales.
-    // Si la autenticación es exitosa:
     setIsAuthenticated(true);
   };
 
-  /**
-   * Función logout: Cierra la sesión del usuario.
-   * 
-   * Esta función simplemente actualiza el estado de autenticación a `false`, indicando que el usuario ha cerrado sesión.
-   */
   const logout = () => {
     setIsAuthenticated(false);
   };
 
-  /**
-   * El componente AuthContext.Provider envuelve a los componentes hijos y les proporciona acceso
-   * a las funciones `login`, `logout` y al estado de `isAuthenticated`.
-   */
+  const register = async (first_name, last_name, email, phone, password, role) => {
+    // Imprimir los datos antes de enviarlos a la API
+    console.log('Datos enviados al registro:', { first_name, last_name, email, phone, password, role });
+
+    try {
+      const response = await fetch('http://127.0.0.1:8000/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name,
+          last_name,
+          email,
+          phone: phone.toString(), // Asegurarse de que el número de teléfono sea una cadena
+          password,
+          role,
+        }),
+      });
+
+      // Imprimir la respuesta cruda de la API
+      console.log('Respuesta de la API:', response);
+
+      if (!response.ok) {
+        const errorData = await response.json(); // Obtener el detalle del error
+        console.log('Error en el registro:', errorData); // Imprimir el detalle del error
+        throw new Error(errorData.detail ? errorData.detail[0].msg : 'Error en el registro');
+      }
+
+      const data = await response.json();
+      console.log('Registro exitoso:', data); // Imprimir la respuesta de un registro exitoso
+      setIsAuthenticated(true); // Cambiar el estado después de un registro exitoso
+      return data;
+    } catch (error) {
+      console.error('Error capturado:', error.message); // Imprimir el mensaje de error
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-/**
- * Hook personalizado useAuth: Proporciona acceso a los valores del contexto de autenticación.
- * Este hook facilita el uso del contexto en otros componentes sin necesidad de importar `useContext` cada vez.
- * 
- * @returns {object} - Un objeto con las propiedades `isAuthenticated`, `login` y `logout`.
- */
 export const useAuth = () => useContext(AuthContext);
+
 
