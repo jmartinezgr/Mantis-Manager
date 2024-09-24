@@ -3,6 +3,7 @@ import TicketsBoard from '../TicketsContent/TicketBoard';
 import Ajustes from '../settings/ajustes';
 import Maquina from '../Maquina/maquina';
 import Board from '../board/board';
+import Desarrollo from'../Gestión de usuario/userG';
 
 /**
  * Componente principal para mostrar el contenido basado en la pestaña activa.
@@ -24,7 +25,7 @@ const MainContent = ({ activeTab }) => {
         {activeTab === 'board' && <Board/>}
         {activeTab === 'maquinas' && <Maquina />}
         {activeTab === 'tickets' && <TicketsBoard />}
-        {/*  */}
+        {activeTab === 'desarrollo'&& <Desarrollo/>}
       </div>
     </main>
   );

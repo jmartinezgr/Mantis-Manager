@@ -1,21 +1,23 @@
-// src/components/context/authContext.js
 import React, { createContext, useState, useContext } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(''); // Agregar estado para el rol del usuario
 
   const login = (username, password) => {
+    // Aquí implementarías la lógica de autenticación y establecerías el rol del usuario
     setIsAuthenticated(true);
+    setUserRole('jefe de desarrollo'); // Cambia el rol según la respuesta de la autenticación
   };
 
   const logout = () => {
     setIsAuthenticated(false);
+    setUserRole('');
   };
 
   const register = async (first_name, last_name, email, phone, password, role) => {
-    // Imprimir los datos antes de enviarlos a la API
     console.log('Datos enviados al registro:', { first_name, last_name, email, phone, password, role });
 
     try {
@@ -34,32 +36,33 @@ export const AuthProvider = ({ children }) => {
         }),
       });
 
-      // Imprimir la respuesta cruda de la API
       console.log('Respuesta de la API:', response);
 
       if (!response.ok) {
-        const errorData = await response.json(); // Obtener el detalle del error
-        console.log('Error en el registro:', errorData); // Imprimir el detalle del error
+        const errorData = await response.json();
+        console.log('Error en el registro:', errorData);
         throw new Error(errorData.detail ? errorData.detail[0].msg : 'Error en el registro');
       }
 
       const data = await response.json();
-      console.log('Registro exitoso:', data); // Imprimir la respuesta de un registro exitoso
-      setIsAuthenticated(true); // Cambiar el estado después de un registro exitoso
+      console.log('Registro exitoso:', data);
+      setIsAuthenticated(true);
+      setUserRole(role); // Establecer el rol del usuario después del registro
       return data;
     } catch (error) {
-      console.error('Error capturado:', error.message); // Imprimir el mensaje de error
+      console.error('Error capturado:', error.message);
       throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, register }}>
+    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
+
 
 
