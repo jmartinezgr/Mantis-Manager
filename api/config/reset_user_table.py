@@ -15,7 +15,8 @@ with SessionLocal() as session:
     try:
         # Eliminar la tabla User si existe
         session.execute(text("DROP TABLE IF EXISTS user"))
-        session.commit()  # Confirmar los cambios
+        session.commit()
+        print("Tabla User eliminada.")
     except Exception as e:
         session.rollback()
         print(f"Error eliminando la tabla User: {e}")
