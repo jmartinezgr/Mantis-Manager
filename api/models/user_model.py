@@ -10,12 +10,12 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class User(Base):
     __tablename__ = 'user'
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(String, primary_key=True)
     password = Column(String, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
-    email = Column(String, nullable=False, unique=True)
-    phone = Column(Integer, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String, nullable=False)
     image_field = Column(String, nullable=True, default=None)
     role_id = Column(Integer, ForeignKey('role.id'))
     role = relationship("Role", back_populates="user")

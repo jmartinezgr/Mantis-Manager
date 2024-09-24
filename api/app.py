@@ -9,6 +9,7 @@ from routers.tokens_router import tokens_router
 from routers.user_image_router import user_image_router
 from routers.ticket_router import ticket_router
 from routers.machine_router import machine_router
+from routers.solicitud_router import solicitud_router
 from routers.web_sockets_router import ws_router
 
 from models.create_tables import create_tables
@@ -38,6 +39,7 @@ app.include_router(tokens_router)
 app.include_router(user_image_router)
 app.include_router(ticket_router)
 app.include_router(machine_router)
+app.include_router(solicitud_router)
 app.include_router(ws_router)
 
 # Configuración de CORS

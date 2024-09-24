@@ -5,22 +5,22 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer
-
 from config.db import get_db
 from models.ticket_model import Ticket
 from models.machine_model import Machine 
 from models.user_model import User, Role
-from schemas.ticket_schema import TicketCreate, TicketUpdate, TicketData
-
+from schemas.ticket_schema import TicketCreate, TicketData, TicketAssign, TicketStateUpdate
+from services.solicitud_service import create_solicitud
 
 bearer_scheme = HTTPBearer()
 
 # Crear un router para los tickets
 ticket_router = APIRouter(tags=["Tickets"])
+
 # Crear un ticket (POST)
 @ticket_router.post("/tickets", response_model=TicketData)
 async def create_ticket(request: Request, ticket: TicketCreate, db: Session = Depends(get_db),
-                        dependencies=Depends(bearer_scheme)):
+    dependencies=Depends(bearer_scheme)):
     """
     Crea un nuevo ticket con el estado predeterminado 'pendiente'.
     
@@ -76,7 +76,6 @@ async def create_ticket(request: Request, ticket: TicketCreate, db: Session = De
         deadline=new_ticket.deadline 
     )
 
-
 @ticket_router.get("/tickets/{ticket_id}", response_model=TicketData)
 async def get_ticket(ticket_id: int, db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
     """
@@ -107,74 +106,79 @@ async def get_ticket(ticket_id: int, db: Session = Depends(get_db), dependencies
         deadline=ticket.deadline
     )
 
-# Actualizar un ticket (PATCH)
-@ticket_router.patch("/tickets/{ticket_id}", response_model=TicketData)
-async def update_ticket(ticket_id: int, ticket_update: TicketUpdate, db: Session = Depends(get_db),dependencies=Depends(bearer_scheme)):
+
+@ticket_router.patch("/tickets/{ticket_id}/assign", response_model=TicketData)
+async def assign_ticket(ticket_id: int, ticket_assign: TicketAssign, db: Session = Depends(get_db)):
     """
-    Actualiza un ticket por su ID.
-    
-    Parámetros:
-    - ticket_id: ID del ticket a actualizar.
-    - ticket_update: Los campos a actualizar (TicketUpdate).
-    - db: Sesión de la base de datos. (Dependencia)
-    
-    Retorna:
-    - Datos del ticket actualizado.
+    Asigna un operario al ticket.
     """
-    # Buscar el ticket en la base de datos
     ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
-    
+
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
-    
-    # Actualizar la descripción si es proporcionada
-    if ticket_update.description:
-        ticket.description = ticket_update.description
-    
-    # Actualizar el estado si es proporcionado y válido
-    if ticket_update.state:
 
-        #si el ticket no esta asignado no se puede cambiar el estado a en progreso o finalizado
-        if ticket_update.state in ["en progreso", "finalizado"] and not ticket.assigned_to:
-            raise HTTPException(status_code=400, detail="El ticket debe estar asignado") 
-  
-        ticket.state = ticket_update.state
-    
-    # Actualizar el assigned_to 
-    if ticket_update.assigned_to:
-        employer = db.query(User).filter(User.email == ticket_update.assigned_to).first()
-        if not employer:
-            raise HTTPException(status_code=404, detail="Usuario no encontrado")
-        
-        role = db.query(Role).filter(Role.id == employer.role_id).first()
-        if role.name != "Operario de Mantenimiento":
-            raise HTTPException(status_code=400, detail="El usuario no es un Operario de mantenimiento")
-        
-        if ticket.state == "pendiente":
-            ticket.state = "asignado"
-        ticket.assigned_to = employer.id
-    
+    employer = db.query(User).filter(User.id == ticket_assign.assigned_to).first()
+
+    if not employer:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    role = db.query(Role).filter(Role.id == employer.role_id).first()
+
+    if role.name != "Operario de Mantenimiento":
+        raise HTTPException(status_code=400, detail="El usuario no es un Operario de Mantenimiento")
+
+    if ticket.state == "pendiente":
+        ticket.state = "asignado"
+
+    ticket.assigned_to = employer.id
     db.commit()
     db.refresh(ticket)
 
-    
-    #ticket actualizado
     return TicketData(
         id=ticket.id,
         description=ticket.description,
         state=ticket.state,
         priority=ticket.priority,
-        machine_serial=ticket.machine.serial,  
+        machine_serial=ticket.machine.serial,
         created_by=ticket.created_by,
         assigned_to=ticket.assigned_to,
         created_at=ticket.created_at,
         deadline=ticket.deadline
-        )
+    )
 
-@ticket_router.get("/historial", response_model=List[TicketData])
+@ticket_router.patch("/tickets/{ticket_id}/state", response_model=TicketData)
+async def change_ticket_state(ticket_id: int, ticket_update: TicketStateUpdate, db: Session = Depends(get_db)):
+    """
+    Cambia el estado de un ticket.
+    """
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket no encontrado")
+
+    if ticket_update.state not in ["asignado", "en proceso", "pendiente"]:
+        raise HTTPException(status_code=400, detail="Estado no válido para cambio directo.")
+
+    ticket.state = ticket_update.state
+    db.commit()
+    db.refresh(ticket)
+
+    return TicketData(
+        id=ticket.id,
+        description=ticket.description,
+        state=ticket.state,
+        priority=ticket.priority,
+        machine_serial=ticket.machine.serial,
+        created_by=ticket.created_by,
+        assigned_to=ticket.assigned_to,
+        created_at=ticket.created_at,
+        deadline=ticket.deadline
+    )
+
+@ticket_router.get("/finalizado", response_model=List[TicketData])
 async def get_finalized_tickets(db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
     """
-    Obtiene el historial, con todos los tickets de estado "finalizado".
+    Obtiene todos los tickets de estado "finalizado".
     
     Parámetros:
     - db: Sesión de la base de datos. (Dependencia)
@@ -242,8 +246,6 @@ async def get_my_tickets(request: Request, db: Session = Depends(get_db), depend
         assigned_to=ticket.assigned_to,
         created_at=ticket.created_at,
         deadline=ticket.deadline
-    )
+        )
         for ticket in tickets
     ]
-
-

@@ -14,7 +14,7 @@ Base = declarative_base()
 with SessionLocal() as session:
     try:
         # Eliminar la tabla User si existe
-        session.execute(text("DROP TABLE IF EXISTS ticket"))
+        session.execute(text("DROP TABLE IF EXISTS solicitud"))
         session.commit()
         print("Tabla User eliminada.")
     except Exception as e:
