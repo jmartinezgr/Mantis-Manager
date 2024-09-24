@@ -2,6 +2,7 @@ import React from 'react';
 import TicketsBoard from '../TicketsContent/TicketBoard';
 import Ajustes from '../settings/ajustes';
 import Maquina from '../Maquina/maquina';
+import Board from '../board/board';
 
 /**
  * Componente principal para mostrar el contenido basado en la pestaña activa.
@@ -20,7 +21,7 @@ const MainContent = ({ activeTab }) => {
         {/* cambio de pestaña dado por active tab que  viene del header  */}
       </div>
       <div className="content-box">
-        {activeTab === 'board' && <p>board</p>}
+        {activeTab === 'board' && <Board/>}
         {activeTab === 'maquinas' && <Maquina />}
         {activeTab === 'tickets' && <TicketsBoard />}
         {/*  */}

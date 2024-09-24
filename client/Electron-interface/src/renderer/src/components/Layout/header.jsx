@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { HiCog, HiBell, HiSearch } from 'react-icons/hi';
 import Ajustes from '../settings/ajustes';
+import TicketNotifications from '../Notificación/notificacion'; // Asegúrate de que la ruta sea correcta
 
 /**
  * Componente de encabezado de la aplicación.
@@ -10,12 +11,20 @@ import Ajustes from '../settings/ajustes';
  */
 const Header = ({ onTabChange }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false); // Nuevo estado para las notificaciones
 
   /**
    * Alterna la visibilidad del menú de ajustes.
    */
   const toggleSettings = () => {
     setIsSettingsOpen(!isSettingsOpen);
+  };
+
+  /**
+   * Alterna la visibilidad del menú de notificaciones.
+   */
+  const toggleNotifications = () => {
+    setIsNotificationsOpen(!isNotificationsOpen);
   };
 
   return (
@@ -54,7 +63,7 @@ const Header = ({ onTabChange }) => {
             <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition duration-300">
               <HiSearch className="text-white" size={20} />
             </button>
-            <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition duration-300">
+            <button onClick={toggleNotifications} className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition duration-300">
               <HiBell className="text-white" size={20} />
             </button>
             <button onClick={toggleSettings} className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition duration-300">
@@ -65,6 +74,13 @@ const Header = ({ onTabChange }) => {
           {/* Settings Dropdown */}
           {isSettingsOpen && (
             <Ajustes />
+          )}
+
+          {/* Notifications Dropdown */}
+          {isNotificationsOpen && (
+            <div className="absolute top-16 right-4 bg-white shadow-lg rounded-lg p-4 w-80">
+              <TicketNotifications />
+            </div>
           )}
 
           {/* Profile Picture */}
@@ -79,6 +95,7 @@ const Header = ({ onTabChange }) => {
 };
 
 export default Header;
+
 
 
 
