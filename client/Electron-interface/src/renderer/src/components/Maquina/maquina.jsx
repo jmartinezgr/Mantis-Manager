@@ -14,7 +14,7 @@ const MachineList = () => {
   }, []); // El efecto se ejecuta solo una vez al montar el componente
 
   return (
-    <div className="p-8 bg-gray-200 min-h-screen">
+    <div className="p-8 bg-white min-h-screen">
       {/* Título de la página */}
       <h1 className="text-4xl font-bold text-center mb-10 text-indigo-700">Inventario de Máquinas</h1>
       
@@ -32,7 +32,7 @@ const MachineList = () => {
               <p className="text-gray-700"><span className="font-bold">Estado:</span> {machine.status}</p>
             </div>
             {/* Contenedor de partes e inventario de la máquina */}
-            <div className="bg-gray-50 p-6">
+            <div className="bg-white p-6">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">Partes y Inventario:</h3>
               {/* Itera sobre cada parte de la máquina */}
               {machine.parts.map((part, partIndex) => (

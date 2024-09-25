@@ -2,7 +2,7 @@
     {
       "name": "Máquina de Tejer A",
       "model": "T1000",
-      "type": "Tejedora",
+      "type": "Circular",
       "capacity": "50 m/h",
       "status": "Operativa",
       "parts": [
@@ -33,7 +33,7 @@
     {
       "name": "Máquina de Tejer B",
       "model": "T2000",
-      "type": "Tejedora",
+      "type": "Rashel",
       "capacity": "75 m/h",
       "status": "En Mantenimiento",
       "parts": [
@@ -61,9 +61,9 @@
       ]
     },
     {
-      "name": "Máquina de Cortar C",
+      "name": "Máquina de urdido C",
       "model": "C3000",
-      "type": "Cortadora",
+      "type": "Urdidora",
       "capacity": "100 m/h",
       "status": "Operativa",
       "parts": [
