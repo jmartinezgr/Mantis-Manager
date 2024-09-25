@@ -14,8 +14,8 @@ Base = declarative_base()
 with SessionLocal() as session:
     try:
         # Eliminar la tabla User si existe
-        session.execute(text("DROP TABLE IF EXISTS ticket"))
-        session.commit()  # Confirmar los cambios
+        session.execute(text("DROP TABLE IF EXISTS notifications"))
+        session.commit()
         print("Tabla User eliminada.")
     except Exception as e:
         session.rollback()
@@ -24,6 +24,5 @@ with SessionLocal() as session:
 # Recrear la tabla User
 try:
     Base.metadata.create_all(bind=engine)
-    print("Tabla User recreada.")
 except Exception as e:
     print(f"Error recreando la tabla User: {e}")

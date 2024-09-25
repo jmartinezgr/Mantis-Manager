@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
@@ -31,7 +33,7 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
     Retorna:
     - Mensaje de éxito, los datos del usuario y los tokens de acceso y refresco.
     """
-    user = db.query(User).filter(User.email == data.email).first()
+    user = db.query(User).filter(User.id == data.id).first()
 
     # Verificar si el usuario existe y si la contraseña es correcta
     if not user or not user.verify_password(data.password):
@@ -48,6 +50,14 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
         "phone": user.phone,
         "role_id": user.role_id
     }
+    
+    from services.web_socket_service import ConnectionManager
+    
+    await ConnectionManager.send_message({
+        "type": "Login",
+        "message": "Se ha logueado"
+    },
+    user.id)
 
     # Crear tokens de acceso y refresco
     token_info = {"sub": user.id, "scopes": user.role_id}
@@ -68,8 +78,8 @@ async def register(data: RegisterData, db: Session = Depends(get_db)):
     """
     Registrarse en el sistema y generar tokens de acceso y refresco.
     """
-    # Verificar si el email ya está registrado
-    existing_user = db.query(User).filter(User.email == data.email).first()
+    # Verificar si el id ya está registrado
+    existing_user = db.query(User).filter(User.id == data.id).first()
     if existing_user:
         return JSONResponse(status_code=400, content={
             "error": "El email ya está registrado"
@@ -87,6 +97,7 @@ async def register(data: RegisterData, db: Session = Depends(get_db)):
 
     # Crear el nuevo usuario con los datos proporcionados
     new_user = User(
+        id=data.id,
         password=pwd_context.hash(data.password),
         first_name=data.first_name,
         last_name=data.last_name,

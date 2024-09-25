@@ -3,29 +3,29 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from middlewares.auth_midddleware import AuthMiddleware
 from middlewares.logger_middleware import LogRequestsMiddleware
-
-
+from apscheduler.schedulers.background import BackgroundScheduler
 from routers.user_auth_router import user_auth_router
 from routers.tokens_router import tokens_router
 from routers.user_image_router import user_image_router
 from routers.ticket_router import ticket_router
 from routers.machine_router import machine_router
+from routers.solicitud_router import solicitud_router
+from routers.web_sockets_router import ws_router
 
 from models.create_tables import create_tables
+from config.db import init_roles  
 
-#Crear las tablas en la base de datos
+from config.db import get_db
+from services.ticket_service import actualizar_prioridad_y_deadline
+
+
+
+# Crear las tablas en la base de datos
 create_tables()
 
 # Crear la instancia principal de FastAPI
 app = FastAPI(
     title="MANTIS MANAGER API",
-    description=(
-        "Mantis Manager API proporciona un conjunto de servicios avanzados para gestionar "
-        "el mantenimiento de equipos y recursos dentro de la empresa Balalika S.A. "
-        "Este sistema facilita la creación, seguimiento y administración de tickets de mantenimiento, "
-        "incluyendo la gestión de usuarios, autenticación segura, y carga y acceso de imágenes de perfil. "
-        "Es compatible con futuras ampliaciones hacia aplicaciones móviles y otros sistemas externos."
-    ),
     version="0.5"
 )
 
@@ -35,15 +35,40 @@ app.add_middleware(LogRequestsMiddleware)
 
 # Agregar los routers
 app.include_router(user_auth_router)
-app.include_router(tokens_router)   
+app.include_router(tokens_router)
 app.include_router(user_image_router)
-app.include_router(ticket_router) 
-app.include_router(machine_router)   
+app.include_router(ticket_router)
+app.include_router(machine_router)
+app.include_router(solicitud_router)
+app.include_router(ws_router)
 
+# Configuración de CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+scheduler = BackgroundScheduler()
+
+def ejecutar_actualizacion():
+    try:
+        db = next(get_db())
+        actualizar_prioridad_y_deadline(db)
+    except Exception as e:
+        print(f"Error en ejecutar_actualizacion: {e}")
+
+scheduler.add_job(ejecutar_actualizacion, 'interval', seconds=20)
+
+@app.on_event("shutdown")
+def shutdown_event():
+    scheduler.shutdown()
+
+# Inicializar roles
+@app.on_event("startup")
+def startup_event():
+    init_roles()
+    
+scheduler.start()
