@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const login = (username, password) => {
     // Aquí implementarías la lógica de autenticación y establecerías el rol del usuario
     setIsAuthenticated(true);
-    setUserRole('jefe de mantenimiento'); // Cambia el rol según la respuesta de la autenticación
+    setUserRole('jefe de desarrollo'); // Cambia el rol según la respuesta de la autenticación
   };
 
   const logout = () => {
