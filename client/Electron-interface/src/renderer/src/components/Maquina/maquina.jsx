@@ -30,6 +30,9 @@ const MachineList = () => {
               <p className="text-gray-700"><span className="font-bold">Tipo:</span> {machine.type}</p>
               <p className="text-gray-700"><span className="font-bold">Capacidad:</span> {machine.capacity}</p>
               <p className="text-gray-700"><span className="font-bold">Estado:</span> {machine.status}</p>
+              <p className="text-gray-700"><span className="font-bold">Último Mantenimiento:</span> {machine.lastMaintenance}</p>
+              <p className="text-gray-700"><span className="font-bold">Ubicación:</span> {machine.location}</p>
+              <p className="text-gray-700"><span className="font-bold">Área:</span> {machine.area}</p>
             </div>
             {/* Contenedor de partes e inventario de la máquina */}
             <div className="bg-white p-6">
@@ -58,4 +61,5 @@ const MachineList = () => {
 };
 
 export default MachineList;
+
 
