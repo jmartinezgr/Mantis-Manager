@@ -48,6 +48,12 @@ const Header = ({ onTabChange }) => {
               Desarrollo
             </button>
           )}
+          {/* Mostrar opción solo si el usuario es "jefe de mantenimiento" */}
+          {userRole === 'jefe de mantenimiento' && (
+            <button onClick={() => onTabChange('mantenimiento')} className="text-gray-300 hover:text-white transition duration-300">
+              Mantenimiento
+            </button>
+          )}
         </div>
 
         <div className="flex items-center space-x-4">
@@ -81,6 +87,7 @@ const Header = ({ onTabChange }) => {
 };
 
 export default Header;
+
 
 
 
