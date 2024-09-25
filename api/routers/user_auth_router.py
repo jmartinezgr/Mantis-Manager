@@ -78,7 +78,7 @@ async def register(data: RegisterData, db: Session = Depends(get_db)):
     """
     Registrarse en el sistema y generar tokens de acceso y refresco.
     """
-    # Verificar si el email ya está registrado
+    # Verificar si el id ya está registrado
     existing_user = db.query(User).filter(User.id == data.id).first()
     if existing_user:
         return JSONResponse(status_code=400, content={

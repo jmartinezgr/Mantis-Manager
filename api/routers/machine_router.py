@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from typing import List
@@ -25,6 +26,12 @@ async def create_machine(machine: MachineCreate, db: Session = Depends(get_db), 
     Retorna:
     - Datos de la máquina creada.
     """
+    existing_machine = db.query(Machine).filter(Machine.serial == machine.serial).first()
+    if existing_machine:
+        return JSONResponse(status_code=400, content={
+            "error": "ya existe una maquina con este serial"
+        })
+
     new_machine = Machine(  
         type=machine.type,
         brand=machine.brand,

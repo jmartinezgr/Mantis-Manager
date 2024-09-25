@@ -27,16 +27,8 @@ class RequestData(BaseModel):
 
 class RequestCreate(BaseModel):
     description: str
-    status: Optional[str] = "pendiente"  # Default to "pending"
-    type: str
+    type: str #solicitud de "cierre" o "apertura"
     ticket_id: int
-
-    @validator('status')
-    def status_must_be_valid(cls, v):
-        valid_status = ["pendiente", "aceptada", "rechazada"]
-        if v not in valid_status:
-            raise ValueError("El estado debe ser uno de los siguiente: aceptada, pendiente, rechazada")
-        return v
 
     @validator('type')
     def type_must_be_valid(cls, v):
