@@ -4,17 +4,50 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState(''); // Agregar estado para el rol del usuario
+  const [userRole, setUserRole] = useState('');
+  const [accessToken, setAccessToken] = useState('');
+  const [refreshToken, setRefreshToken] = useState('');
 
-  const login = (username, password) => {
-    // Aquí implementarías la lógica de autenticación y establecerías el rol del usuario
-    setIsAuthenticated(true);
-    setUserRole('jefe de desarrollo'); // Cambia el rol según la respuesta de la autenticación
+  const login = async (email, password) => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log('Error en el inicio de sesión:', errorData);
+        throw new Error(errorData.detail ? errorData.detail[0].msg : 'Error en el inicio de sesión');
+      }
+
+      const data = await response.json();
+      console.log('Inicio de sesión exitoso:', data);
+
+      // Guardar los tokens de acceso y refresco
+      setAccessToken(data.access_token);
+      setRefreshToken(data.refresh_token);
+
+      // Establecer la autenticación y el rol de usuario
+      setIsAuthenticated(true);
+      setUserRole(data.user_role); // Supongo que el rol está en la respuesta, ajústalo según sea necesario
+    } catch (error) {
+      console.error('Error capturado en el login:', error.message);
+      throw error;
+    }
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setUserRole('');
+    setAccessToken('');
+    setRefreshToken('');
   };
 
   const register = async (first_name, last_name, email, phone, password, role) => {
@@ -30,13 +63,11 @@ export const AuthProvider = ({ children }) => {
           first_name,
           last_name,
           email,
-          phone: phone.toString(), // Asegurarse de que el número de teléfono sea una cadena
+          phone: phone.toString(),
           password,
           role,
         }),
       });
-
-      console.log('Respuesta de la API:', response);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -47,16 +78,16 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       console.log('Registro exitoso:', data);
       setIsAuthenticated(true);
-      setUserRole(role); // Establecer el rol del usuario después del registro
+      setUserRole(role);
       return data;
     } catch (error) {
-      console.error('Error capturado:', error.message);
+      console.error('Error capturado en el registro:', error.message);
       throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout, register }}>
+    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout, register, accessToken, refreshToken }}>
       {children}
     </AuthContext.Provider>
   );
