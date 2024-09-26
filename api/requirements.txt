@@ -23,7 +23,8 @@ starlette==0.38.5
 typing_extensions==4.12.2
 tzdata==2024.1
 tzlocal==5.2
-uvicorn==0.30.6tzdata==2024.1
+uvicorn==0.30.6
+tzdata==2024.1
 tzlocal==5.2
 uvicorn==0.30.6
 websockets==13.0.1
