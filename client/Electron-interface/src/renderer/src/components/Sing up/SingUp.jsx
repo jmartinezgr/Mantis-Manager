@@ -1,17 +1,17 @@
 // src/components/SignUp.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './singUpHeader'; 
-import SignUpForm from './SingUpFomr'; 
+import Header from './singUpHeader';
+import SignUpForm from './SingUpFomr';
 import { useAuth } from '../context/authContext';
 
 const SignUp = () => {
     const navigate = useNavigate();
-    const { register } = useAuth(); 
+    const { register } = useAuth();
 
     const handleSignUp = async (data) => {
         try {
-            await register(data.first_name, data.last_name, data.email, data.phone, data.password, data.role);
+            await register(data.id, data.first_name, data.last_name, data.email, data.phone, data.password, data.role);
 
             console.log('Usuario registrado:', data);
             // Redirigir o realizar otra acción después del registro
@@ -34,7 +34,7 @@ const SignUp = () => {
             </div>
             <footer className="mt-8 text-center text-gray-700">
                 <p className="text-sm">
-                    ¿Ya tienes una cuenta? 
+                    ¿Ya tienes una cuenta?
                     <button
                         onClick={() => navigate('/login')}
                         className="text-blue-600 hover:text-blue-800 underline"
