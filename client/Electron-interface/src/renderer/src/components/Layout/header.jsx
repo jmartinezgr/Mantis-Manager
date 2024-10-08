@@ -43,7 +43,7 @@ const Header = ({ onTabChange }) => {
             Tickets
           </button>
           {/* Mostrar opción solo si el usuario es "jefe de desarrollo" */}
-          {userRole === 'jefe de desarrollo' && (
+          {userRole === 'Jefe de Desarrollo' && (
             <button onClick={() => onTabChange('desarrollo')} className="text-gray-300 hover:text-white transition duration-300">
               Desarrollo
             </button>

@@ -4,7 +4,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState('Jefe de Desarrollo');
   const [accessToken, setAccessToken] = useState('');
   const [refreshToken, setRefreshToken] = useState('');
 
@@ -30,13 +30,16 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       console.log('Inicio de sesión exitoso:', data);
 
+      // Depuración: imprimir el rol del usuario recibido desde el servidor
+      console.log('Rol recibido:', data.user_role);
+
       // Guardar los tokens de acceso y refresco
       setAccessToken(data.access_token);
       setRefreshToken(data.refresh_token);
 
       // Establecer la autenticación y el rol de usuario
       setIsAuthenticated(true);
-      setUserRole(data.user_role); // Supongo que el rol está en la respuesta, ajústalo según sea necesario
+      setUserRole("Jefe de Desarrollo"); // Supongo que el rol está en la respuesta
     } catch (error) {
       console.error('Error capturado en el login:', error.message);
       throw error;
@@ -79,7 +82,8 @@ export const AuthProvider = ({ children }) => {
       console.log('Registro exitoso:', data);
       setIsAuthenticated(true);
       setUserRole(role);
-      return data;
+
+      return data.data;
     } catch (error) {
       console.error('Error capturado en el registro:', error.message);
       throw error;
@@ -94,6 +98,4 @@ export const AuthProvider = ({ children }) => {
 };
 
 export const useAuth = () => useContext(AuthContext);
-
-
 
