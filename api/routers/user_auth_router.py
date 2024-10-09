@@ -63,6 +63,8 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
     })
 
 # Ruta para registrar un nuevo usuario
+from sqlalchemy import func
+
 @user_auth_router.post("/register")
 async def register(data: RegisterData, db: Session = Depends(get_db)):
     """
@@ -75,14 +77,24 @@ async def register(data: RegisterData, db: Session = Depends(get_db)):
             "error": "El email ya está registrado"
         })
 
-    # Verificar si el rol existe
-    role = db.query(Role).filter(Role.name == data.role).first()
+    # Normalizar data.role eliminando espacios y convirtiendo a minúsculas
+    data_role_normalized = data.role.strip().lower()
+    print(f"Valor de data.role normalizado: '{data_role_normalized}'")
+
+    # Normalizar los nombres de los roles en la consulta
+    role = db.query(Role).filter(func.lower(func.trim(Role.name)) == data_role_normalized).first()
+
+    # Mostrar los roles disponibles para depuración
+    roles = db.query(Role).all()
+    for e in roles: 
+        print(f"Rol disponible en BD: '{e.name.strip()}'")
+
+    print(f"Rol encontrado: {role}")
     if not role:
         available_roles = db.query(Role).all()
         available_role_names = [r.name for r in available_roles]
         return JSONResponse(status_code=400, content={
             "error": "El rol no existe",
-            
         })
 
     # Crear el nuevo usuario con los datos proporcionados

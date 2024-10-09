@@ -81,7 +81,7 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       console.log('Registro exitoso:', data);
       setIsAuthenticated(true);
-      setUserRole(role);
+      
 
       return data.data;
     } catch (error) {
