@@ -4,7 +4,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userRole, setUserRole] = useState('Jefe de Desarrollo');
+  const [userRole, setUserRole] = useState(0);
   const [accessToken, setAccessToken] = useState('');
   const [refreshToken, setRefreshToken] = useState('');
 
@@ -32,6 +32,8 @@ export const AuthProvider = ({ children }) => {
 
       // Actualizar el estado de autenticación
       setIsAuthenticated(true);  // Cambiar el estado después de iniciar sesión
+      console.log(data.data)
+      setUserRole(data.data.role_id)
       return data;
     } catch (error) {
       throw error;

@@ -92,7 +92,7 @@ async def register(data: RegisterData, db: Session = Depends(get_db)):
     print(f"Valor de data.role normalizado: '{data_role_normalized}'")
 
     # Normalizar los nombres de los roles en la consulta
-    role = db.query(Role).filter(func.lower(func.trim(Role.name)) == data_role_normalized).first()
+    role = db.query(Role).filter(func.lower(func.trim(Role.id)) == data_role_normalized).first()
 
     # Mostrar los roles disponibles para depuración
     roles = db.query(Role).all()
