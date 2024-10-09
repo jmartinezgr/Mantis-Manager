@@ -11,6 +11,7 @@ from routers.ticket_router import ticket_router
 from routers.machine_router import machine_router
 from routers.solicitud_router import solicitud_router
 from routers.web_sockets_router import ws_router
+from routers.user_info_router import user_info_router
 
 from models.create_tables import create_tables
 from config.db import init_roles  
@@ -41,6 +42,7 @@ app.include_router(ticket_router)
 app.include_router(machine_router)
 app.include_router(solicitud_router)
 app.include_router(ws_router)
+app.include_router(user_info_router)
 
 # Configuración de CORS
 app.add_middleware(
