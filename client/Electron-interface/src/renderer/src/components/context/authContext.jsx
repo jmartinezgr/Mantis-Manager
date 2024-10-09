@@ -80,12 +80,11 @@ export const AuthProvider = ({ children }) => {
 
       const data = await response.json();
 
-      // Guardar tokens y datos del usuario en localStorage
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
-      localStorage.setItem('user', JSON.stringify(data.data));
+      // Guardar tokens y datos del usuario en localStorage  a cambio esto
+      
       setIsAuthenticated(true); // Cambiar el estado después de un registro exitoso
-      return data;
+      console.log(data.data)
+      return data.data;
 
     } catch (error) {
       throw error;

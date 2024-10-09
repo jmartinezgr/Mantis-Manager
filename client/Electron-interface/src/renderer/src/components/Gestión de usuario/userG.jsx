@@ -1,65 +1,95 @@
-import React, { useState } from 'react';
-import { HiPencil, HiTrash, HiPlus, HiSearch, HiOutlineEye } from 'react-icons/hi';
+import React, { useState,useEffect } from 'react';
+import { HiPencil, HiTrash, HiPlus, HiSearch, HiOutlineEye,HiArrowLeft, HiArrowRight } from 'react-icons/hi';
 import { useAuth } from '../context/authContext';
 
 const UserManagement = () => {
   const { register } = useAuth();
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      firstName: 'Juan',
-      lastName: 'Pérez',
-      email: 'juan.perez@example.com',
-      role: 'admin',
-      password: 'admin123',
-      phone: '1234567890',
-      tickets: ['Ticket #001', 'Ticket #002'],
-      history: [
-        { action: 'Creación de usuario', date: '2024-01-01' },
-        { action: 'Actualización de perfil', date: '2024-02-15' }
-      ]
-    },
-    {
-      id: 2,
-      firstName: 'María',
-      lastName: 'Gómez',
-      email: 'maria.gomez@example.com',
-      role: 'usuario',
-      password: 'user123',
-      phone: '0987654321',
-      tickets: ['Ticket #003'],
-      history: [
-        { action: 'Creación de usuario', date: '2024-03-10' },
-        { action: 'Reportado un problema', date: '2024-04-22' }
-      ]
-    },
-    {
-      id: 3,
-      firstName: 'Carlos',
-      lastName: 'Ruiz',
-      email: 'carlos.ruiz@example.com',
-      role: 'usuario',
-      password: 'user456',
-      phone: '1122334455',
-      tickets: [],
-      history: [
-        { action: 'Creación de usuario', date: '2024-05-05' }
-      ]
-    },
-  ]);
+  const [users, setUsers] = useState([ ]);
   const [formData, setFormData] = useState({ id: '', firstName: '', lastName: '', email: '', role: '', password: '', phone: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUserHistory, setSelectedUserHistory] = useState([]);
+  const [selectedUserHistory, setSelectedUserHistory] = useState([ ]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const handlePageR=() => {
+    setCurrentPage(currentPage+1);
+    console.log(currentPage)
+  }
+  const handlePageL=() => {
+    if (currentPage >1){
+      setCurrentPage(currentPage-1);
+
+    }
+    
+
+  }
+
+
+  const fetchUsers = async (page = 1, limit = 10) => {
+    try {
+      // Obtener el token de acceso del localStorage
+      const token = localStorage.getItem('access_token');
+      console.log(token);
+      if (!token) {
+        throw new Error('No se encontró el token de acceso');
+      }
+  
+      // Construir la URL con los parámetros de paginación
+      const url = `http://127.0.0.1:8000/user_info?page=${page}&limit=${limit}`;
+  
+      // Realizar la solicitud a la API
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${token}`, // Usar el token aquí
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      // Comprobar si la respuesta fue exitosa
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log('Error al obtener usuarios:', errorData);
+        throw new Error(errorData.detail ? errorData.detail[0].msg : 'Error al obtener usuarios');
+      }
+  
+      // Parsear la respuesta JSON
+      const data = await response.json();
+      console.log(data.users)
+
+
+      setUsers(data.users); // Ajusta según la estructura de la respuesta real
+       
+  
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error; // Vuelve a lanzar el error para que pueda ser manejado en otro lugar
+    }
+  };
+  
+  // Ejemplo de uso
+  useEffect(() => {
+    fetchUsers(currentPage, 10);
+    console.log("hola")
+  },[currentPage]);
+  
+  
+  
+
+
+
+
+
+
 
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleAddUser = async () => {
-    console.log("Datos del formulario:", formData);
+    
 
     if (!formData.id || !formData.firstName || !formData.lastName || !formData.email || !formData.role || !formData.password || !formData.phone) {
       alert('Por favor, completa todos los campos');
@@ -89,24 +119,13 @@ const UserManagement = () => {
           formData.role
         );
 
-        const uploadU = {
-          id: formData.id, // Asigna el ID ingresado por el usuario
-          firstName: formData.firstName,
-          lastName: formData.lastName,
-          email: formData.email,
-          role: formData.role,
-          password: formData.password,
-          phone: formData.phone,
-          tickets: [],
-          history: []
-        };
+       
 
         console.log("Nuevo usuario registrado:", newUser);
 
-        setUsers((prevUsers) => [
-          ...prevUsers,
-          uploadU
-        ]);
+        fetchUsers(currentPage,10)
+
+        
       } catch (error) {
         console.error('Error al registrar el usuario:', error);
         alert('Error al registrar el usuario. Por favor, intenta de nuevo.');
@@ -137,11 +156,11 @@ const UserManagement = () => {
   const handleSearch = (e) => {
     setSearchQuery(e.target.value.toLowerCase());
   };
-
+//filtrado de usuarios para busqueda
   const filteredUsers = users.filter((user) => {
     return (
-      user.firstName.toLowerCase().includes(searchQuery) ||
-      user.lastName.toLowerCase().includes(searchQuery) ||
+      user.full_name.toLowerCase().includes(searchQuery)||
+      user.full_name.toLowerCase().includes(searchQuery) ||
       user.email.toLowerCase().includes(searchQuery)
     );
   });
@@ -252,7 +271,7 @@ const UserManagement = () => {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto flex-col items-center align-middle">
         <table className="min-w-full table-auto">
           <thead>
             <tr className="bg-gray-200 text-gray-600">
@@ -264,9 +283,9 @@ const UserManagement = () => {
           </thead>
           <tbody>
             {filteredUsers.length > 0 ? (
-              filteredUsers.map((user) => (
-                <tr key={user.id} className="border-b border-gray-300">
-                  <td className="p-2">{`${user.firstName} ${user.lastName}`}</td>
+              filteredUsers.map((user,index) => (
+                <tr key={index+1} className="border-b border-gray-300">
+                  <td className="p-2 pl-4">{`${user.full_name}`}</td>
                   <td className="p-2">{user.email}</td>
                   <td className="p-2">{user.role}</td>
                   <td className="p-2 flex space-x-2">
@@ -289,6 +308,15 @@ const UserManagement = () => {
             )}
           </tbody>
         </table>
+        <div className='flex p-4 '>
+          <HiArrowLeft onClick={handlePageL}/>
+          < HiArrowRight  className='items-start' onClick={ handlePageR}/>
+
+
+        </div>
+        
+
+
       </div>
 
       {isModalOpen && (
@@ -296,12 +324,17 @@ const UserManagement = () => {
           <div className="bg-white rounded-lg p-6 w-1/3">
             <h3 className="text-lg font-bold mb-4">Historial de Usuario</h3>
             <ul>
-              {selectedUserHistory.map((item, index) => (
-                <li key={index} className="border-b border-gray-300 p-2">
-                  {item.action} - {item.date}
-                </li>
-              ))}
-            </ul>
+            {selectedUserHistory?.length > 0 ? (
+            selectedUserHistory.map((item, index) => (
+          <li key={index} className="border-b border-gray-300 p-2">
+          {item.action} - {item.date}
+          </li>
+    ))
+  ) : (
+    <li className="text-gray-500">No history available for this user</li>
+  )}
+</ul>
+
             <button onClick={handleCloseModal} className="mt-4 bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600">
               Cerrar
             </button>

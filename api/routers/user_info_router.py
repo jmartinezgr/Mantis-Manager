@@ -37,8 +37,9 @@ def get_user_info(
     - **users**: Lista de usuarios con su información filtrada.
     """
     user = req.state.user
+    print(f"hola  {user}")
 
-    if user.get("scopes") != 1:
+    if user.get("scopes") != 2:
         return JSONResponse(status_code=401, content={"error": "No tienes permisos para ver la información de los usuarios"})
     
     # Calcular el offset en base al número de página
