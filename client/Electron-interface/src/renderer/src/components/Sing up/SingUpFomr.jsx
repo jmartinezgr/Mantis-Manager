@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 const SignUpForm = ({ onSubmit, onGoBack }) => {
+    const [id, setId] = useState(''); // Nuevo estado para la cédula
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -31,13 +32,26 @@ const SignUpForm = ({ onSubmit, onGoBack }) => {
         }
 
         setError('');
-        onSubmit({ first_name: firstName, last_name: lastName, email, phone: Number(phone), password, role });
+        onSubmit({ id, first_name: firstName, last_name: lastName, email, phone: Number(phone), password, role }); // Pasar el campo "id"
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mb-4">
-            <h1 className="text-2xl font-semibold mb-6 text-center text-gray-700">Registrarse</h1>
+        <form onSubmit={handleSubmit} className="mt-20 mb-4">
+            <h1 className="text-2xl font-semibold mb-6 text-center text-gray-700 mt-4">Registrarse</h1>
+
+            {/* Nuevo campo para la Cédula */}
             <div>
+                <label className="block mb-2">Cédula:</label>
+                <input
+                    type="text"
+                    value={id}
+                    onChange={(e) => setId(e.target.value)}
+                    required
+                    className="border rounded p-2 w-full"
+                />
+            </div>
+
+            <div className="mt-4">
                 <label className="block mb-2">Nombre:</label>
                 <input
                     type="text"
@@ -116,17 +130,15 @@ const SignUpForm = ({ onSubmit, onGoBack }) => {
             <button type="submit" className="mt-4 bg-blue-500 text-white rounded p-2">
                 Registrarse
             </button>
-            <button 
-                type="button" 
-                onClick={onGoBack} 
+            <button
+                type="button"
+                onClick={onGoBack}
                 className="mt-2 bg-gray-500 text-white rounded p-2 ml-4"
             >
-                Regresar 
+                Regresar
             </button>
         </form>
     );
 };
 
 export default SignUpForm;
-
-

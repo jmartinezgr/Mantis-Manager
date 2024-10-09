@@ -8,53 +8,50 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState('');
   const [refreshToken, setRefreshToken] = useState('');
 
-  const login = async (email, password) => {
+  const login = async (id, password) => {
     try {
       const response = await fetch('http://127.0.0.1:8000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Accept: 'application/json'
         },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
+        body: JSON.stringify({ id, password })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        console.log('Error en el inicio de sesión:', errorData);
-        throw new Error(errorData.detail ? errorData.detail[0].msg : 'Error en el inicio de sesión');
+        throw new Error('Error al iniciar sesión');
       }
 
       const data = await response.json();
-      console.log('Inicio de sesión exitoso:', data);
 
-      // Depuración: imprimir el rol del usuario recibido desde el servidor
-      console.log('Rol recibido:', data.user_role);
+      // Guardar tokens y datos del usuario en localStorage
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      localStorage.setItem('user', JSON.stringify(data.data));
 
-      // Guardar los tokens de acceso y refresco
-      setAccessToken(data.access_token);
-      setRefreshToken(data.refresh_token);
-
-      // Establecer la autenticación y el rol de usuario
-      setIsAuthenticated(true);
-      setUserRole("Jefe de Desarrollo"); // Supongo que el rol está en la respuesta
+      // Actualizar el estado de autenticación
+      setIsAuthenticated(true);  // Cambiar el estado después de iniciar sesión
+      return data;
     } catch (error) {
-      console.error('Error capturado en el login:', error.message);
       throw error;
     }
   };
 
   const logout = () => {
+    // Eliminar los tokens y la información del usuario de localStorage
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+
+    // Actualizar el estado de autenticación
     setIsAuthenticated(false);
     setUserRole('');
     setAccessToken('');
     setRefreshToken('');
   };
 
-  const register = async (first_name, last_name, email, phone, password, role) => {
-    console.log('Datos enviados al registro:', { first_name, last_name, email, phone, password, role });
+  const register = async (id, first_name, last_name, email, phone, password, role) => {
 
     try {
       const response = await fetch('http://127.0.0.1:8000/register', {
@@ -63,6 +60,7 @@ export const AuthProvider = ({ children }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          id, // Incluir la cédula en la solicitud
           first_name,
           last_name,
           email,
@@ -79,13 +77,15 @@ export const AuthProvider = ({ children }) => {
       }
 
       const data = await response.json();
-      console.log('Registro exitoso:', data);
-      setIsAuthenticated(true);
-      
 
-      return data.data;
+      // Guardar tokens y datos del usuario en localStorage
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refresh_token);
+      localStorage.setItem('user', JSON.stringify(data.data));
+      setIsAuthenticated(true); // Cambiar el estado después de un registro exitoso
+      return data;
+
     } catch (error) {
-      console.error('Error capturado en el registro:', error.message);
       throw error;
     }
   };
