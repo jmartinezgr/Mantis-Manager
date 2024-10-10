@@ -1,10 +1,12 @@
-// src/components/context/authContext.js
 import React, { createContext, useState, useContext } from 'react';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(0);
+  const [accessToken, setAccessToken] = useState('');
+  const [refreshToken, setRefreshToken] = useState('');
 
   const login = async (id, password) => {
     try {
@@ -30,6 +32,8 @@ export const AuthProvider = ({ children }) => {
 
       // Actualizar el estado de autenticación
       setIsAuthenticated(true);  // Cambiar el estado después de iniciar sesión
+      console.log(data.data)
+      setUserRole(data.data.role_id)
       return data;
     } catch (error) {
       throw error;
@@ -44,6 +48,9 @@ export const AuthProvider = ({ children }) => {
 
     // Actualizar el estado de autenticación
     setIsAuthenticated(false);
+    setUserRole('');
+    setAccessToken('');
+    setRefreshToken('');
   };
 
   const register = async (id, first_name, last_name, email, phone, password, role) => {
@@ -59,7 +66,7 @@ export const AuthProvider = ({ children }) => {
           first_name,
           last_name,
           email,
-          phone: phone.toString(), // Asegurarse de que el número de teléfono sea una cadena
+          phone: phone.toString(),
           password,
           role,
         }),
@@ -73,12 +80,11 @@ export const AuthProvider = ({ children }) => {
 
       const data = await response.json();
 
-      // Guardar tokens y datos del usuario en localStorage
-      localStorage.setItem('access_token', data.access_token);
-      localStorage.setItem('refresh_token', data.refresh_token);
-      localStorage.setItem('user', JSON.stringify(data.data));
+      // Guardar tokens y datos del usuario en localStorage  a cambio esto
+      
       setIsAuthenticated(true); // Cambiar el estado después de un registro exitoso
-      return data;
+      console.log(data.data)
+      return data.data;
 
     } catch (error) {
       throw error;
@@ -86,12 +92,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, register }}>
+    <AuthContext.Provider value={{ isAuthenticated, userRole, login, logout, register, accessToken, refreshToken }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => useContext(AuthContext);
-
 

@@ -1,28 +1,18 @@
 import React, { useState } from 'react';
 import { HiCog, HiBell, HiSearch } from 'react-icons/hi';
+import { useAuth } from '../context/authContext'; // Asegúrate de que la ruta sea correcta
 import Ajustes from '../settings/ajustes';
-import TicketNotifications from '../Notificación/notificacion'; // Asegúrate de que la ruta sea correcta
+import TicketNotifications from '../Notificación/notificacion';
 
-/**
- * Componente de encabezado de la aplicación.
- * @param {Object} props - Props del componente.
- * @param {Function} props.onTabChange - Función para manejar el cambio de pestaña que repercuten en el componente main content.
- * @returns {React.ReactElement} - Elemento de encabezado.
- */
 const Header = ({ onTabChange }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false); // Nuevo estado para las notificaciones
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const { userRole } = useAuth(); // Obtener el rol del usuario desde el contexto
 
-  /**
-   * Alterna la visibilidad del menú de ajustes.
-   */
   const toggleSettings = () => {
     setIsSettingsOpen(!isSettingsOpen);
   };
 
-  /**
-   * Alterna la visibilidad del menú de notificaciones.
-   */
   const toggleNotifications = () => {
     setIsNotificationsOpen(!isNotificationsOpen);
   };
@@ -30,7 +20,6 @@ const Header = ({ onTabChange }) => {
   return (
     <header className="bg-gray-800 text-white shadow-md p-4">
       <div className="flex justify-between items-center">
-        {/* Logo and Title */}
         <div className="flex items-center space-x-4">
           <div className="logo w-10 h-10 flex justify-center items-center bg-gray-700 rounded-full">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-white">
@@ -43,7 +32,6 @@ const Header = ({ onTabChange }) => {
           <h2 className="text-2xl font-bold tracking-tight">Mantis Manager</h2>
         </div>
 
-        {/* Navigation Links */}
         <div className="hidden md:flex space-x-6">
           <button onClick={() => onTabChange('board')} className="text-gray-300 hover:text-white transition duration-300">
             Board
@@ -54,11 +42,21 @@ const Header = ({ onTabChange }) => {
           <button onClick={() => onTabChange('tickets')} className="text-gray-300 hover:text-white transition duration-300">
             Tickets
           </button>
+          {/* Mostrar opción solo si el usuario es "jefe de desarrollo" */}
+          {userRole === 2 && (
+            <button onClick={() => onTabChange('desarrollo')} className="text-gray-300 hover:text-white transition duration-300">
+              Desarrollo
+            </button>
+          )}
+          {/* Mostrar opción solo si el usuario es "jefe de mantenimiento" */}
+          {userRole === 4 && (
+            <button onClick={() => onTabChange('mantenimiento')} className="text-gray-300 hover:text-white transition duration-300">
+              Mantenimiento
+            </button>
+          )}
         </div>
 
-        {/* Icons and Profile */}
         <div className="flex items-center space-x-4">
-          {/* Icon Buttons */}
           <div className="flex space-x-3">
             <button className="p-2 bg-gray-700 rounded-full hover:bg-gray-600 transition duration-300">
               <HiSearch className="text-white" size={20} />
@@ -71,19 +69,13 @@ const Header = ({ onTabChange }) => {
             </button>
           </div>
 
-          {/* Settings Dropdown */}
-          {isSettingsOpen && (
-            <Ajustes />
-          )}
-
-          {/* Notifications Dropdown */}
+          {isSettingsOpen && <Ajustes />}
           {isNotificationsOpen && (
             <div className="absolute top-16 right-4 bg-white shadow-lg rounded-lg p-4 w-80">
               <TicketNotifications />
             </div>
           )}
 
-          {/* Profile Picture */}
           <div
             className="w-10 h-10 rounded-full bg-cover bg-center"
             style={{ backgroundImage: 'url("https://cdn.usegalileo.io/avatars/1.png")' }}
@@ -95,6 +87,8 @@ const Header = ({ onTabChange }) => {
 };
 
 export default Header;
+
+
 
 
 
