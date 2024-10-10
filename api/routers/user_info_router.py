@@ -1,17 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Query
+from fastapi import APIRouter, Depends, HTTPException, Request, Query, status
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from models.user_model import User
 from config.db import get_db
+from schemas.auth_schema import UserOut, UserUpdate, PaginatedUsers  
 
-user_info_router = APIRouter(tags=["User Information"])
+user_info_router = APIRouter(tags=["Acciones del Jefe de Desarrollo"])
 
-@user_info_router.get("/user_info", summary="Obtener información paginada de los usuarios", 
-                      description="Este endpoint devuelve información paginada de los usuarios, "
-                                  "como el nombre completo, correo electrónico, rol y teléfono. "
-                                  "Requiere autenticación con un token válido y permisos adecuados.",
-                      response_description="Un JSON con la información de los usuarios paginados.")
+@user_info_router.get(
+    "/user_info",
+    summary="Obtener información paginada de los usuarios",
+    description=(
+        "Este endpoint devuelve información paginada de los usuarios, "
+        "como el nombre completo, correo electrónico, rol y teléfono. "
+        "Requiere autenticación con un token válido y permisos adecuados."
+    ),
+    response_model=PaginatedUsers,  # Especifica el modelo de respuesta
+    response_description="Un JSON con la información de los usuarios paginados."
+)
 def get_user_info(
     req: Request = None, 
     token: str = Depends(HTTPBearer()), 
@@ -36,10 +43,14 @@ def get_user_info(
     - **total_users**: Número total de usuarios en la base de datos.
     - **users**: Lista de usuarios con su información filtrada.
     """
-    user = req.state.user
+    current_user = req.state.user
 
-    if user.get("scopes") != 1:
-        return JSONResponse(status_code=401, content={"error": "No tienes permisos para ver la información de los usuarios"})
+    # Verificar permisos: scopes == 1 indica jefe de desarrollo (ajusta según tu lógica)
+    if current_user.get("scopes") != 1:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="No tienes permisos para ver la información de los usuarios"
+        )
     
     # Calcular el offset en base al número de página
     offset = (page - 1) * limit
@@ -47,14 +58,15 @@ def get_user_info(
     # Consultar los usuarios con límite y offset para paginación
     users = db.query(User).offset(offset).limit(limit).all()
 
-    # Mapeo de los datos de los usuarios
+    # Mapeo de los datos de los usuarios utilizando UserOut
     users_data = [
-        {
-            "full_name": f"{user.first_name} {user.last_name}",  # Unir first_name y last_name
-            "email": user.email,  # Correo electrónico
-            "role": user.role.name,  # Obtener el nombre del rol a través de la relación
-            "phone": user.phone  # Teléfono
-        } 
+        UserOut(
+            id=user.id,
+            full_name=f"{user.first_name} {user.last_name}",
+            email=user.email,
+            role=user.role.name,
+            phone=user.phone
+        ) 
         for user in users
     ]
 
@@ -62,9 +74,66 @@ def get_user_info(
     total_users = db.query(User).count()
 
     # Retornar los datos de paginación y los usuarios
-    return {
-        "page": page,
-        "limit": limit,
-        "total_users": total_users,
-        "users": users_data
-    }
+    paginated_response = PaginatedUsers(
+        page=page,
+        limit=limit,
+        total_users=total_users,
+        users=users_data
+    )
+
+    return paginated_response
+
+    
+@user_info_router.put("/user_info/{user_id}", 
+                      summary="Actualizar información de un usuario",
+                      description="Permite al jefe de desarrollo actualizar el correo electrónico, rol o teléfono de un usuario específico.",
+                      response_model=UserOut)
+def update_user_info(
+    user_id: int,
+    user_update: UserUpdate,
+    request: Request,
+    token: str = Depends(HTTPBearer()),
+    db: Session = Depends(get_db)
+):
+    """
+    Actualiza la información de un usuario específico.
+
+    - **user_id**: ID del usuario a actualizar.
+    - **user_update**: Datos a actualizar (email, role_id, phone).
+    - **token**: Token de autenticación requerido.
+    """
+    # Obtener el usuario que realiza la petición
+    current_user = request.state.user
+
+    # Verificar que el usuario tenga permisos de jefe de desarrollo
+    if current_user.get("scopes") != 1:
+        return JSONResponse(status_code=403,content="No tienes permisos para realizar esta acción.")
+
+    # Obtener el usuario a actualizar
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return  JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+        
+        
+    # Actualizar los campos proporcionados
+    if user_update.email:
+        user.email = user_update.email
+    if user_update.role_id:
+        user.role_id = user_update.role_id
+    if user_update.phone:
+        user.phone = user_update.phone
+
+    # Confirmar los cambios en la base de datos
+    db.commit()
+    db.refresh(user)
+
+    # Preparar la respuesta
+    updated_user = UserOut(
+        id=user.id,
+        full_name=f"{user.first_name} {user.last_name}",
+        email=user.email,
+        role=user.role.name,
+        phone=user.phone
+    )
+
+    return updated_user
