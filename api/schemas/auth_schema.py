@@ -27,9 +27,12 @@ class UserData(BaseModel):
 
 class UserUpdate(BaseModel):
     """Esquema para la actualización de datos de usuario."""
+    first_name: Optional[str] = Field(None, description="Nuevo nombre del usuario.")
+    last_name: Optional[str] = Field(None, description="Nuevo apellido del usuario.")
     email: Optional[EmailStr] = Field(None, description="Nuevo correo electrónico del usuario.")
     role_id: Optional[int] = Field(None, description="Nuevo ID del rol del usuario.")
     phone: Optional[str] = Field(None, description="Nuevo número de teléfono del usuario.")
+    password: Optional[str] = Field(None, description="Nueva contraseña del usuario.")
 
 class PaginatedUsers(BaseModel):
     """Esquema para la paginación de usuarios."""

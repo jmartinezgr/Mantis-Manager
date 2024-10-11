@@ -112,6 +112,12 @@ async def update_user_info(
         return  JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
         
     # Actualizar los campos proporcionados
+    if user_update.first_name:
+        user.first_name = user_update.first_name
+    if user_update.last_name:
+        user.last_name = user_update.last_name
+    if user_update.password:
+        user.password = pwd_context.hash(user_update.password)
     if user_update.email:
         user.email = user_update.email
     if user_update.role_id:
@@ -126,9 +132,10 @@ async def update_user_info(
     # Preparar la respuesta
     updated_user = UserData(
         id=user.id,
-        full_name=f"{user.first_name} {user.last_name}",
+        first_name=user.first_name,
+        last_name=user.last_name,
         email=user.email,
-        role=user.role.name,
+        role_id =user.role.id,
         phone=user.phone
     )
 
