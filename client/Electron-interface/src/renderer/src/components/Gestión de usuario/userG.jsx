@@ -1,28 +1,28 @@
-import React, { useState,useEffect } from 'react';
-import { HiPencil, HiTrash, HiPlus, HiSearch, HiOutlineEye,HiArrowLeft, HiArrowRight } from 'react-icons/hi';
+import React, { useState, useEffect } from 'react';
+import { HiPencil, HiTrash, HiPlus, HiSearch, HiOutlineEye, HiArrowLeft, HiArrowRight } from 'react-icons/hi';
 import { useAuth } from '../context/authContext';
 
 const UserManagement = () => {
   const { register } = useAuth();
-  const [users, setUsers] = useState([ ]);
+  const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({ id: '', firstName: '', lastName: '', email: '', role: '', password: '', phone: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUserHistory, setSelectedUserHistory] = useState([ ]);
+  const [selectedUserHistory, setSelectedUserHistory] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
-  const handlePageR=() => {
-    setCurrentPage(currentPage+1);
+  const handlePageR = () => {
+    setCurrentPage(currentPage + 1);
     console.log(currentPage)
   }
-  const handlePageL=() => {
-    if (currentPage >1){
-      setCurrentPage(currentPage-1);
+  const handlePageL = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
 
     }
-    
+
 
   }
 
@@ -35,10 +35,10 @@ const UserManagement = () => {
       if (!token) {
         throw new Error('No se encontró el token de acceso');
       }
-  
+
       // Construir la URL con los parámetros de paginación
       const url = `http://127.0.0.1:8000/jefe_desarrollo/user_info?page=${page}&limit=${limit}`;
-  
+
       // Realizar la solicitud a la API
       const response = await fetch(url, {
         method: 'GET',
@@ -47,36 +47,36 @@ const UserManagement = () => {
           'Content-Type': 'application/json',
         },
       });
-  
+
       // Comprobar si la respuesta fue exitosa
       if (!response.ok) {
         const errorData = await response.json();
         console.log('Error al obtener usuarios:', errorData);
         throw new Error(errorData.detail ? errorData.detail[0].msg : 'Error al obtener usuarios');
       }
-  
+
       // Parsear la respuesta JSON
       const data = await response.json();
       console.log(data.users)
 
 
       setUsers(data.users); // Ajusta según la estructura de la respuesta real
-       
-  
+
+
     } catch (error) {
       console.error('Error fetching users:', error);
       throw error; // Vuelve a lanzar el error para que pueda ser manejado en otro lugar
     }
   };
-  
+
   // Ejemplo de uso
   useEffect(() => {
     fetchUsers(currentPage, 10);
     console.log("hola")
-  },[currentPage]);
-  
-  
-  
+  }, [currentPage]);
+
+
+
 
 
 
@@ -89,7 +89,7 @@ const UserManagement = () => {
   };
 
   const handleAddUser = async () => {
-    
+
 
     if (!formData.id || !formData.firstName || !formData.lastName || !formData.email || !formData.role || !formData.password || !formData.phone) {
       alert('Por favor, completa todos los campos');
@@ -116,16 +116,16 @@ const UserManagement = () => {
           formData.email,
           formData.phone,
           formData.password,
-          parseInt(formData.role,10)     
+          parseInt(formData.role, 10)
         );
 
-       
+
 
         console.log("Nuevo usuario registrado:", newUser);
 
-        fetchUsers(currentPage,10)
+        fetchUsers(currentPage, 10)
 
-        
+
       } catch (error) {
         console.error('Error al registrar el usuario:', error);
         alert('Error al registrar el usuario. Por favor, intenta de nuevo.');
@@ -138,10 +138,10 @@ const UserManagement = () => {
   const handleEditUser = (user) => {
     setFormData({
       id: user.id, // Asigna el ID del usuario a editar
-      firstName: user.firstName,
-      lastName: user.lastName,
+      firstName: user.first_name,
+      lastName: user.last_name,
       email: user.email,
-      role: user.role,
+      role: user.role_id,
       password: user.password,
       phone: user.phone,
     });
@@ -156,11 +156,11 @@ const UserManagement = () => {
   const handleSearch = (e) => {
     setSearchQuery(e.target.value.toLowerCase());
   };
-//filtrado de usuarios para busqueda
+  //filtrado de usuarios para busqueda
   const filteredUsers = users.filter((user) => {
     return (
-      user.first_name.toLowerCase().includes(searchQuery)||
-      user.email.toLowerCase().includes(searchQuery)||
+      user.first_name.toLowerCase().includes(searchQuery) ||
+      user.email.toLowerCase().includes(searchQuery) ||
       user.last_name.toLowerCase().includes(searchQuery)
     );
   });
@@ -215,21 +215,21 @@ const UserManagement = () => {
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <select
-          name="role"
-          value={formData.role}
-          onChange={handleInputChange}
-          className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
->
-        <option value="" disabled>
-        
-        </option>
-        <option value={2}>Operario de mantenimiento</option>
-        <option value={1}>Jefe de desarrollo</option>
-        <option value={3}>Operario de Maquinaria</option>
-        <option value={4}>Jefe de mantenimiento</option>
-       
-        
-        </select>
+            name="role"
+            value={formData.role}
+            onChange={handleInputChange}
+            className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="" disabled>
+
+            </option>
+            <option value={2}>Operario de mantenimiento</option>
+            <option value={1}>Jefe de desarrollo</option>
+            <option value={3}>Operario de Maquinaria</option>
+            <option value={4}>Jefe de mantenimiento</option>
+
+
+          </select>
           <input
             type="password"
             name="password"
@@ -283,8 +283,8 @@ const UserManagement = () => {
           </thead>
           <tbody>
             {filteredUsers.length > 0 ? (
-              filteredUsers.map((user,index) => (
-                <tr key={index+1} className="border-b border-gray-300">
+              filteredUsers.map((user, index) => (
+                <tr key={index + 1} className="border-b border-gray-300">
                   <td className="p-2 pl-4">{`${user.first_name} ${user.last_name}`}</td>
                   <td className="p-2">{user.email}</td>
                   <td className="p-2">{user.role_id}</td>
@@ -309,12 +309,12 @@ const UserManagement = () => {
           </tbody>
         </table>
         <div className='flex p-4 '>
-          <HiArrowLeft onClick={handlePageL}/>
-          < HiArrowRight  className='items-start' onClick={ handlePageR}/>
+          <HiArrowLeft onClick={handlePageL} />
+          < HiArrowRight className='items-start' onClick={handlePageR} />
 
 
         </div>
-        
+
 
 
       </div>
@@ -324,16 +324,16 @@ const UserManagement = () => {
           <div className="bg-white rounded-lg p-6 w-1/3">
             <h3 className="text-lg font-bold mb-4">Historial de Usuario</h3>
             <ul>
-            {selectedUserHistory?.length > 0 ? (
-            selectedUserHistory.map((item, index) => (
-          <li key={index} className="border-b border-gray-300 p-2">
-          {item.action} - {item.date}
-          </li>
-    ))
-  ) : (
-    <li className="text-gray-500">No history available for this user</li>
-  )}
-</ul>
+              {selectedUserHistory?.length > 0 ? (
+                selectedUserHistory.map((item, index) => (
+                  <li key={index} className="border-b border-gray-300 p-2">
+                    {item.action} - {item.date}
+                  </li>
+                ))
+              ) : (
+                <li className="text-gray-500">No history available for this user</li>
+              )}
+            </ul>
 
             <button onClick={handleCloseModal} className="mt-4 bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600">
               Cerrar
