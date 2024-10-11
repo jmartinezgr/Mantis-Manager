@@ -7,8 +7,8 @@ from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from config.db import get_db
-from models.user_model import User, Role
-from schemas.auth_schema import LoginData, RegisterData
+from models.user_model import User
+from schemas.auth_schema import LoginData , LoginResponse
 from services.jwt_services import create_acess_token, create_refresh_token 
 
 
@@ -18,7 +18,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 user_auth_router = APIRouter(tags=["Users Authentification"])
 
 # Ruta para iniciar sesión
-@user_auth_router.post("/login")
+@user_auth_router.post("/login", response_model=LoginResponse)
 async def login(data: LoginData, db: Session = Depends(get_db)):
     """
     Iniciar sesión en el sistema y generar tokens de acceso y refresco.
@@ -70,74 +70,4 @@ async def login(data: LoginData, db: Session = Depends(get_db)):
         "data": user_data,
         "access_token": access_token,
         "refresh_token": refresh_token
-    })
-
-# Ruta para registrar un nuevo usuario
-from sqlalchemy import func
-
-@user_auth_router.post("/register")
-async def register(data: RegisterData, db: Session = Depends(get_db)):
-    """
-    Registrarse en el sistema y generar tokens de acceso y refresco.
-    """
-    # Verificar si el id ya está registrado
-    existing_user = db.query(User).filter(User.id == data.id).first()
-    if existing_user:
-        return JSONResponse(status_code=400, content={
-            "error": "El email ya está registrado"
-        })
-
-    # Normalizar data.role eliminando espacios y convirtiendo a minúsculas
-    data_role_normalized = data.role.strip().lower()
-    print(f"Valor de data.role normalizado: '{data_role_normalized}'")
-
-    # Normalizar los nombres de los roles en la consulta
-    role = db.query(Role).filter(func.lower(func.trim(Role.id)) == data_role_normalized).first()
-
-    # Mostrar los roles disponibles para depuración
-    roles = db.query(Role).all()
-    for e in roles: 
-        print(f"Rol disponible en BD: '{e.name.strip()}'")
-
-    print(f"Rol encontrado: {role}")
-    if not role:
-        available_roles = db.query(Role).all()
-        available_role_names = [r.name for r in available_roles]
-        return JSONResponse(status_code=400, content={
-            "error": "El rol no existe",
-        })
-
-    # Crear el nuevo usuario con los datos proporcionados
-    new_user = User(
-        id=data.id,
-        password=pwd_context.hash(data.password),
-        first_name=data.first_name,
-        last_name=data.last_name,
-        email=data.email,
-        phone=data.phone,
-        role_id=role.id
-    )
-
-    # Guardar el usuario en la base de datos
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    # Crear tokens de acceso y refresco para el nuevo usuario
-    access_token = create_acess_token(data={"sub": new_user.id, "scopes": new_user.role_id})
-    refresh_token = create_refresh_token(data={"sub": new_user.id, "scopes": new_user.role_id})
-
-    # Respuesta con el token y datos del nuevo usuario
-    return JSONResponse(status_code=200, content={
-        "detail": "Usuario creado correctamente",
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "data": {
-            "id": new_user.id,
-            "first_name": new_user.first_name,
-            "last_name": new_user.last_name,
-            "email": new_user.email,
-            "phone": new_user.phone,
-            "role_id": new_user.role_id
-        }
     })

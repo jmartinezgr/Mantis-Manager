@@ -13,12 +13,12 @@ from config.db import get_db
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-user_info_router = APIRouter(
+jd_router = APIRouter(
     tags=["Acciones del Jefe de Desarrollo"],
     prefix="/jefe_desarrollo"
 )
 
-@user_info_router.get(
+@jd_router.get(
     "/user_info",
     summary="Obtener información paginada de los usuarios",
     description=(
@@ -86,7 +86,7 @@ async def get_user_info(
 
     return paginated_response
 
-@user_info_router.put("/user_info/{user_id}", 
+@jd_router.put("/user_info/{user_id}", 
     summary="Actualizar información de un usuario",
     description="Permite al jefe de desarrollo actualizar el correo electrónico, rol o teléfono de un usuario específico.",
     response_model=UserOut
@@ -133,7 +133,7 @@ async def update_user_info(
 
     return updated_user
 
-@user_info_router.post(
+@jd_router.post(
     "/register",
     summary="Registrar un nuevo usuario",
     description="Permite al jefe de desarrollo crear un nuevo usuario.", 
