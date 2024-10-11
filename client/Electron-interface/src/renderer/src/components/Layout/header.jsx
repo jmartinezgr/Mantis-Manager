@@ -50,10 +50,20 @@ const Header = ({ onTabChange }) => {
           )}
           {/* Mostrar opción solo si el usuario es "jefe de mantenimiento" */}
           {userRole === 4 && (
+
             <button onClick={() => onTabChange('mantenimiento')} className="text-gray-300 hover:text-white transition duration-300">
               Mantenimiento
             </button>
+            
+
           )}
+          {userRole === 4 && (
+            <button onClick={() => onTabChange('Gestion ticktes')} className="text-gray-300 hover:text-white transition duration-300">
+              Gestión Ticktes
+            </button>
+          )}
+
+          
         </div>
 
         <div className="flex items-center space-x-4">

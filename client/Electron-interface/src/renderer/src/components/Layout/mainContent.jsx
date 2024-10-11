@@ -5,6 +5,7 @@ import Maquina from '../Maquina/maquina';
 import Board from '../board/board';
 import Desarrollo from'../Gestión de usuario/userG';
 import Mantenimiento from '../Mantenimietno/Mantenimiento'
+import GestionTicktes from '../Gestion Ticktes/ticketManager'
 
 /**
  * Componente principal para mostrar el contenido basado en la pestaña activa.
@@ -28,6 +29,7 @@ const MainContent = ({ activeTab }) => {
         {activeTab === 'tickets' && <TicketsBoard />}
         {activeTab === 'desarrollo'&& <Desarrollo/>}
         {activeTab === 'mantenimiento'&& <Mantenimiento/>}
+        {activeTab === 'Gestion ticktes' && <GestionTicktes/>}
       </div>
     </main>
   );
