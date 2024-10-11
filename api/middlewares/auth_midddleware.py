@@ -4,7 +4,7 @@
     si el token de acceso es válido.
 '''
 
-from fastapi import Request, HTTPException
+from fastapi import Request, HTTPException, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 from services.jwt_services import verify_access_token
@@ -29,17 +29,25 @@ class AuthMiddleware(BaseHTTPMiddleware):
             return JSONResponse(
                 status_code=403, 
                 content={
-                    "detail": "Hace falta Bearer token  o tiene un formato incorrecto",
+                    "detail": "Hace falta Bearer token o tiene un formato incorrecto",
                     "code": "auth/missing_token"
                 }
             )
         
-        # Extraer el token quitando el prefijo 'Bearer '
+        # Extraer el token quitando el prefijo 'Bearer'
         token = auth_header[len("Bearer "):]
         
         try:
             payload = verify_access_token(token)
             request.state.user = payload
+            
+            # Verificar que el usuario tenga permisos de jefe de desarrollo
+            if request.url.path.startswith("/jefe_desarrollo") and payload.get("scopes") != 1:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED, 
+                    detail="No tienes permisos para acceder a esta ruta"
+                )
+                
         except HTTPException as e:
             return JSONResponse(
                 status_code=e.status_code,

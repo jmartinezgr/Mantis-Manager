@@ -2,11 +2,21 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Query, status
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
-from models.user_model import User
-from config.db import get_db
-from schemas.auth_schema import UserOut, UserUpdate, PaginatedUsers  
+from sqlalchemy import func
+from passlib.context import CryptContext
 
-user_info_router = APIRouter(tags=["Acciones del Jefe de Desarrollo"])
+from schemas.auth_schema import UserOut, UserUpdate, PaginatedUsers  
+from schemas.auth_schema import RegisterData, CreatedUser
+from services.jwt_services import create_acess_token, create_refresh_token 
+from models.user_model import User, Role
+from config.db import get_db
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+user_info_router = APIRouter(
+    tags=["Acciones del Jefe de Desarrollo"],
+    prefix="/jefe_desarrollo"
+)
 
 @user_info_router.get(
     "/user_info",
@@ -19,7 +29,7 @@ user_info_router = APIRouter(tags=["Acciones del Jefe de Desarrollo"])
     response_model=PaginatedUsers,  # Especifica el modelo de respuesta
     response_description="Un JSON con la información de los usuarios paginados."
 )
-def get_user_info(
+async def get_user_info(
     req: Request = None, 
     token: str = Depends(HTTPBearer()), 
     db: Session = Depends(get_db),
@@ -44,13 +54,6 @@ def get_user_info(
     - **users**: Lista de usuarios con su información filtrada.
     """
     current_user = req.state.user
-
-    # Verificar permisos: scopes == 1 indica jefe de desarrollo (ajusta según tu lógica)
-    if current_user.get("scopes") != 1:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, 
-            detail="No tienes permisos para ver la información de los usuarios"
-        )
     
     # Calcular el offset en base al número de página
     offset = (page - 1) * limit
@@ -83,15 +86,14 @@ def get_user_info(
 
     return paginated_response
 
-    
 @user_info_router.put("/user_info/{user_id}", 
-                      summary="Actualizar información de un usuario",
-                      description="Permite al jefe de desarrollo actualizar el correo electrónico, rol o teléfono de un usuario específico.",
-                      response_model=UserOut)
-def update_user_info(
+    summary="Actualizar información de un usuario",
+    description="Permite al jefe de desarrollo actualizar el correo electrónico, rol o teléfono de un usuario específico.",
+    response_model=UserOut
+)
+async def update_user_info(
     user_id: int,
     user_update: UserUpdate,
-    request: Request,
     token: str = Depends(HTTPBearer()),
     db: Session = Depends(get_db)
 ):
@@ -102,18 +104,11 @@ def update_user_info(
     - **user_update**: Datos a actualizar (email, role_id, phone).
     - **token**: Token de autenticación requerido.
     """
-    # Obtener el usuario que realiza la petición
-    current_user = request.state.user
-
-    # Verificar que el usuario tenga permisos de jefe de desarrollo
-    if current_user.get("scopes") != 1:
-        return JSONResponse(status_code=403,content="No tienes permisos para realizar esta acción.")
-
+    
     # Obtener el usuario a actualizar
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         return  JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
-        
         
     # Actualizar los campos proporcionados
     if user_update.email:
@@ -137,3 +132,75 @@ def update_user_info(
     )
 
     return updated_user
+
+@user_info_router.post(
+    "/register",
+    summary="Registrar un nuevo usuario",
+    description="Permite al jefe de desarrollo crear un nuevo usuario.", 
+    response_model=CreatedUser
+)
+async def register(
+    data: RegisterData, 
+    db: Session = Depends(get_db), 
+    token: str = Depends(HTTPBearer())
+):
+    """
+    Registrarse en el sistema y generar tokens de acceso y refresco.
+    """
+    # Verificar si el id ya está registrado
+    existing_user = db.query(User).filter(User.id == data.id).first()
+    if existing_user:
+        return JSONResponse(status_code=400, content={
+            "error": "El email ya está registrado"
+        })
+
+    # Normalizar data.role eliminando espacios y convirtiendo a minúsculas
+    data_role_normalized = data.role.strip().lower()
+
+    # Normalizar los nombres de los roles en la consulta
+    role = db.query(Role).filter(func.lower(func.trim(Role.id)) == data_role_normalized).first()
+
+    # Mostrar los roles disponibles para depuración
+    roles = db.query(Role).all()
+
+    if not role:
+        available_roles = db.query(Role).all()
+        available_role_names = [r.name for r in available_roles]
+        return JSONResponse(status_code=400, content={
+            "error": "El rol no existe",
+        })
+
+    # Crear el nuevo usuario con los datos proporcionados
+    new_user = User(
+        id=data.id,
+        password=pwd_context.hash(data.password),
+        first_name=data.first_name,
+        last_name=data.last_name,
+        email=data.email,
+        phone=data.phone,
+        role_id=role.id
+    )
+
+    # Guardar el usuario en la base de datos
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    # Crear tokens de acceso y refresco para el nuevo usuario
+    access_token = create_acess_token(data={"sub": new_user.id, "scopes": new_user.role_id})
+    refresh_token = create_refresh_token(data={"sub": new_user.id, "scopes": new_user.role_id})
+
+    # Respuesta con el token y datos del nuevo usuario
+    return JSONResponse(status_code=200, content={
+        "detail": "Usuario creado correctamente",
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "data": {
+            "id": new_user.id,
+            "first_name": new_user.first_name,
+            "last_name": new_user.last_name,
+            "email": new_user.email,
+            "phone": new_user.phone,
+            "role_id": new_user.role_id
+        }
+    })
