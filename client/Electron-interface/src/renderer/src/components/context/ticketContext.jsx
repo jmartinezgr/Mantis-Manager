@@ -14,10 +14,40 @@ export const TicketProvider = ({ children }) => {
   };
 
   const fetchTickets = async () => {
+    const url= "http://127.0.0.1:8000/seguimiento"
+
+
     try {
-      const response = await fetch("/data/tickets.json");
-      const data = await response.json();
-      setTicketsData(data);
+      const response = await fetch(url,{
+        method:"GET",
+        headers:{
+          "Authorization": `Bearer ${localStorage.getItem('access_token')}`, // Reemplazar 'token' con el nombre de la variable de sesión que contiene el token
+          "Content-Type": "application/json"
+
+        }
+
+      });
+      if (response.ok){
+        const data = await response.json();
+        const pendientes= data.length>0?data.filter(data=>data.state=="pendiente"):[];
+
+        // nueva forma de manejar el estado de los tickets 
+        setTicketsData(previeTicket => ({
+          ...previeTicket, // Copia todas las categorías anteriores
+          "En cola": [...pendientes],
+          "En proceso": [],
+          "Terminados": [] 
+            
+        }));
+        
+        console.log(data)
+        return data 
+      }
+     
+     
+     
+     
+      
     } catch (error) {
       console.error("Error al cargar los tickets:", error);
     }
