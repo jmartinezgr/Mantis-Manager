@@ -11,11 +11,11 @@ const TicketDetails = ({ ticket }) => {
         <span className="font-semibold">Description:</span> {ticket.description}
       </p>
       <p className="mb-4">
-        <span className="font-semibold">Status:</span> 
+        <span className="font-semibold">Estado:</span> 
         <span 
-          className={`font-bold ${
-            ticket.status === 'Open' ? 'text-green-500' :
-            ticket.status === 'Closed' ? 'text-red-500' : 'text-orange-500'
+          className= {`font-bold, pl-2 ${
+            ticket.status === 'En cola' ? 'text-orange-500' :
+            ticket.status === 'Closed' ? 'text-red-500' : 'text-green-500'
           }`}
         >
           {ticket.status}
@@ -23,10 +23,10 @@ const TicketDetails = ({ ticket }) => {
       </p>
 
       <button
-        className="bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition"
+        className="bg-blue-500 border-4 border-red-500 text-white font-bold py-2 px-4 rounded-full  hover:bg-blue-600  hover:border-gray-100 transition"
         onClick={() => alert('Change State')}
       >
-        Change State
+        Cambiar estado 
       </button>
     </div>
   );
