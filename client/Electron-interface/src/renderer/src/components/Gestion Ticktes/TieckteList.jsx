@@ -12,9 +12,9 @@ const TicketList = () => {
     // Simula la carga de tickets
     setTimeout(() => {
       setTickets([
-        { id: 1, description: 'Ticket 1', status: 'Open' },
-        { id: 2, description: 'Ticket 2', status: 'In Progress' },
-        { id: 3, description: 'Ticket 3', status: 'Closed' },
+        { id: 1, description: 'Ticket 1', status: 'En cola' },
+        { id: 2, description: 'Ticket 2', status: 'En proceso' },
+        { id: 3, description: 'Ticket 3', status: 'Terminados' },
       ]);
       setLoading(false);
     }, 1000);
@@ -39,7 +39,7 @@ const TicketList = () => {
 
   return (
     <div className="flex flex-col  items-center min-h-screen ">
-      <div className="bg-white p-8 rounded-lg shadow-lg  w-full">
+      <div className="bg-white p-8 rounded-lg   w-full">
         <h1 className="text-3xl font-bold text-center mb-8">Tickets List</h1>
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse">
@@ -47,8 +47,8 @@ const TicketList = () => {
               <tr className="bg-gray-100">
                 <th className="py-4 px-6 text-left">ID</th>
                 <th className="py-4 px-6 text-left">Description</th>
-                <th className="py-4 px-6 text-left">Status</th>
-                <th className="py-4 px-6 text-left">Actions</th>
+                <th className="py-4 px-6 text-left">Estado</th>
+                <th className="py-4 px-6 text-left">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -58,10 +58,10 @@ const TicketList = () => {
                   <td className="py-4 px-6">{ticket.description}</td>
                   <td
                     className={`py-4 px-6 text-left ${
-                      ticket.status === 'Open'
-                        ? 'text-green-500'
-                        : ticket.status === 'Closed'
+                      ticket.status === 'En cola'
                         ? 'text-red-500'
+                        : ticket.status === 'Terminados'
+                        ? 'text-green-500'
                         : 'text-orange-500'
                     }`}
                   >

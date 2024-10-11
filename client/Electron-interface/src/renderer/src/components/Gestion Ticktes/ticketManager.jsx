@@ -30,7 +30,7 @@ const TicketsManager = () => {
         </button>
 
         {menuOpen && (
-          <div className="absolute top-12 bg-white shadow-lg rounded-lg mt-2 w-56 z-10">
+          <div className="absolute top-12 bg-white rounded-lg mt-2 w-56 z-10">
             <ul className="flex flex-col">
               <li>
                 <button

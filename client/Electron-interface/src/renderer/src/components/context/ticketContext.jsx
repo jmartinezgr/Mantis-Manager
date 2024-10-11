@@ -52,7 +52,7 @@ export const TicketProvider = ({ children }) => {
       console.error("Error al cargar los tickets:", error);
     }
   };
-
+// esto es viejo
   const updateTicketsData = async (updatedData) => {
     try {
       await fetch("/data/tickets.json", {
@@ -117,7 +117,7 @@ export const TicketProvider = ({ children }) => {
     await updateTicketsData(updatedData);
     recordHistory(ticketId, 'Cancelado');
   };
-
+//se requiere endpoint
   const handleEdit = async (editedTicket) => {
     const updatedData = { ...ticketsData };
     Object.keys(updatedData).forEach(tab => {
@@ -132,6 +132,15 @@ export const TicketProvider = ({ children }) => {
   const toggleGenerarTickets = () => {
     setShowGenerarTickets(prev => !prev);
   };
+const getAllTicket=()=>{
+
+  const url = ""
+
+
+
+}
+
+
 
   React.useEffect(() => {
     fetchTickets();
