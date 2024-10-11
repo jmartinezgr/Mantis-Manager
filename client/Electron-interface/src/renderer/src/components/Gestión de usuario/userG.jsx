@@ -5,13 +5,21 @@ import { useAuth } from '../context/authContext';
 const UserManagement = () => {
   const { register } = useAuth();
   const [users, setUsers] = useState([]);
-  const [formData, setFormData] = useState({ id: '', firstName: '', lastName: '', email: '', role: '', password: '', phone: '' });
+  const [formData, setFormData] = useState({
+    first_name: '',
+    last_name: '',
+    email: '',
+    password: '',
+    confirmPassword: '', // nuevo campo para confirmar la contraseña
+    role_id: ''
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUserHistory, setSelectedUserHistory] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [originalData, setOriginalData] = useState({});
 
   const handlePageR = () => {
     setCurrentPage(currentPage + 1);
@@ -20,12 +28,8 @@ const UserManagement = () => {
   const handlePageL = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
-
     }
-
-
   }
-
 
   const fetchUsers = async (page = 1, limit = 10) => {
     try {
@@ -59,9 +63,7 @@ const UserManagement = () => {
       const data = await response.json();
       console.log(data.users)
 
-
       setUsers(data.users); // Ajusta según la estructura de la respuesta real
-
 
     } catch (error) {
       console.error('Error fetching users:', error);
@@ -75,42 +77,76 @@ const UserManagement = () => {
     console.log("hola")
   }, [currentPage]);
 
-
-
-
-
-
-
-
-
-
   const handleInputChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleAddUser = async () => {
-
-
-    if (!formData.id || !formData.firstName || !formData.lastName || !formData.email || !formData.role || !formData.password || !formData.phone) {
+    if (formData.password !== formData.confirmPassword) {
+      alert('Las contraseñas no coinciden.');
+      return;
+    }
+    // Validar si es un nuevo usuario (todos los campos requeridos)
+    if (!isEditing && (!formData.id || !formData.firstName || !formData.lastName || !formData.email || !formData.role || !formData.password || !formData.phone)) {
       alert('Por favor, completa todos los campos');
       return;
     }
 
     if (isEditing) {
-      setUsers((prevUsers) =>
-        prevUsers.map((user) =>
-          user.id === selectedUserId
-            ? { ...user, ...formData }
-            : user
-        )
-      );
+      // Crear un objeto vacío para almacenar solo los campos modificados
+      const updatedUser = {};
+
+      if (formData.id !== originalData.id) {
+        alert('No puedes cambiar el ID de un usuario.');
+        return;
+      }
+      // Comparar cada campo con los valores originales
+      if (formData.firstName !== originalData.firstName) updatedUser.first_name = formData.firstName;
+      if (formData.lastName !== originalData.lastName) updatedUser.last_name = formData.lastName;
+      if (formData.email !== originalData.email) updatedUser.email = formData.email;
+      if (parseInt(formData.role, 10) !== originalData.role) updatedUser.role_id = parseInt(formData.role, 10);
+      if (formData.password) updatedUser.password = formData.password; // Solo agregar si se cambió la contraseña
+      if (formData.phone !== originalData.phone) updatedUser.phone = formData.phone;
+
+      if (Object.keys(updatedUser).length === 0) {
+        alert('No has realizado ningún cambio.');
+        return;
+      }
+
+      console.log(JSON.stringify(updatedUser))
+      const token = localStorage.getItem('access_token');
+      // Realizar el fetch a la URL con el ID dinámico
+      try {
+        const response = await fetch(`http://127.0.0.1:8000/jefe_desarrollo/user_info/${formData.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Añadir el token aquí
+          },
+          body: JSON.stringify(updatedUser),
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al actualizar el usuario');
+        }
+
+        const result = await response.json();
+        console.log('Usuario actualizado:', result);
+        setUsers(prevUsers =>
+          prevUsers.map(user =>
+            user.id === result.id ? { ...user, ...result } : user
+          )
+        );
+      } catch (error) {
+        console.error('Error al actualizar el usuario:', error);
+      }
       setIsEditing(false);
       setSelectedUserId(null);
     } else {
       try {
-        // Aquí asumimos que el ID se proporciona directamente por el usuario
+        // Si no es edición, agregar un nuevo usuario
         const newUser = await register(
-          formData.id, // Envía el ID ingresado
+          formData.id,
           formData.firstName,
           formData.lastName,
           formData.email,
@@ -119,12 +155,8 @@ const UserManagement = () => {
           parseInt(formData.role, 10)
         );
 
-
-
         console.log("Nuevo usuario registrado:", newUser);
-
-        fetchUsers(currentPage, 10)
-
+        fetchUsers(currentPage, 10);
 
       } catch (error) {
         console.error('Error al registrar el usuario:', error);
@@ -144,6 +176,15 @@ const UserManagement = () => {
       role: user.role_id,
       password: user.password,
       phone: user.phone,
+    });
+    setOriginalData({
+      id: user.id,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      email: user.email,
+      role: user.role_id,
+      password: '', // Puede estar vacío o un valor fijo
+      phone: user.phone
     });
     setIsEditing(true);
     setSelectedUserId(user.id);
@@ -186,15 +227,17 @@ const UserManagement = () => {
             type="text"
             name="id"
             placeholder="ID"
-            value={formData.id}
+            value={formData.id || ''}
             onChange={handleInputChange}
+            readOnly={isEditing}
+            disabled={isEditing}
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="text"
             name="firstName"
             placeholder="Nombre"
-            value={formData.firstName}
+            value={formData.firstName || ''}
             onChange={handleInputChange}
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -202,7 +245,7 @@ const UserManagement = () => {
             type="text"
             name="lastName"
             placeholder="Apellido"
-            value={formData.lastName}
+            value={formData.lastName || ''}
             onChange={handleInputChange}
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -210,43 +253,53 @@ const UserManagement = () => {
             type="email"
             name="email"
             placeholder="Correo electrónico"
-            value={formData.email}
+            value={formData.email || ''}
             onChange={handleInputChange}
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <select
             name="role"
-            value={formData.role}
+            value={formData.role || ''}
             onChange={handleInputChange}
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="" disabled>
-
+              Selecciona un rol
             </option>
             <option value={2}>Operario de mantenimiento</option>
             <option value={1}>Jefe de desarrollo</option>
             <option value={3}>Operario de Maquinaria</option>
             <option value={4}>Jefe de mantenimiento</option>
-
-
           </select>
           <input
             type="password"
             name="password"
             placeholder="Contraseña"
-            value={formData.password}
+            value={formData.password || ''}
+            onChange={handleInputChange}
+            className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required={!isEditing}
+          />
+          <input
+            type="tel"
+            name="phone"
+            placeholder="Teléfono"
+            value={formData.phone || ''}
             onChange={handleInputChange}
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <input
-            type="text"
-            name="phone"
-            placeholder="Teléfono"
-            value={formData.phone}
+            type="password"
+            id="confirmPassword"
+            name="confirmPassword"
+            placeholder='Confirmar contraseña'
+            value={formData.confirmPassword || ''}
             onChange={handleInputChange}
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required={!isEditing}
           />
         </div>
+
         <div className="flex justify-end mt-4">
           <button
             onClick={handleAddUser}
@@ -275,20 +328,20 @@ const UserManagement = () => {
         <table className="min-w-full table-auto">
           <thead>
             <tr className="bg-gray-200 text-gray-600">
-              <th className="p-2">Nombre</th>
-              <th className="p-2">Correo</th>
-              <th className="p-2">Rol</th>
-              <th className="p-2">Acciones</th>
+              <th className="p-4 md:p-2 text-left">Nombre</th>
+              <th className="p-4 md:p-2 text-left">Correo</th>
+              <th className="p-4 md:p-2 text-left">Rol</th>
+              <th className="p-4 md:p-2 text-left">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user, index) => (
                 <tr key={index + 1} className="border-b border-gray-300">
-                  <td className="p-2 pl-4">{`${user.first_name} ${user.last_name}`}</td>
-                  <td className="p-2">{user.email}</td>
-                  <td className="p-2">{user.role_id}</td>
-                  <td className="p-2 flex space-x-2">
+                  <td className="p-4 md:p-2 pl-4">{`${user.first_name} ${user.last_name}`}</td>
+                  <td className="p-4 md:p-2">{user.email}</td>
+                  <td className="p-4 md:p-2">{user.role_id}</td>
+                  <td className="p-4 md:p-2 flex space-x-2">
                     <button onClick={() => handleEditUser(user)} className="text-blue-500 hover:underline">
                       <HiPencil />
                     </button>
@@ -310,13 +363,8 @@ const UserManagement = () => {
         </table>
         <div className='flex p-4 '>
           <HiArrowLeft onClick={handlePageL} />
-          < HiArrowRight className='items-start' onClick={handlePageR} />
-
-
+          <HiArrowRight className='items-start' onClick={handlePageR} />
         </div>
-
-
-
       </div>
 
       {isModalOpen && (
