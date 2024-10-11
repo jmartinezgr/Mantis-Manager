@@ -27,8 +27,8 @@ class UserOut(BaseModel):
     id: int
     full_name: str
     email: EmailStr
-    role_id: int
-    phone: Optional[str]
+    role: str
+    phone: str
 
     class Config:
         from_attributes = True
