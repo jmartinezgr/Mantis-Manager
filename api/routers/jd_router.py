@@ -141,6 +141,44 @@ async def update_user_info(
 
     return updated_user
 
+@jd_router.delete("/user_info/{user_id}",
+    summary="Eliminar un usuario",
+    description="Permite al jefe de desarrollo eliminar un usuario específico.",
+    response_model=UserData
+)
+async def delete_user(
+    user_id: int,
+    token: str = Depends(HTTPBearer()),
+    db: Session = Depends(get_db)
+):
+    """
+    Elimina un usuario específico.
+
+    - **user_id**: ID del usuario a eliminar.
+    - **token**: Token de autenticación requerido.
+    """
+    # Obtener el usuario a eliminar
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+
+    # Eliminar el usuario de la base de datos
+    db.delete(user)
+
+    # Preparar la respuesta
+    deleted_user = UserData(
+        id=user.id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        role_id = user.role.id,
+        phone=user.phone
+    )
+    
+    db.commit()
+
+    return deleted_user
+
 @jd_router.post(
     "/register",
     summary="Registrar un nuevo usuario",

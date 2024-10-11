@@ -190,8 +190,31 @@ const UserManagement = () => {
     setSelectedUserId(user.id);
   };
 
-  const handleDeleteUser = (userId) => {
-    setUsers(users.filter((user) => user.id !== userId));
+  const handleDeleteUser = async (userId) => {
+    try {
+      // Llamada al endpoint para eliminar el usuario
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`http://127.0.0.1:8000/jefe_desarrollo/user_info/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          // Agrega aquí tu token de autenticación si es necesario
+          Authorization: `Bearer ${token}`, // Asegúrate de tener el token disponible
+        },
+      });
+
+      if (response.ok) {
+        // Si la respuesta es exitosa, filtra el usuario eliminado
+        setUsers(users.filter((user) => user.id !== userId));
+      } else {
+        const errorData = await response.json();
+        console.error('Error al eliminar el usuario:', errorData.error);
+        // Manejar el error según sea necesario (mostrar un mensaje al usuario, etc.)
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+      // Manejar el error de red (mostrar un mensaje al usuario, etc.)
+    }
   };
 
   const handleSearch = (e) => {
