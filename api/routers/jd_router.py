@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from passlib.context import CryptContext
 
-from schemas.auth_schema import UserOut, UserUpdate, PaginatedUsers, UserData
+from schemas.auth_schema import UserUpdate, PaginatedUsers, UserData
 from schemas.auth_schema import RegisterData, CreatedUser
 from services.jwt_services import create_acess_token, create_refresh_token 
 from models.user_model import User, Role
@@ -26,7 +26,7 @@ jd_router = APIRouter(
         "como el nombre completo, correo electrónico, rol y teléfono. "
         "Requiere autenticación con un token válido y permisos adecuados."
     ),
-    response_model=PaginatedUsers,  # Especifica el modelo de respuesta
+    response_model=PaginatedUsers,  
     response_description="Un JSON con la información de los usuarios paginados."
 )
 async def get_user_info(
@@ -63,12 +63,13 @@ async def get_user_info(
 
     # Mapeo de los datos de los usuarios utilizando UserOut
     users_data = [
-        UserOut(
+        UserData(
             id=user.id,
-            full_name=f"{user.first_name} {user.last_name}",
+            first_name=user.first_name,
+            last_name=user.last_name,   
             email=user.email,
-            role=user.role.name,
-            phone=user.phone
+            phone=user.phone,
+            role_id = user.role_id
         ) 
         for user in users
     ]
@@ -86,44 +87,10 @@ async def get_user_info(
 
     return paginated_response
 
-@jd_router.get("/user_info/{user_id}",
-               summary="Obtener información de un usuario específico",
-    description="Devuelve la información de un usuario específico.",
-    response_model=UserData
-)
-async def get_user_by_id( 
-    user_id: int, 
-    token: str = Depends(HTTPBearer()), 
-    db: Session = Depends(get_db)
-):
-    """
-    Devuelve la información de un usuario específico.
-
-    - **user_id**: ID del usuario a obtener.
-    - **token**: Token de autenticación requerido.
-    """
-    # Consultar el usuario por ID
-    user = db.query(User).filter(User.id == user_id).first()
-
-    if not user:
-        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
-
-    # Preparar la respuesta con los datos del usuario
-    user_data = UserData(
-        id=user.id,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        email=user.email,
-        phone=user.phone,
-        role_id=user.role_id
-    )
-
-    return user_data
-
 @jd_router.put("/user_info/{user_id}", 
     summary="Actualizar información de un usuario",
     description="Permite al jefe de desarrollo actualizar el correo electrónico, rol o teléfono de un usuario específico.",
-    response_model=UserOut
+    response_model=UserData
 )
 async def update_user_info(
     user_id: int,
@@ -157,7 +124,7 @@ async def update_user_info(
     db.refresh(user)
 
     # Preparar la respuesta
-    updated_user = UserOut(
+    updated_user = UserData(
         id=user.id,
         full_name=f"{user.first_name} {user.last_name}",
         email=user.email,
@@ -188,22 +155,14 @@ async def register(
             "error": "El email ya está registrado"
         })
 
-    # Normalizar data.role eliminando espacios y convirtiendo a minúsculas
-    data_role_normalized = data.role.strip().lower()
-
     # Normalizar los nombres de los roles en la consulta
-    role = db.query(Role).filter(func.lower(func.trim(Role.id)) == data_role_normalized).first()
-
-    # Mostrar los roles disponibles para depuración
-    roles = db.query(Role).all()
-
+    role = db.query(Role).filter(Role.id == data.role).first()
+    
     if not role:
-        available_roles = db.query(Role).all()
-        available_role_names = [r.name for r in available_roles]
-        return JSONResponse(status_code=400, content={
-            "error": "El rol no existe",
+        return JSONResponse(status_code=404, content={
+            "error": "El rol no existe"
         })
-
+        
     # Crear el nuevo usuario con los datos proporcionados
     new_user = User(
         id=data.id,
@@ -220,21 +179,9 @@ async def register(
     db.commit()
     db.refresh(new_user)
 
-    # Crear tokens de acceso y refresco para el nuevo usuario
-    access_token = create_acess_token(data={"sub": new_user.id, "scopes": new_user.role_id})
-    refresh_token = create_refresh_token(data={"sub": new_user.id, "scopes": new_user.role_id})
-
     # Respuesta con el token y datos del nuevo usuario
-    return JSONResponse(status_code=200, content={
-        "detail": "Usuario creado correctamente",
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "data": {
-            "id": new_user.id,
-            "first_name": new_user.first_name,
-            "last_name": new_user.last_name,
-            "email": new_user.email,
-            "phone": new_user.phone,
-            "role_id": new_user.role_id
-        }
-    })
+    response = CreatedUser(
+        detail="Usuario creado con éxito"
+    )
+    
+    return response
