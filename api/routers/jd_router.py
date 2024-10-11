@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from passlib.context import CryptContext
 
-from schemas.auth_schema import UserOut, UserUpdate, PaginatedUsers  
+from schemas.auth_schema import UserOut, UserUpdate, PaginatedUsers, UserData
 from schemas.auth_schema import RegisterData, CreatedUser
 from services.jwt_services import create_acess_token, create_refresh_token 
 from models.user_model import User, Role
@@ -85,6 +85,40 @@ async def get_user_info(
     )
 
     return paginated_response
+
+@jd_router.get("/user_info/{user_id}",
+               summary="Obtener información de un usuario específico",
+    description="Devuelve la información de un usuario específico.",
+    response_model=UserData
+)
+async def get_user_by_id( 
+    user_id: int, 
+    token: str = Depends(HTTPBearer()), 
+    db: Session = Depends(get_db)
+):
+    """
+    Devuelve la información de un usuario específico.
+
+    - **user_id**: ID del usuario a obtener.
+    - **token**: Token de autenticación requerido.
+    """
+    # Consultar el usuario por ID
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+
+    # Preparar la respuesta con los datos del usuario
+    user_data = UserData(
+        id=user.id,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        email=user.email,
+        phone=user.phone,
+        role_id=user.role_id
+    )
+
+    return user_data
 
 @jd_router.put("/user_info/{user_id}", 
     summary="Actualizar información de un usuario",
