@@ -1,42 +1,18 @@
 import React, { createContext, useState, useContext } from "react";
 
 // Crear el contexto
-/**
- * Contexto para manejar el estado y funciones relacionadas con los tickets así centralizar más el codigo .
- * @type {React.Context}
- */
 const TicketContext = createContext();
 
-/**
- * Proveedor del contexto de tickets.
- * @param {Object} props - Props del componente.
- * @param {React.ReactNode} props.children - Componentes hijos que tendrán acceso al contexto.
- * @returns {React.ReactElement} - El proveedor del contexto.
- */
 export const TicketProvider = ({ children }) => {
-  // Estado para los datos de los tickets
   const [ticketsData, setTicketsData] = useState({ "En cola": [], "En proceso": [], "Terminados": [] });
-  
-  // Estado para mostrar u ocultar el formulario de generación de tickets
   const [showGenerarTickets, setShowGenerarTickets] = useState(false);
-  
-  // Estado para el historial de acciones sobre los tickets
   const [history, setHistory] = useState([]);
 
-  /**
-   * Registra una acción en el historial.
-   * @param {string} ticketId - ID del ticket relacionado con la acción.
-   * @param {string} action - Acción realizada (e.g., 'Creado', 'Cancelado', 'Editado').
-   */
   const recordHistory = (ticketId, action) => {
     const date = new Date().toLocaleDateString();
     setHistory(prevHistory => [...prevHistory, { date, ticketId, action }]);
   };
 
-  /**
-   * Obtiene los datos de tickets desde un archivo JSON.
-   * Actualiza el estado `ticketsData` con los datos obtenidos.
-   */
   const fetchTickets = async () => {
     try {
       const response = await fetch("/data/tickets.json");
@@ -47,10 +23,6 @@ export const TicketProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Actualiza los datos de tickets en el archivo JSON.
-   * @param {Object} updatedData - Datos actualizados de los tickets.
-   */
   const updateTicketsData = async (updatedData) => {
     try {
       await fetch("/data/tickets.json", {
@@ -68,31 +40,54 @@ export const TicketProvider = ({ children }) => {
 
   /**
    * Maneja la adición de un nuevo ticket.
-   * @param {Object} newTicket - Nuevo ticket a añadir.
+   * @param {Object} newTicket - Nuevo ticket a añadir con los campos: description, machine, priority.
    */
   const handleAddTicket = async (newTicket) => {
-    const updatedData = { ...ticketsData };
-    updatedData["En cola"].push(newTicket);
-    await updateTicketsData(updatedData);
-    recordHistory(newTicket.id, 'Creado');
+    // Datos del ticket para enviar a la API
+    const ticketData = {
+      description: newTicket.description,
+      machine: newTicket.machine,
+      priority: newTicket.priority,
+    };
+
+    try {
+      const token = localStorage.getItem('access_token'); // Reemplaza 'token' con el nombre de la variable de sesión que contiene el token
+
+      console.log(ticketData);
+      const response = await fetch("http://127.0.0.1:8000/tickets", { // Reemplaza 'API_URL_HERE' con la URL de tu API
+        method: "POST",
+        headers: {
+           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          
+
+        },
+        body: JSON.stringify(ticketData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Error ${response.status}: ${JSON.stringify(errorData)}`);
+        console.log(token);
+      }
+
+      const createdTicket = await response.json();
+      const updatedData = { ...ticketsData };
+      updatedData["En cola"].push(createdTicket);
+      await updateTicketsData(updatedData);
+      recordHistory(createdTicket.id, 'Creado');
+    } catch (error) {
+      console.error("Error al crear el ticket:", error);
+    }
   };
 
-  /**
-   * Maneja la cancelación de un ticket.
-   * @param {string} ticketId - ID del ticket a cancelar.
-   * @param {string} tab - Pestaña donde se encuentra el ticket ('En cola', 'En proceso', 'Terminados').
-   */
   const handleCancel = async (ticketId, tab) => {
     const updatedData = { ...ticketsData };
     updatedData[tab] = updatedData[tab].filter(ticket => ticket.id !== ticketId);
-    await updateTicketsData(updatedData);//actualiza el ticket
-    recordHistory(ticketId, 'Cancelado');// se añade la operacion al historial
+    await updateTicketsData(updatedData);
+    recordHistory(ticketId, 'Cancelado');
   };
 
-  /**
-   * Maneja la edición de un ticket.
-   * @param {Object} editedTicket - Ticket editado.
-   */
   const handleEdit = async (editedTicket) => {
     const updatedData = { ...ticketsData };
     Object.keys(updatedData).forEach(tab => {
@@ -104,14 +99,10 @@ export const TicketProvider = ({ children }) => {
     recordHistory(editedTicket.id, 'Editado');
   };
 
-  /**
-   * Alterna la visibilidad del formulario de generación de tickets.
-   */
   const toggleGenerarTickets = () => {
     setShowGenerarTickets(prev => !prev);
   };
 
-  // Carga los datos de tickets cuando el componente se monta
   React.useEffect(() => {
     fetchTickets();
   }, []);
@@ -131,18 +122,6 @@ export const TicketProvider = ({ children }) => {
   );
 };
 
-/**
- * Hook para usar el contexto de tickets en componentes funcionales.
- * @returns {Object} - El valor del contexto que incluye:
- *   - `ticketsData`: Datos actuales de los tickets, organizados en las categorías 'En cola', 'En proceso', 'Terminados'.
- *   - `handleAddTicket`: Función para añadir un nuevo ticket.
- *   - `handleCancel`: Función para cancelar un ticket basado en su ID y la pestaña en la que se encuentra.
- *   - `handleEdit`: Función para editar un ticket.
- *   - `showGenerarTickets`: Estado booleano que indica si el formulario de generación de tickets está visible o no.
- *   - `toggleGenerarTickets`: Función para alternar la visibilidad del formulario de generación de tickets.
- *   - `history`: Historial de acciones realizadas sobre tickets, con fecha, ID del ticket y acción realizada.
- */
 export const useTicketContext = () => useContext(TicketContext);
-
 
 

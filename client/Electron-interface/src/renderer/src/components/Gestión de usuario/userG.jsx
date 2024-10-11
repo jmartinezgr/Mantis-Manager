@@ -37,7 +37,7 @@ const UserManagement = () => {
       }
   
       // Construir la URL con los parámetros de paginación
-      const url = `http://127.0.0.1:8000/user_info?page=${page}&limit=${limit}`;
+      const url = `http://127.0.0.1:8000/jefe_desarrollo/user_info?page=${page}&limit=${limit}`;
   
       // Realizar la solicitud a la API
       const response = await fetch(url, {
@@ -116,7 +116,7 @@ const UserManagement = () => {
           formData.email,
           formData.phone,
           formData.password,
-          formData.role
+          parseInt(formData.role,10)     
         );
 
        
@@ -159,9 +159,9 @@ const UserManagement = () => {
 //filtrado de usuarios para busqueda
   const filteredUsers = users.filter((user) => {
     return (
-      user.full_name.toLowerCase().includes(searchQuery)||
-      user.full_name.toLowerCase().includes(searchQuery) ||
-      user.email.toLowerCase().includes(searchQuery)
+      user.first_name.toLowerCase().includes(searchQuery)||
+      user.email.toLowerCase().includes(searchQuery)||
+      user.last_name.toLowerCase().includes(searchQuery)
     );
   });
 
@@ -223,8 +223,8 @@ const UserManagement = () => {
         <option value="" disabled>
         
         </option>
-        <option value={1}>Operario de mantenimiento</option>
-        <option value={2}>Jefe de desarrollo</option>
+        <option value={2}>Operario de mantenimiento</option>
+        <option value={1}>Jefe de desarrollo</option>
         <option value={3}>Operario de Maquinaria</option>
         <option value={4}>Jefe de mantenimiento</option>
        
@@ -285,9 +285,9 @@ const UserManagement = () => {
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user,index) => (
                 <tr key={index+1} className="border-b border-gray-300">
-                  <td className="p-2 pl-4">{`${user.full_name}`}</td>
+                  <td className="p-2 pl-4">{`${user.first_name} ${user.last_name}`}</td>
                   <td className="p-2">{user.email}</td>
-                  <td className="p-2">{user.role}</td>
+                  <td className="p-2">{user.role_id}</td>
                   <td className="p-2 flex space-x-2">
                     <button onClick={() => handleEditUser(user)} className="text-blue-500 hover:underline">
                       <HiPencil />
