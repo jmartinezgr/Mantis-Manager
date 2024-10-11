@@ -239,6 +239,13 @@ const UserManagement = () => {
     setSelectedUserHistory([]);
   };
 
+  const roleMap = {
+    1: "Jefe de desarrollo",
+    2: "Operario de mantenimiento",
+    3: "Operario de Maquinaria",
+    4: "Jefe de mantenimiento",
+  };
+
   return (
     <div className="p-8 bg-white min-h-screen">
       <h1 className="text-3xl font-semibold text-gray-800 mb-6">Gestión de Usuarios</h1>
@@ -363,7 +370,7 @@ const UserManagement = () => {
                 <tr key={index + 1} className="border-b border-gray-300">
                   <td className="p-4 md:p-2 pl-4">{`${user.first_name} ${user.last_name}`}</td>
                   <td className="p-4 md:p-2">{user.email}</td>
-                  <td className="p-4 md:p-2">{user.role_id}</td>
+                  <td className="p-4 md:p-2">{roleMap[user.role_id] || "Rol desconocido"}</td>
                   <td className="p-4 md:p-2 flex space-x-2">
                     <button onClick={() => handleEditUser(user)} className="text-blue-500 hover:underline">
                       <HiPencil />
