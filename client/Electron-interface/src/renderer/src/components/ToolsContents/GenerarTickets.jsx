@@ -14,28 +14,25 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
   });
 
   // Obtiene la función para agregar un ticket desde el contexto
-  const { handleAddTicket } = useTicketContext();
+  const {  handleAddTicket } = useTicketContext(); // Asegúrate de que este método exista en tu contexto
 
   // Maneja los cambios en los campos del formulario
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setTicket({
-      ...ticket,
+    setTicket((prevTicket) => ({
+      ...prevTicket,
       [name]: value,
-    });
+    }));
   };
 
   // Genera un nuevo ticket y lo envía al contexto
   const generarTicket = () => {
     const newTicket = {
-      id: Date.now(), // Asigna un ID único basado en la fecha actual
-      title: ticket.title,        
+         
       description: ticket.description,
-      date: ticket.date,
-      priority: ticket.prioridad,
-      person: ticket.persona,       
+      priority: ticket.prioridad,       
       machine: ticket.maquina,      
-      color: "#ffcc00", // Color predeterminado para el ticket
+      // Color predeterminado para el ticket
     };
 
     handleAddTicket(newTicket); // Agrega el nuevo ticket usando la función del contexto
@@ -60,16 +57,16 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
 
         {/* Campo para el título del ticket */}
         <div className="mb-4">
-          <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-            Título:
+          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+            Descripción:
           </label>
           <input
             type="text"
-            id="title"
-            name="title"
-            value={ticket.title}
+            id="description"
+            name="description"
+            value={ticket.description}
             onChange={handleInputChange}
-            placeholder="Ingrese el título"
+            placeholder="Ingrese la descripción"
             className="mt-1 p-2 w-full border border-gray-300 rounded-md text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
@@ -90,36 +87,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
           />
         </div>
 
-        {/* Campo para la persona que hace la petición */}
-        <div className="mb-4">
-          <label htmlFor="persona" className="block text-sm font-medium text-gray-700">
-            Persona que hace la petición:
-          </label>
-          <input
-            type="text"
-            id="persona"
-            name="persona"
-            value={ticket.persona}
-            onChange={handleInputChange}
-            placeholder="Ingrese el nombre"
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-
-        {/* Campo para la descripción del ticket */}
-        <div className="mb-4">
-          <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-            Descripción:
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            value={ticket.description}
-            onChange={handleInputChange}
-            placeholder="Descripción del problema"
-            className="mt-1 p-2 w-full border border-gray-300 rounded-md text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
+        
 
         {/* Campo para la prioridad del ticket */}
         <div className="mb-4">
@@ -133,14 +101,14 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
             onChange={handleInputChange}
             className="mt-1 p-2 w-full border border-gray-300 rounded-md text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <option value="Alta">Alta</option>
-            <option value="Media">Media</option>
-            <option value="Baja">Baja</option>
+            <option value="alta">Alta</option>
+            <option value="media">Media</option>
+            <option value="baja">Baja</option>
           </select>
         </div>
 
         {/* Campo para la fecha del ticket */}
-        <div className="mb-4">
+        {/*<div className="mb-4">
           <label htmlFor="date" className="block text-sm font-medium text-gray-700">
             Fecha:
           </label>
@@ -152,7 +120,7 @@ const GenerarTickets = ({ CerrarHerramienta }) => {
             onChange={handleInputChange}
             className="mt-1 p-2 w-full border border-gray-300 rounded-md text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
           />
-        </div>
+        </div>*/}
 
         {/* Botón para generar el ticket */}
         <button

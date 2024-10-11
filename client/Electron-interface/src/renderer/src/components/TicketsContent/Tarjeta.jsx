@@ -83,9 +83,9 @@ const TicketCard = ({ ticket, onCancel, onEdit, tab }) => {
                 onChange={handleEditChange}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               >
-                <option value="Alta">Alta</option>
-                <option value="Media">Media</option>
-                <option value="Baja">Baja</option>
+                <option value="alta">Alta</option>
+                <option value="media">Media</option>
+                <option value="baja">Baja</option>
                 <option value="N/A">N/A</option>
               </select>
             </label>

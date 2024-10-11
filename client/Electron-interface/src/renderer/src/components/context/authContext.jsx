@@ -39,6 +39,7 @@ export const AuthProvider = ({ children }) => {
       throw error;
     }
   };
+  
 
   const logout = () => {
     // Eliminar los tokens y la información del usuario de localStorage
@@ -53,13 +54,18 @@ export const AuthProvider = ({ children }) => {
     setRefreshToken('');
   };
 
-  const register = async (id, first_name, last_name, email, phone, password, role) => {
+  const register = async (id, first_name, last_name, email, phone, password,role ) => {
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/register', {
+      const token = localStorage.getItem('access_token');
+
+      const response = await fetch('http://127.0.0.1:8000/jefe_desarrollo/register', {
         method: 'POST',
         headers: {
+          Authorization: `Bearer ${token}`, // Añadir el token aquí
           'Content-Type': 'application/json',
+           
+          
         },
         body: JSON.stringify({
           id, // Incluir la cédula en la solicitud
@@ -80,13 +86,25 @@ export const AuthProvider = ({ children }) => {
 
       const data = await response.json();
 
+
+      
+
       // Guardar tokens y datos del usuario en localStorage  a cambio esto
       
-      setIsAuthenticated(true); // Cambiar el estado después de un registro exitoso
+      
       console.log(data.data)
       return data.data;
 
     } catch (error) {
+      console.log(JSON.stringify({
+        id, // Incluir la cédula en la solicitud
+        first_name,
+        last_name,
+        email,
+        phone: phone.toString(),
+        password,
+        role,
+      }),)
       throw error;
     }
   };
