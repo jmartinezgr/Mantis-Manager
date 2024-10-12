@@ -83,15 +83,7 @@ export const SessionProvider = ({ children }) => {
     <SessionContext.Provider value={{ refreshToken }}>
       {children}
       {showNotification && (
-        <div style={{ 
-          cursor: 'pointer', 
-          background: 'yellow', 
-          padding: '10px', 
-          position: 'fixed', 
-          bottom: '20px', 
-          right: '20px', 
-          zIndex: 1000 
-        }}>
+        <div className='bg-yellow-300 p-2  fixed bottom-4 right-4 z-10' >
           <p>Tu sesión está a punto de expirar. ¿Deseas seguir?</p>
           <button onClick={handleContinue}>Seguir</button>
           <button onClick={handleLogout}>Salir</button>
