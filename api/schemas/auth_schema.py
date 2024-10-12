@@ -41,7 +41,7 @@ class PaginatedUsers(BaseModel):
     total_users: int
     users: List[UserData]
 
-class CreatedUser(BaseModel):
+class InfoUser(BaseModel):
     """Esquema para la respuesta de usuario creado."""
     detail: str
 

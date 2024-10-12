@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Query, status, Path
 from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
@@ -6,7 +6,7 @@ from sqlalchemy import func
 from passlib.context import CryptContext
 
 from schemas.auth_schema import UserUpdate, PaginatedUsers, UserData
-from schemas.auth_schema import RegisterData, CreatedUser
+from schemas.auth_schema import RegisterData, InfoUser
 from services.jwt_services import create_acess_token, create_refresh_token 
 from models.user_model import User, Role
 from config.db import get_db
@@ -39,19 +39,15 @@ async def get_user_info(
     """
     Devuelve la información de los usuarios en formato paginado.
 
-    - **token**: Token de autenticación requerido.
-    - **page**: Número de la página que se desea obtener (empieza en 1).
-    - **limit**: Cantidad de usuarios por página (el valor predeterminado es 10).
-    - **full_name**: Nombre completo del usuario (unión de `first_name` y `last_name`).
-    - **email**: Correo electrónico del usuario.
-    - **role**: Nombre del rol del usuario.
-    - **phone**: Teléfono del usuario.
+    Args:
+        page: Número de la página que se desea obtener (empieza en 1).
+        limit: Cantidad de usuarios por página (el valor predeterminado es 10).
     
-    Responde con un JSON que contiene:
-    - **page**: Número de la página solicitada.
-    - **limit**: Cantidad de usuarios devueltos en la página.
-    - **total_users**: Número total de usuarios en la base de datos.
-    - **users**: Lista de usuarios con su información filtrada.
+    Returns: 
+        page: Número de la página solicitada.
+        limit: Cantidad de usuarios devueltos en la página.
+        total_users: Número total de usuarios en la base de datos.
+        users: Lista de usuarios con su información filtrada.
     """
     current_user = req.state.user
     
@@ -69,7 +65,7 @@ async def get_user_info(
             last_name=user.last_name,   
             email=user.email,
             phone=user.phone,
-            role_id = user.role_id
+            role_id=user.role_id
         ) 
         for user in users
     ]
@@ -87,29 +83,37 @@ async def get_user_info(
 
     return paginated_response
 
-@jd_router.patch("/user_info/{user_id}", 
+@jd_router.patch(
+    "/user_info/{user_id}", 
     summary="Actualizar información de un usuario",
-    description="Permite al jefe de desarrollo actualizar el correo electrónico, rol o teléfono de un usuario específico.",
-    response_model=UserData
+    description=("Permite al jefe de desarrollo actualizar el correo electrónico"
+                "rol o teléfono de un usuario específico."),
+    response_model=InfoUser
 )
 async def update_user_info(
-    user_id: int,
-    user_update: UserUpdate,
+    user_id: int = Path(..., title="ID del usuario", description="ID del usuario a actualizar."),
+    user_update: UserUpdate = None,
     token: str = Depends(HTTPBearer()),
     db: Session = Depends(get_db)
 ):
     """
-    Actualiza la información de un usuario específico.
+    Actualiza la información de un usuario específico, como el correo electrónico, rol o teléfono.
+    Los parámetros son opcionales y solo se actualizarán los campos proporcionados.
 
-    - **user_id**: ID del usuario a actualizar.
-    - **user_update**: Datos a actualizar (email, role_id, phone).
-    - **token**: Token de autenticación requerido.
+    Args:
+        user_id (int): ID del usuario a actualizar.
+        user_update (UserUpdate): Un objeto que contiene los campos a actualizar.
+        token (str): Token de autenticación requerido.
+        db (Session): Sesión de la base de datos.
+
+    Returns:
+        UserData: Un JSON con la información del usuario actualizado.
     """
     
     # Obtener el usuario a actualizar
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        return  JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
         
     # Actualizar los campos proporcionados
     if user_update.first_name:
@@ -129,33 +133,33 @@ async def update_user_info(
     db.commit()
     db.refresh(user)
 
-    # Preparar la respuesta
-    updated_user = UserData(
-        id=user.id,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        email=user.email,
-        role_id =user.role.id,
-        phone=user.phone
+    response = InfoUser(
+        detail="Usuario actualizado con exito"
     )
 
-    return updated_user
+    return response
 
-@jd_router.delete("/user_info/{user_id}",
-    summary="Eliminar un usuario",
+@jd_router.delete(
+    "/user_info/{user_id}",
+    summary="Eliminar un usuario específico",
     description="Permite al jefe de desarrollo eliminar un usuario específico.",
-    response_model=UserData
+    response_model=InfoUser
 )
 async def delete_user(
-    user_id: int,
+    user_id: int = Path(..., title="ID del usuario", description="ID del usuario a eliminar."),
     token: str = Depends(HTTPBearer()),
     db: Session = Depends(get_db)
 ):
     """
-    Elimina un usuario específico.
+    Elimina un usuario específicicando su id.
 
-    - **user_id**: ID del usuario a eliminar.
-    - **token**: Token de autenticación requerido.
+    Args:
+        user_id (int): ID del usuario a eliminar.
+        token (str): Token de autenticación requerido.
+        db (Session): Sesión de la base de datos.
+
+    Returns:
+        UserData: Un JSON con la información del usuario eliminado.
     """
     # Obtener el usuario a eliminar
     user = db.query(User).filter(User.id == user_id).first()
@@ -166,24 +170,19 @@ async def delete_user(
     db.delete(user)
 
     # Preparar la respuesta
-    deleted_user = UserData(
-        id=user.id,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        email=user.email,
-        role_id = user.role.id,
-        phone=user.phone
+    response = InfoUser(
+        detail="Usuario eliminado con exito" 
     )
     
     db.commit()
 
-    return deleted_user
+    return response
 
 @jd_router.post(
     "/register",
     summary="Registrar un nuevo usuario",
     description="Permite al jefe de desarrollo crear un nuevo usuario.", 
-    response_model=CreatedUser
+    response_model=InfoUser
 )
 async def register(
     data: RegisterData, 
@@ -191,7 +190,15 @@ async def register(
     token: str = Depends(HTTPBearer())
 ):
     """
-    Registrarse en el sistema y generar tokens de acceso y refresco.
+    Registra un nuevo usuario en el sistema.
+
+    Args:
+        data (RegisterData): Un objeto que contiene la información del nuevo usuario.
+        db (Session): Sesión de la base de datos.
+        token (str): Token de autenticación requerido.
+
+    Returns:
+        InfoUser: Un JSON indicando el éxito del registro.
     """
     # Verificar si el id ya está registrado
     existing_user = db.query(User).filter(User.id == data.id).first()
@@ -224,8 +231,8 @@ async def register(
     db.commit()
     db.refresh(new_user)
 
-    # Respuesta con el token y datos del nuevo usuario
-    response = CreatedUser(
+    # Respuesta con el detalle del nuevo usuario
+    response = InfoUser(
         detail="Usuario creado con éxito"
     )
     
