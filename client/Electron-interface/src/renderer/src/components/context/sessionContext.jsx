@@ -85,7 +85,7 @@ export const SessionProvider = ({ children }) => {
       {showNotification && (
         <div className='bg-yellow-300 p-2  fixed bottom-4 right-4 z-10' >
           <p>Tu sesión está a punto de expirar. ¿Deseas seguir?</p>
-          <button onClick={handleContinue}>Seguir</button>
+          <button className='pr-4' onClick={handleContinue}>Seguir</button>
           <button onClick={handleLogout}>Salir</button>
         </div>
       )}
