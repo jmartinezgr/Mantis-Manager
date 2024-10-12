@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {authcontext} from './authContext'
+import {useAuth} from './authContext'
 const SessionContext = createContext();
 
 
@@ -9,7 +9,7 @@ export const useSession = () => {
 };
 
 export const SessionProvider = ({ children }) => {
-    const{logout}=useContext(authcontext);
+    const{logout}=useAuth();
     
   const [showNotification, setShowNotification] = useState(false);
   const sessionDuration = 1000 * 60 * 15; // 15 minutos
