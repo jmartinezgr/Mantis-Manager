@@ -1,5 +1,3 @@
-import datetime
-
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 
@@ -8,9 +6,8 @@ from sqlalchemy.orm import Session
 
 from config.db import get_db
 from models.user_model import User
-from schemas.user_schema import LoginData , LoginResponse
-from services.jwt_services import create_acess_token, create_refresh_token 
-
+from schemas.user_schema import LoginData, LoginResponse
+from services.jwt_services import create_acess_token, create_refresh_token
 
 # Crear un objeto de contexto de cifrado con bcrypt
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
