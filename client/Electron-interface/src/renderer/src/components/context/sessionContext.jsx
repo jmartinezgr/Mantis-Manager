@@ -1,54 +1,102 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-
+import {authcontext} from './authContext'
 const SessionContext = createContext();
+
+
 
 export const useSession = () => {
   return useContext(SessionContext);
 };
 
 export const SessionProvider = ({ children }) => {
+    const{logout}=useContext(authcontext);
+    
   const [showNotification, setShowNotification] = useState(false);
-  const [timeoutId, setTimeoutId] = useState(null);
   const sessionDuration = 1000 * 60 * 15; // 15 minutos
-  const warningDuration = 1000 * 60 * 14; // 14 minutos para advertencia
+  const warningDuration = 1000 * 60 * 13; // 13 minutos para advertencia
 
   const resetTimer = () => {
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
     setShowNotification(false);
+    // Reinicia el temporizador para la notificación
     const id = setTimeout(() => {
-      setShowNotification(true);
+      setShowNotification(true); // Mostrar la notificación después de 13 minutos
     }, warningDuration);
-    setTimeoutId(id);
+
+    // Limpia el temporizador existente si existe
+    return id;
   };
 
   const refreshToken = async () => {
     console.log('Refrescando token...');
-    // Aquí la lógica para refrescar el token
+    const url = 'http://127.0.0.1:8000/refresh';
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem('access_token')}`,
+          "Content-Type": "application/json"
+        }
+      });
+      if (!response.ok) {
+        throw new Error('Error al renovar el token');
+      }
+      const data = await response.json();
+      localStorage.setItem('access_token', data.access_token);
+      localStorage.setItem('refresh_token', data.refreshToken);
+      setShowNotification(false); // Ocultar la notificación si el token se refresca correctamente
+    } catch (error) {
+      console.error('Error refrescando token:', error);
+    }
   };
 
   useEffect(() => {
-    resetTimer();
-    window.addEventListener('mousemove', resetTimer);
-    window.addEventListener('keydown', resetTimer);
+    const timeoutId = resetTimer();
 
+    // Tiempo de expiración de la sesión
     const sessionTimeout = setTimeout(() => {
       alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-      // Redirigir al login si es necesario
+      logout();
     }, sessionDuration);
 
+    // Limpia los temporizadores al desmontar
     return () => {
       clearTimeout(sessionTimeout);
       clearTimeout(timeoutId);
-      window.removeEventListener('mousemove', resetTimer);
-      window.removeEventListener('keydown', resetTimer);
     };
-  }, [timeoutId]);
+  }, []);
+
+  // Manejar clic en continuar
+  const handleContinue = () => {
+    refreshToken(); // Refrescar el token
+    setShowNotification(false); // Cerrar la notificación
+    resetTimer(); // Reiniciar el temporizador
+  };
+
+  // Manejar clic en salir
+  const handleLogout = () => {
+    setShowNotification(false); // Cerrar la notificación
+    logout(); // Llamar a la función de logout
+  };
 
   return (
-    <SessionContext.Provider value={{ showNotification, refreshToken }}>
+    <SessionContext.Provider value={{ refreshToken }}>
       {children}
+      {showNotification && (
+        <div style={{ 
+          cursor: 'pointer', 
+          background: 'yellow', 
+          padding: '10px', 
+          position: 'fixed', 
+          bottom: '20px', 
+          right: '20px', 
+          zIndex: 1000 
+        }}>
+          <p>Tu sesión está a punto de expirar. ¿Deseas seguir?</p>
+          <button onClick={handleContinue}>Seguir</button>
+          <button onClick={handleLogout}>Salir</button>
+        </div>
+      )}
     </SessionContext.Provider>
   );
 };
