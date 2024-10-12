@@ -35,11 +35,11 @@ async def login(
     Este endpoint permite a un usuario sin autenticar subir iniciar sesion en el sistema.
     Esto se logra verificando las credenciales del usuario y generando tokens de acceso y refresco.
 
-    Parámetros:
-    - data: Datos de inicio de sesión (ID y contraseña).
+    Args:
+        Datos de inicio de sesión (ID y contraseña).
 
-    Retorna:
-    - Mensaje de éxito, los datos del usuario y los tokens de acceso y refresco.
+    Returns:
+        Mensaje de éxito, los datos del usuario y los tokens de acceso y refresco.
     """
     user = db.query(User).filter(User.id == data.id).first()
 

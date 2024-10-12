@@ -1,12 +1,15 @@
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Request, Path
+import os
+import shutil
+
+from fastapi import APIRouter, Depends, File, HTTPException, Path, Request, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer
-import shutil
-import os
 from sqlalchemy.orm import Session
+
 from config.db import get_db
 from models.user_model import User
 from schemas.user_schema import ImageResponse
+
 
 # Crear directorio 'images' si no existe
 os.makedirs("images", exist_ok=True)
