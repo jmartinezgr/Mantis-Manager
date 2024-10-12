@@ -1,25 +1,28 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {useAuth} from './authContext'
+import { useAuth } from './authContext';
+import { useApi } from '../hooks/apiHook'; // Importar el hook de API
+// esto es una opción la otra sería refrescarlo en las mismas peticiones , se evaluará con mi compañero
 const SessionContext = createContext();
-
-
 
 export const useSession = () => {
   return useContext(SessionContext);
 };
 
 export const SessionProvider = ({ children }) => {
-    const{logout}=useAuth();
-    
+  const { logout } = useAuth();
+  const { fetchApi } = useApi(); // Utilizar el hook de API
+
   const [showNotification, setShowNotification] = useState(false);
+  const [sessionExpired, setSessionExpired] = useState(false); // Nueva variable para gestionar expiración
   const sessionDuration = 1000 * 60 * 15; // 15 minutos
   const warningDuration = 1000 * 60 * 13; // 13 minutos para advertencia
 
   const resetTimer = () => {
     setShowNotification(false);
-    // Reinicia el temporizador para la notificación
+    setSessionExpired(false); // Reiniciamos la expiración
+
     const id = setTimeout(() => {
-      setShowNotification(true); // Mostrar la notificación después de 13 minutos
+      setShowNotification(true); // Mostrar advertencia después de 13 minutos
     }, warningDuration);
 
     // Limpia el temporizador existente si existe
@@ -28,20 +31,10 @@ export const SessionProvider = ({ children }) => {
 
   const refreshToken = async () => {
     console.log('Refrescando token...');
-    const url = 'http://127.0.0.1:8000/refresh';
+    const url = 'http://127.0.0.1:8000/refresh'; // Endpoint para refrescar el token
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${localStorage.getItem('access_token')}`,
-          "Content-Type": "application/json"
-        }
-      });
-      if (!response.ok) {
-        throw new Error('Error al renovar el token');
-      }
-      const data = await response.json();
+      const data = await fetchApi(url, 'POST'); // Utilizar el hook de API para refrescar token
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('refresh_token', data.refreshToken);
       setShowNotification(false); // Ocultar la notificación si el token se refresca correctamente
@@ -53,10 +46,10 @@ export const SessionProvider = ({ children }) => {
   useEffect(() => {
     const timeoutId = resetTimer();
 
-    // Tiempo de expiración de la sesión
+    // Tiempo de expiración de la sesión (15 minutos)
     const sessionTimeout = setTimeout(() => {
-      alert('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
-      logout();
+      setSessionExpired(true); // Marcar como sesión expirada
+      setShowNotification(true); // Mostrar notificación personalizada
     }, sessionDuration);
 
     // Limpia los temporizadores al desmontar
@@ -83,9 +76,15 @@ export const SessionProvider = ({ children }) => {
     <SessionContext.Provider value={{ refreshToken }}>
       {children}
       {showNotification && (
-        <div className='bg-yellow-300 p-2  fixed bottom-4 right-4 z-10' >
-          <p>Tu sesión está a punto de expirar. ¿Deseas seguir?</p>
-          <button className='pr-4' onClick={handleContinue}>Seguir</button>
+        <div className='bg-yellow-300 p-2 fixed bottom-4 right-4 z-10'>
+          {sessionExpired ? (
+            <p>Tu sesión ha expirado. Por favor, inicia sesión nuevamente.</p>
+          ) : (
+            <p>Tu sesión está a punto de expirar. ¿Deseas seguir?</p>
+          )}
+          {!sessionExpired && (
+            <button className='pr-4' onClick={handleContinue}>Seguir</button>
+          )}
           <button onClick={handleLogout}>Salir</button>
         </div>
       )}
