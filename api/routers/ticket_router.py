@@ -19,71 +19,81 @@ bearer_scheme = HTTPBearer()
 ticket_router = APIRouter(tags=["Tickets"])
 
 # Crear un ticket (POST)
-@ticket_router.post("/tickets", response_model=TicketData)
-async def create_ticket(request: Request, ticket: TicketCreate, db: Session = Depends(get_db),
-    dependencies=Depends(bearer_scheme)):
+@ticket_router.post(
+    "/ticket",
+    summary="",
+    response_model=TicketData
+)
+async def create_ticket(
+    request: Request = None,
+    ticket: TicketCreate = None,
+    db: Session = Depends(get_db),
+    dependencies = Depends(HTTPBearer())
+):
     """
     Crea un nuevo ticket con el estado predeterminado 'pendiente'.
     
     Parámetros:
-    - ticket: Los datos del ticket a crear, descripcion, serial de la maquina a la que 
-      pertenece el ticket y propridad (description, machine, priority).
+    - ticket: Los datos del ticket a crear, descripción, serial de la máquina a la que 
+      pertenece el ticket y prioridad (description, machine, priority).
     - db: Sesión de la base de datos. (Dependencia)
     
     Retorna:
     - Datos del ticket creado.
     """
+    # Verificar si la máquina existe en la base de datos
     machine = db.query(Machine).filter(Machine.serial == ticket.machine).first()
-    
     if not machine:
-        raise HTTPException(status_code=400, detail="La máquina con el serial proporcionado no existe.")
+        raise HTTPException(status_code=404, detail="La máquina con el serial proporcionado no existe.")
+
+    # Obtener el ID del usuario desde el token
+    user_info = request.state.user  # Asegúrate de que tu middleware de autenticación coloca esta información
+    user_id = user_info.get("sub")
     
-    user_info = request.state.user  
-    user_id = user_info.get("sub")  
-    
-    
+    # Validar que el usuario existe en la base de datos
     creator = db.query(User).filter(User.id == user_id).first()
     if not creator:
         raise HTTPException(status_code=404, detail="Usuario creador no encontrado.")
-    
 
     # Establecer el deadline basado en la prioridad
-    if ticket.priority == 'baja':
-        deadline = datetime.now() + timedelta(weeks=1) 
-    elif ticket.priority == 'media':
-        deadline = datetime.now() + timedelta(days=3) 
-    elif ticket.priority == 'alta':
-        deadline = datetime.now() + timedelta(days=1)
-    else:
+    priority_deadlines = {
+        'baja': timedelta(weeks=1),
+        'media': timedelta(days=3),
+        'alta': timedelta(days=1)
+    }
+
+    if ticket.priority not in priority_deadlines:
         raise HTTPException(status_code=400, detail="Prioridad no válida.")
+
+    # Calcular el deadline según la prioridad
+    deadline = datetime.now() + priority_deadlines[ticket.priority]
     
     # Crear el ticket si la máquina existe
     new_ticket = Ticket(
         description=ticket.description,
         state="pendiente",  
-        machine_id=machine.id,  
+        machine_id=machine.id,
         priority=ticket.priority,
-        created_by=user_id, 
-        created_at=func.now(),  
+        created_by=user_id,  # Asignar el creador desde el token
+        created_at=func.now(),  # Usar SQLAlchemy para la fecha/hora actual
         deadline=deadline
     )
 
     db.add(new_ticket)
     db.commit()
     db.refresh(new_ticket)
-
-    created_by_name = f"{creator.first_name} {creator.last_name}"
     
+    # Retornar la información del ticket creado
     return TicketData(
         id=new_ticket.id,
         description=new_ticket.description,
         state=new_ticket.state,
         priority=new_ticket.priority,  
         machine_serial=machine.serial,  
-        created_by=created_by_name,
-        assigned_to=new_ticket.assigned_to,
+        created_by=creator.id,
+        assigned_to=new_ticket.assigned_to,  
         created_at=new_ticket.created_at,
-        deadline=new_ticket.deadline 
+        deadline=new_ticket.deadline
     )
 
 @ticket_router.get("/tickets/{ticket_id}", response_model=TicketData)

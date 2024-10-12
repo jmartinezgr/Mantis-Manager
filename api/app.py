@@ -16,18 +16,17 @@ from routers.jd_router import jd_router
 from models.create_tables import create_tables
 from config.db import init_roles  
 
-from config.db import get_db
+from config.db import get_db, init_roles
 from services.ticket_service import actualizar_prioridad_y_deadline
-
-
 
 # Crear las tablas en la base de datos
 create_tables()
+init_roles()
 
 # Crear la instancia principal de FastAPI
 app = FastAPI(
     title="MANTIS MANAGER API",
-    version="0.5"
+    version="0.7.0",
 )
 
 # Agregar el middleware de autenticación
@@ -38,11 +37,11 @@ app.add_middleware(LogRequestsMiddleware)
 app.include_router(user_auth_router)
 app.include_router(tokens_router)
 app.include_router(user_image_router)
+app.include_router(jd_router)
 app.include_router(ticket_router)
 app.include_router(machine_router)
 app.include_router(solicitud_router)
 app.include_router(ws_router)
-app.include_router(jd_router)
 
 # Configuración de CORS
 app.add_middleware(
@@ -53,6 +52,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+"""
 scheduler = BackgroundScheduler()
 
 def ejecutar_actualizacion():
@@ -73,4 +73,4 @@ def shutdown_event():
 def startup_event():
     init_roles()
     
-scheduler.start()
+scheduler.start()"""
