@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Request
+from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Request, Path
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer
 import shutil
@@ -6,6 +6,7 @@ import os
 from sqlalchemy.orm import Session
 from config.db import get_db
 from models.user_model import User
+from schemas.user_schema import ImageResponse
 
 # Crear directorio 'images' si no existe
 os.makedirs("images", exist_ok=True)
@@ -13,9 +14,18 @@ os.makedirs("images", exist_ok=True)
 # Crear el router para manejar las imágenes de los usuarios
 user_image_router = APIRouter(tags=["Users Images"])
 
-@user_image_router.post('/users/upload/{user_id}')
+@user_image_router.post(
+    "/users/upload/{user_id}",
+    summary="Subir una imagen de perfil para un usuario específico",
+    description=(
+        "Este endpoint permite a un usuario autenticado subir una imagen de perfil. Si el usuario ya "
+        "tiene una imagen guardada, esta se eliminará antes de almacenar la nueva."
+    ),
+    response_model=ImageResponse,
+    response_description="path donde se encuentra la imagen.",
+)
 async def upload_user_image(
-    user_id: str,
+    user_id: int = Path(..., title="ID del usuario", description="ID del usuario al que corresponde la imagen"),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     token: str = Depends(HTTPBearer()),
@@ -27,15 +37,12 @@ async def upload_user_image(
     Este endpoint permite a un usuario autenticado subir una imagen de perfil. Si el usuario ya 
     tiene una imagen guardada, esta se eliminará antes de almacenar la nueva.
 
-    Parámetros:
-    - user_id: ID del usuario que sube la imagen.
-    - file: Imagen que se va a subir (debe ser un archivo de tipo imagen).
-    - db: Sesión de la base de datos.
-    - token: Token de autenticación del usuario (requiere autenticación HTTPBearer).
-    - req: Objeto Request que contiene el token del usuario autenticado.
+    Args: 
+        user_id: ID del usuario que sube la imagen.
+        file: Imagen que se va a subir (debe ser un archivo de tipo imagen).
 
-    Retorna:
-    - Mensaje de éxito y el path donde se encuentra la imagen.
+    Returns: 
+        Mensaje de éxito y el path donde se encuentra la imagen.
     """
 
     # Obtener el ID del usuario desde el token
@@ -74,28 +81,30 @@ async def upload_user_image(
     db.refresh(user)
 
     # Retornar la respuesta con el path de la imagen
-    return {"message": "Foto subida exitosamente", "path": f'/users/image/{user_id}'}
+    return ImageResponse(path = f'/users/image/{user_id}')
 
-@user_image_router.get('/users/image/{user_id}')
+@user_image_router.get(
+    "/users/image/{user_id}",
+    summary="Obtener la imagen de perfil de un usuario específico",
+    description="Obtiene la imagen de perfil de un usuario específico.",
+    response_description="Archivo de imagen.",
+    response_class=FileResponse 
+)
 async def get_user_image(
-    user_id: str,
+    user_id: int = Path(..., title="ID del usuario", description="ID del usuario al que corresponde la imagen"),
     db: Session = Depends(get_db),
     token: str = Depends(HTTPBearer()),
     req: Request = None
 ):
     """
     Obtiene la imagen de perfil de un usuario específico.
-
     Este endpoint permite a un usuario autenticado obtener su propia imagen de perfil almacenada en el servidor.
 
-    Parámetros:
-    - user_id: ID del usuario cuya imagen se desea obtener.
-    - db: Sesión de la base de datos.
-    - token: Token de autenticación del usuario (requiere autenticación HTTPBearer).
-    - req: Objeto Request que contiene el token del usuario autenticado.
+    Args:
+        user_id: ID del usuario cuya imagen se desea obtener.
 
-    Retorna:
-    - El archivo de imagen si existe o un error si no se encuentra.
+    Returns:
+        El archivo de imagen si existe o un error si no se encuentra.
     """
 
     # Obtener el ID del usuario desde el token

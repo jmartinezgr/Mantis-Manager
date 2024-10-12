@@ -50,3 +50,7 @@ class LoginResponse(BaseModel):
     data: UserData
     access_token: str
     refresh_token: str
+    
+class ImageResponse(BaseModel):
+    """Esquema para la respuesta de subir imagen."""
+    message: str
