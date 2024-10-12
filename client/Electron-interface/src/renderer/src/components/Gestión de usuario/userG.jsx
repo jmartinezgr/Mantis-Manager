@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { HiPencil, HiTrash, HiPlus, HiSearch, HiOutlineEye, HiArrowLeft, HiArrowRight } from 'react-icons/hi';
-import { useAuth } from '../context/authContext';
+import React, { useState, useEffect } from 'react'
+import {
+  HiPencil,
+  HiTrash,
+  HiPlus,
+  HiSearch,
+  HiOutlineEye,
+  HiArrowLeft,
+  HiArrowRight
+} from 'react-icons/hi'
+import { useAuth } from '../context/authContext'
 
 const UserManagement = () => {
-  const { register } = useAuth();
-  const [users, setUsers] = useState([]);
+  const { register } = useAuth()
+  const [users, setUsers] = useState([])
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
@@ -12,136 +20,146 @@ const UserManagement = () => {
     password: '',
     confirmPassword: '', // nuevo campo para confirmar la contraseña
     role_id: ''
-  });
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedUserId, setSelectedUserId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedUserHistory, setSelectedUserHistory] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [originalData, setOriginalData] = useState({});
+  })
+  const [isEditing, setIsEditing] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedUserHistory, setSelectedUserHistory] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [originalData, setOriginalData] = useState({})
 
   const handlePageR = () => {
-    setCurrentPage(currentPage + 1);
+    setCurrentPage(currentPage + 1)
     console.log(currentPage)
   }
   const handlePageL = () => {
     if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+      setCurrentPage(currentPage - 1)
     }
   }
 
   const fetchUsers = async (page = 1, limit = 10) => {
     try {
       // Obtener el token de acceso del localStorage
-      const token = localStorage.getItem('access_token');
-      console.log(token);
+      const token = localStorage.getItem('access_token')
+      console.log(token)
       if (!token) {
-        throw new Error('No se encontró el token de acceso');
+        throw new Error('No se encontró el token de acceso')
       }
 
       // Construir la URL con los parámetros de paginación
-      const url = `http://127.0.0.1:8000/jefe_desarrollo/user_info?page=${page}&limit=${limit}`;
+      const url = `http://127.0.0.1:8000/jefe_desarrollo/user_info?page=${page}&limit=${limit}`
 
       // Realizar la solicitud a la API
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`, // Usar el token aquí
-          'Content-Type': 'application/json',
-        },
-      });
+          'Content-Type': 'application/json'
+        }
+      })
 
       // Comprobar si la respuesta fue exitosa
       if (!response.ok) {
-        const errorData = await response.json();
-        console.log('Error al obtener usuarios:', errorData);
-        throw new Error(errorData.detail ? errorData.detail[0].msg : 'Error al obtener usuarios');
+        const errorData = await response.json()
+        console.log('Error al obtener usuarios:', errorData)
+        throw new Error(errorData.detail ? errorData.detail[0].msg : 'Error al obtener usuarios')
       }
 
       // Parsear la respuesta JSON
-      const data = await response.json();
+      const data = await response.json()
       console.log(data.users)
 
-      setUsers(data.users); // Ajusta según la estructura de la respuesta real
-
+      setUsers(data.users) // Ajusta según la estructura de la respuesta real
     } catch (error) {
-      console.error('Error fetching users:', error);
-      throw error; // Vuelve a lanzar el error para que pueda ser manejado en otro lugar
+      console.error('Error fetching users:', error)
+      throw error // Vuelve a lanzar el error para que pueda ser manejado en otro lugar
     }
-  };
+  }
 
   // Ejemplo de uso
   useEffect(() => {
-    fetchUsers(currentPage, 10);
-    console.log("hola")
-  }, [currentPage]);
+    fetchUsers(currentPage, 10)
+    console.log('hola')
+  }, [currentPage])
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
 
   const handleAddUser = async () => {
     if (formData.password !== formData.confirmPassword) {
-      alert('Las contraseñas no coinciden.');
-      return;
+      alert('Las contraseñas no coinciden.')
+      return
     }
     // Validar si es un nuevo usuario (todos los campos requeridos)
-    if (!isEditing && (!formData.id || !formData.firstName || !formData.lastName || !formData.email || !formData.role || !formData.password || !formData.phone)) {
-      alert('Por favor, completa todos los campos');
-      return;
+    if (
+      !isEditing &&
+      (!formData.id ||
+        !formData.firstName ||
+        !formData.lastName ||
+        !formData.email ||
+        !formData.role ||
+        !formData.password ||
+        !formData.phone)
+    ) {
+      alert('Por favor, completa todos los campos')
+      return
     }
 
     if (isEditing) {
       // Crear un objeto vacío para almacenar solo los campos modificados
-      const updatedUser = {};
+      const updatedUser = {}
 
       if (formData.id !== originalData.id) {
-        alert('No puedes cambiar el ID de un usuario.');
-        return;
+        alert('No puedes cambiar el ID de un usuario.')
+        return
       }
       // Comparar cada campo con los valores originales
-      if (formData.firstName !== originalData.firstName) updatedUser.first_name = formData.firstName;
-      if (formData.lastName !== originalData.lastName) updatedUser.last_name = formData.lastName;
-      if (formData.email !== originalData.email) updatedUser.email = formData.email;
-      if (parseInt(formData.role, 10) !== originalData.role) updatedUser.role_id = parseInt(formData.role, 10);
-      if (formData.password) updatedUser.password = formData.password; // Solo agregar si se cambió la contraseña
-      if (formData.phone !== originalData.phone) updatedUser.phone = formData.phone;
+      if (formData.firstName !== originalData.firstName) updatedUser.first_name = formData.firstName
+      if (formData.lastName !== originalData.lastName) updatedUser.last_name = formData.lastName
+      if (formData.email !== originalData.email) updatedUser.email = formData.email
+      if (parseInt(formData.role, 10) !== originalData.role)
+        updatedUser.role_id = parseInt(formData.role, 10)
+      if (formData.password) updatedUser.password = formData.password // Solo agregar si se cambió la contraseña
+      if (formData.phone !== originalData.phone) updatedUser.phone = formData.phone
 
       if (Object.keys(updatedUser).length === 0) {
-        alert('No has realizado ningún cambio.');
-        return;
+        alert('No has realizado ningún cambio.')
+        return
       }
 
       console.log(JSON.stringify(updatedUser))
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token')
       // Realizar el fetch a la URL con el ID dinámico
       try {
-        const response = await fetch(`http://127.0.0.1:8000/jefe_desarrollo/user_info/${formData.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, // Añadir el token aquí
-          },
-          body: JSON.stringify(updatedUser),
-        });
+        const response = await fetch(
+          `http://127.0.0.1:8000/jefe_desarrollo/user_info/${formData.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}` // Añadir el token aquí
+            },
+            body: JSON.stringify(updatedUser)
+          }
+        )
 
         if (!response.ok) {
-          throw new Error('Error al actualizar el usuario');
+          throw new Error('Error al actualizar el usuario')
         }
 
-        const result = await response.json();
-        console.log('Usuario actualizado:', result);
-        setUsers(prevUsers =>
-          prevUsers.map(user =>
-            user.id === result.id ? { ...user, ...result } : user
-          )
-        );
+        const result = await response.json()
+        console.log('Usuario actualizado:', result)
+        setUsers((prevUsers) =>
+          prevUsers.map((user) => (user.id === result.id ? { ...user, ...result } : user))
+        )
       } catch (error) {
-        console.error('Error al actualizar el usuario:', error);
+        console.error('Error al actualizar el usuario:', error)
       }
-      setIsEditing(false);
-      setSelectedUserId(null);
+      setIsEditing(false)
+      setSelectedUserId(null)
     } else {
       try {
         // Si no es edición, agregar un nuevo usuario
@@ -153,19 +171,26 @@ const UserManagement = () => {
           formData.phone,
           formData.password,
           parseInt(formData.role, 10)
-        );
+        )
 
-        console.log("Nuevo usuario registrado:", newUser);
-        fetchUsers(currentPage, 10);
-
+        console.log('Nuevo usuario registrado:', newUser)
+        fetchUsers(currentPage, 10)
       } catch (error) {
-        console.error('Error al registrar el usuario:', error);
-        alert('Error al registrar el usuario. Por favor, intenta de nuevo.');
+        console.error('Error al registrar el usuario:', error)
+        alert('Error al registrar el usuario. Por favor, intenta de nuevo.')
       }
     }
 
-    setFormData({ id: '', firstName: '', lastName: '', email: '', role: '', password: '', phone: '' });
-  };
+    setFormData({
+      id: '',
+      firstName: '',
+      lastName: '',
+      email: '',
+      role: '',
+      password: '',
+      phone: ''
+    })
+  }
 
   const handleEditUser = (user) => {
     setFormData({
@@ -175,8 +200,8 @@ const UserManagement = () => {
       email: user.email,
       role: user.role_id,
       password: user.password,
-      phone: user.phone,
-    });
+      phone: user.phone
+    })
     setOriginalData({
       id: user.id,
       firstName: user.first_name,
@@ -185,73 +210,75 @@ const UserManagement = () => {
       role: user.role_id,
       password: '', // Puede estar vacío o un valor fijo
       phone: user.phone
-    });
-    setIsEditing(true);
-    setSelectedUserId(user.id);
-  };
+    })
+    setIsEditing(true)
+    setSelectedUserId(user.id)
+  }
 
   const handleDeleteUser = async (userId) => {
     try {
       // Llamada al endpoint para eliminar el usuario
-      const token = localStorage.getItem('access_token');
+      const token = localStorage.getItem('access_token')
       const response = await fetch(`http://127.0.0.1:8000/jefe_desarrollo/user_info/${userId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           // Agrega aquí tu token de autenticación si es necesario
-          Authorization: `Bearer ${token}`, // Asegúrate de tener el token disponible
-        },
-      });
+          Authorization: `Bearer ${token}` // Asegúrate de tener el token disponible
+        }
+      })
 
       if (response.ok) {
         // Si la respuesta es exitosa, filtra el usuario eliminado
-        setUsers(users.filter((user) => user.id !== userId));
+        setUsers(users.filter((user) => user.id !== userId))
       } else {
-        const errorData = await response.json();
-        console.error('Error al eliminar el usuario:', errorData.error);
+        const errorData = await response.json()
+        console.error('Error al eliminar el usuario:', errorData.error)
         // Manejar el error según sea necesario (mostrar un mensaje al usuario, etc.)
       }
     } catch (error) {
-      console.error('Error de red:', error);
+      console.error('Error de red:', error)
       // Manejar el error de red (mostrar un mensaje al usuario, etc.)
     }
-  };
+  }
 
   const handleSearch = (e) => {
-    setSearchQuery(e.target.value.toLowerCase());
-  };
+    setSearchQuery(e.target.value.toLowerCase())
+  }
   //filtrado de usuarios para busqueda
   const filteredUsers = users.filter((user) => {
     return (
       user.first_name.toLowerCase().includes(searchQuery) ||
       user.email.toLowerCase().includes(searchQuery) ||
       user.last_name.toLowerCase().includes(searchQuery)
-    );
-  });
+    )
+  })
 
   const handleShowHistory = (user) => {
-    setSelectedUserHistory(user.history);
-    setIsModalOpen(true);
-  };
+    setSelectedUserHistory(user.history)
+    setIsModalOpen(true)
+  }
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedUserHistory([]);
-  };
+    setIsModalOpen(false)
+    setSelectedUserHistory([])
+  }
 
   const roleMap = {
-    1: "Jefe de desarrollo",
-    2: "Operario de mantenimiento",
-    3: "Operario de Maquinaria",
-    4: "Jefe de mantenimiento",
-  };
+    1: 'Jefe de desarrollo',
+    2: 'Operario de mantenimiento',
+    3: 'Operario de Maquinaria',
+    4: 'Jefe de mantenimiento'
+  }
 
   return (
     <div className="p-8 bg-white min-h-screen">
       <h1 className="text-3xl font-semibold text-gray-800 mb-6">Gestión de Usuarios</h1>
 
       <div className="p-6 mb-8">
-        <h2 className="text-2xl font-bold text-gray-700 mb-4">{isEditing ? 'Editar Usuario' : 'Agregar Usuario'}</h2>
+        <h2 className="text-2xl font-bold text-gray-700 mb-4">
+          {isEditing ? 'Editar Usuario' : 'Agregar Usuario'}
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
@@ -322,7 +349,7 @@ const UserManagement = () => {
             type="password"
             id="confirmPassword"
             name="confirmPassword"
-            placeholder='Confirmar contraseña'
+            placeholder="Confirmar contraseña"
             value={formData.confirmPassword || ''}
             onChange={handleInputChange}
             className="border border-gray-300 rounded-lg p-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -370,15 +397,24 @@ const UserManagement = () => {
                 <tr key={index + 1} className="border-b border-gray-300">
                   <td className="p-4 md:p-2 pl-4">{`${user.first_name} ${user.last_name}`}</td>
                   <td className="p-4 md:p-2">{user.email}</td>
-                  <td className="p-4 md:p-2">{roleMap[user.role_id] || "Rol desconocido"}</td>
+                  <td className="p-4 md:p-2">{roleMap[user.role_id] || 'Rol desconocido'}</td>
                   <td className="p-4 md:p-2 flex space-x-2">
-                    <button onClick={() => handleEditUser(user)} className="text-blue-500 hover:underline">
+                    <button
+                      onClick={() => handleEditUser(user)}
+                      className="text-blue-500 hover:underline"
+                    >
                       <HiPencil />
                     </button>
-                    <button onClick={() => handleDeleteUser(user.id)} className="text-red-500 hover:underline">
+                    <button
+                      onClick={() => handleDeleteUser(user.id)}
+                      className="text-red-500 hover:underline"
+                    >
                       <HiTrash />
                     </button>
-                    <button onClick={() => handleShowHistory(user)} className="text-green-500 hover:underline">
+                    <button
+                      onClick={() => handleShowHistory(user)}
+                      className="text-green-500 hover:underline"
+                    >
                       <HiOutlineEye />
                     </button>
                   </td>
@@ -386,14 +422,16 @@ const UserManagement = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="p-4 text-center">No se encontraron usuarios.</td>
+                <td colSpan="4" className="p-4 text-center">
+                  No se encontraron usuarios.
+                </td>
               </tr>
             )}
           </tbody>
         </table>
-        <div className='flex p-4 '>
+        <div className="flex p-4 ">
           <HiArrowLeft onClick={handlePageL} />
-          <HiArrowRight className='items-start' onClick={handlePageR} />
+          <HiArrowRight className="items-start" onClick={handlePageR} />
         </div>
       </div>
 
@@ -413,14 +451,17 @@ const UserManagement = () => {
               )}
             </ul>
 
-            <button onClick={handleCloseModal} className="mt-4 bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600">
+            <button
+              onClick={handleCloseModal}
+              className="mt-4 bg-blue-500 text-white rounded-lg px-4 py-2 hover:bg-blue-600"
+            >
               Cerrar
             </button>
           </div>
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
-export default UserManagement;
+export default UserManagement

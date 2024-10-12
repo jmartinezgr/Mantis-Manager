@@ -87,7 +87,7 @@ async def get_user_info(
 
     return paginated_response
 
-@jd_router.put("/user_info/{user_id}", 
+@jd_router.patch("/user_info/{user_id}", 
     summary="Actualizar información de un usuario",
     description="Permite al jefe de desarrollo actualizar el correo electrónico, rol o teléfono de un usuario específico.",
     response_model=UserData
