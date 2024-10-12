@@ -3,6 +3,7 @@ import Header from './header';
 import Sidebar from './SideBar';
 import MainContent from './mainContent';
 import { TicketProvider } from "../context/ticketContext";
+import { MachineProvider } from '../context/MachineContext'; // Asegúrate de que la ruta sea correcta
 import { Routes, Route } from 'react-router-dom';
 import Ajustes from '../settings/ajustes';
 import Profile from '../Perfil/perfil';
@@ -17,21 +18,23 @@ const Layout = () => {
 
     return (
         <TicketProvider>
-            <div className="app-container">
-                <Header onTabChange={handleTabChange} />
-                <div className="main-container">
-                    <Sidebar activeTab={activeTab} />
-                    <MainContent activeTab={activeTab} />
+            <MachineProvider>
+                <div className="app-container">
+                    <Header onTabChange={handleTabChange} />
+                    <div className="main-container">
+                        <Sidebar activeTab={activeTab} />
+                        <MainContent activeTab={activeTab} />
 
-                    <Routes>
-                        <Route path="profile" element={<Profile />} /> {/* Cambia a "profile" */}
-                        <Route path="perfil/seguridad" element={<Ajustes />} /> {/* Cambia a "perfil/seguridad" */}
-                    </Routes>
+                        {/* Define las rutas aquí */}
+                        <Routes>
+                            <Route path="profile" element={<Profile />} />
+                            <Route path="perfil/seguridad" element={<Ajustes />} />
+                        </Routes>
+                    </div>
                 </div>
-            </div>
+            </MachineProvider>
         </TicketProvider>
     );
 };
 
 export default Layout;
-

@@ -1,54 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
+import { MachineContext } from '../context/MachineContext';
 import MachineForm from './machineForm';
 import MachineDetailsModal from './MachineModal';
 
 const MachineList = () => {
-  const [machines, setMachines] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedMachine, setSelectedMachine] = useState(null); // Para la máquina seleccionada
-  const [isAddMachineModalOpen, setIsAddMachineModalOpen] = useState(false); // Modal para agregar máquina
-
-  useEffect(() => {
-    fetch('/data/maquinas.json')
-      .then(response => response.json())
-      .then(data => setMachines(data))
-      .catch(error => console.error('Error al cargar el JSON:', error));
-  }, []);
-
-  const addMachine = (newMachine) => {
-    setMachines([...machines, newMachine]);
-    setIsAddMachineModalOpen(false);
-  };
-
-  const deleteMachine = (index) => {
-    const updatedMachines = machines.filter((_, i) => i !== index);
-    setMachines(updatedMachines);
-  };
-
-  const toggleMachineStatus = (index) => {
-    const updatedMachines = machines.map((machine, i) =>
-      i === index
-        ? { ...machine, status: machine.status === 'Mantenimiento' ? 'Operativa' : 'Mantenimiento' }
-        : machine
-    );
-    setMachines(updatedMachines);
-  };
-
-  const openDetailsModal = (machine) => {
-    setSelectedMachine(machine);
-    setIsModalOpen(true);
-  };
-
-  const closeDetailsModal = () => {
-    setIsModalOpen(false);
-    setSelectedMachine(null); // Reinicia la máquina seleccionada al cerrar
-  };
+  const {
+    machines,
+    addMachine,
+    deleteMachine,
+    toggleMachineStatus,
+    openDetailsModal,
+    closeDetailsModal,
+    isModalOpen,
+    selectedMachine,
+    isAddMachineModalOpen,
+    setIsAddMachineModalOpen
+  } = useContext(MachineContext);
 
   return (
     <div className="p-8 bg-white min-h-screen">
       <h1 className="text-4xl font-bold text-center mb-10 text-indigo-700">Inventario de Máquinas</h1>
-      
-      
 
       {/* Modal para agregar máquina */}
       {isAddMachineModalOpen && (
@@ -68,7 +39,9 @@ const MachineList = () => {
         </thead>
         <tbody>
           {machines.map((machine, index) => (
+            
             <tr key={index} className="border-b hover:bg-gray-100 cursor-pointer" onClick={() => openDetailsModal(machine)}>
+
               <td className="py-3 pr-6 pl-10">{machine.name}</td>
               <td className="py-3 px-6">{machine.model}</td>
               <td className="py-3 pl-6">{machine.type}</td>
@@ -90,9 +63,10 @@ const MachineList = () => {
       {isModalOpen && selectedMachine && (
         <MachineDetailsModal machine={selectedMachine} closeModal={closeDetailsModal} />
       )}
+      
       <button
-        onClick={() => setIsAddMachineModalOpen(true)}//pendiente ponerlo a la derecha
-        className="mb-8 p-4 bg-indigo-600 text-white "
+        onClick={() => setIsAddMachineModalOpen(true)}
+        className="mb-8 p-4 bg-indigo-600 text-white"
       >
         Agregar Máquina
       </button>
@@ -101,4 +75,5 @@ const MachineList = () => {
 };
 
 export default MachineList;
+
 

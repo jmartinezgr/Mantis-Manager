@@ -6,7 +6,7 @@ import { useApi } from "../hooks/apiHook"; // Importar el hook de API
 const TicketContext = createContext();
 
 export const TicketProvider = ({ children }) => {
-  const { fetchApi } = useApi(); // Usar el hook de API
+  const { fetchApi , loading, error } = useApi(); // Usar el hook de API
   const [ticketsData, setTicketsData] = useState({ "En cola": [], "En proceso": [], "Terminados": [] });
   const [showGenerarTickets, setShowGenerarTickets] = useState(false);
   const [history, setHistory] = useState([]);
