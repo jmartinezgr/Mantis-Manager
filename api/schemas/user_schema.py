@@ -47,7 +47,6 @@ class InfoUser(BaseModel):
 
 class LoginResponse(BaseModel):
     """Esquema para la respuesta al iniciar sesión."""
-    message: str
     data: UserData
     access_token: str
     refresh_token: str

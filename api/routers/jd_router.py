@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from passlib.context import CryptContext
 
-from schemas.auth_schema import UserUpdate, PaginatedUsers, UserData
-from schemas.auth_schema import RegisterData, InfoUser
+from schemas.user_schema import UserUpdate, PaginatedUsers, UserData
+from schemas.user_schema import RegisterData, InfoUser
 from services.jwt_services import create_acess_token, create_refresh_token 
 from models.user_model import User, Role
 from config.db import get_db
