@@ -30,6 +30,7 @@ export const useApi = () => {
       const data = await response.json();
       return data;
     } catch (error) {
+      console.error('Error en la solicitud:', error.message);
       setError(error.message);
       throw error;
     } finally {
