@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, Request
-from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 
