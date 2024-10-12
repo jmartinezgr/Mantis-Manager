@@ -25,10 +25,10 @@ machine_router = APIRouter(tags=["Maquinas"], prefix="/machines")
     response_model=MachineActionResponse
 )
 async def create_machine(
+    req :Request,
     machine: MachineData = None, 
     db: Session = Depends(get_db), 
     dependencies = Depends(bearer_scheme),
-    req = Request
 ):
     """
     El jefe de mantenimiento podrá crear una nueva máquina.
@@ -169,10 +169,10 @@ async def update_machine(
     response_model=MachineActionResponse
 )
 async def delete_machine(
+    req :Request,
     machine_id: str = Path(..., description="ID de la máquina", min_length=1, max_length=3),
     db: Session = Depends(get_db), 
     dependencies=Depends(bearer_scheme),
-    req = Request
 ):
     """
     El jefe de mantenimiento elimina una máquina por su ID. Retorna un mensaje de exito
