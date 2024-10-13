@@ -145,60 +145,6 @@ async def get_ticket(
         deadline=ticket.deadline
     )
 
-@ticket_router.patch("/tickets/{ticket_id}/self_assign", response_model=TicketData)
-async def self_assign(ticket_id: int, request: Request, db: Session = Depends(get_db)):
-    """
-    Asigna el ticket al usuario autenticado.
-    
-    Parámetros:
-    - ticket_id: ID del ticket a editar
-    - db: Sesión de la base de datos. (Dependencia)1
-
-    Retorna:
-    - Información del ticket actualizado.
-    """
-    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
-
-    if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket no encontrado")
-
-    user_info = request.state.user  
-    user_id = user_info.get("sub")  # ID del usuario que envía la solicitud
-
-    # Buscar al usuario autenticado
-    employer = db.query(User).filter(User.id == user_id).first()
-
-    if not employer:
-        raise HTTPException(status_code=404, detail="Usuario autenticado no encontrado")
-
-    # Verificar si el usuario tiene el rol correcto
-    role = db.query(Role).filter(Role.id == employer.role_id).first()
-
-    if role.name != "Operario de Mantenimiento":
-        raise HTTPException(status_code=400, detail="El usuario no es un Operario de Mantenimiento")
-
-    # Cambiar el estado a "asignado" si está pendiente
-    if ticket.state == "pendiente":
-        ticket.state = "asignado"
-
-    ticket.assigned_to = employer.id
-    db.commit()
-    db.refresh(ticket)
-
-    created_by_name = f"{db.query(User).filter(User.id == ticket.created_by).first().first_name} {db.query(User).filter(User.id == ticket.created_by).first().last_name}"
-
-    return TicketData(
-        id=ticket.id,
-        description=ticket.description,
-        state=ticket.state,
-        priority=ticket.priority,
-        machine_serial=ticket.machine.serial,
-        created_by=created_by_name,
-        assigned_to=f"{employer.first_name} {employer.last_name}",
-        created_at=ticket.created_at,
-        deadline=ticket.deadline
-    )
-
 @ticket_router.patch(
     "/tickets/assing/{ticket_id}",
     summary="Asignar un responsable a un ticket",
@@ -259,66 +205,6 @@ async def assign_ticket(
         created_by_id= ticket.created_by,
         assigned_to_id= ticket.assigned_to,
         created_at=ticket.created_at,
-    )
-
-@ticket_router.patch("/tickets/{ticket_id}/assign", response_model=TicketData)
-async def assign_ticket1(ticket_id: int, ticket_assign: TicketAssign, db: Session = Depends(get_db)):
-    """
-    Operario de Mantenimeinto o Jefe de Mantenimiento asigna o cede un ticket a un operario de mantenimiento.
-    
-    Parámetros:
-    - ticket_id: ID del ticket a editar
-    - ticket_assign: el id de la persona a la cual se le asiganara el ticket (assigned_to).
-    - db: Sesión de la base de datos. (Dependencia)
-    
-    Retorna:
-    - Información del ticket actualizado.
-    """
-    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
-
-    if not ticket:
-        raise HTTPException(status_code=404, detail="Ticket no encontrado")
-
-    # Buscar al usuario que será asignado
-    employer = db.query(User).filter(User.id == ticket_assign.assigned_to).first()
-
-    if not employer:
-        raise HTTPException(status_code=404, detail="Usuario asignado no encontrado")
-
-    # Verificar si el usuario asignado tiene el rol correcto
-    role = db.query(Role).filter(Role.id == employer.role_id).first()
-
-    if role.name != "Operario de Mantenimiento":
-        raise HTTPException(status_code=400, detail="El usuario no es un Operario de Mantenimiento")
-
-    # Cambiar el estado a "asignado" si está pendiente
-    if ticket.state == "pendiente":
-        ticket.state = "asignado"
-
-    ticket.assigned_to = employer.id
-    db.commit()
-    db.refresh(ticket)
-
-    # Obtener el nombre completo del creador del ticket
-    creator = db.query(User).filter(User.id == ticket.created_by).first()
-    if not creator:
-        raise HTTPException(status_code=404, detail="Creador del ticket no encontrado")
-
-    created_by_name = f"{creator.first_name} {creator.last_name}"
-
-    # Obtener el nombre completo de la persona asignada
-    assigned_to_name = f"{employer.first_name} {employer.last_name}"
-
-    return TicketData(
-        id=ticket.id,
-        description=ticket.description,
-        state=ticket.state,
-        priority=ticket.priority,
-        machine_serial=ticket.machine.serial,
-        created_by=created_by_name,
-        assigned_to=assigned_to_name, 
-        created_at=ticket.created_at,
-        deadline=ticket.deadline
     )
 
 @ticket_router.patch("/tickets/{ticket_id}/state", response_model=TicketData)
