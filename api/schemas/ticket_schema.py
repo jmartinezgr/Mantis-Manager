@@ -25,13 +25,13 @@ class TicketSearchResponse(BaseModel):
     description: str
     state: str
     priority: str
-    machine_serial: str  # Serial de la máquina
+    machine_serial: Optional[str] = None  # Serial de la máquina
     created_by_id: int  # ID del creador
-    created_by_name: str  # Nombre completo del creador
+    created_by_name: Optional[str] = None  # Nombre completo del creador
     assigned_to_id: Optional[int] = None  # ID del asignado (si existe)
     assigned_to_name: Optional[str] = None  # Nombre completo del asignado (si existe)
     created_at: datetime
-    deadline: datetime
+    deadline: Optional[datetime] = None  # Fecha límite (si existe)
 
 class TicketCreate(BaseModel):
     description: str

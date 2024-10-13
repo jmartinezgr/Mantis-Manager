@@ -1,8 +1,8 @@
 from datetime import timedelta, datetime
 from sqlalchemy import case
 
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Request, Path
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, Request, Path,Query
 from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -199,10 +199,70 @@ async def self_assign(ticket_id: int, request: Request, db: Session = Depends(ge
         deadline=ticket.deadline
     )
 
-
+@ticket_router.patch(
+    "/tickets/assing/{ticket_id}",
+    summary="Asignar un responsable a un ticket",
+    description="Puede autoasignarse el ticket o asignarlo a otra persona si es un jefe de mantenimiento"
+)
+async def assign_ticket(
+    req : Request,
+    ticket_id : str = Path(..., title="ID del ticket a asignar"),
+    user_id: Optional[str] = Query(None, title="Usuario al que se le asigna el ticket"), 
+    db: Session = Depends(get_db),
+    token: str = Depends(bearer_scheme)
+):
+    """
+    Asignar un responsable de atencion del ticket:
+    Si se omite el parametro user_id se autoasigna la responsabilidad del ticket,
+    si no es omitido se verifica que el usuario sea un jefe de mantenimiento, que es el
+    unico con el poder de asignarle un ticket a otro usuario.
+    
+    Parámetros:
+        ticket_id: ID del ticket a editar
+        user_id: el id de la persona a la cual se le asiganara el ticket (assigned_to).
+    
+    
+    Retorna:
+       Información del ticket actualizado.
+    """
+    
+    user_to_assing = None
+    
+    if user_id  != None:
+        aux_user = req.state.user
+        
+        if aux_user.get("scopes") != 4:
+            raise HTTPException(status_code=400,detail="No tienes permiso para realizar esta accion (No eres jefe de mantenimiento)")
+        user_to_assing = user_id
+    else:
+        user_to_assing = req.state.user.get("sub")
+        
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
+    
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket no encontrado")
+    
+    user = db.query(User).filter(User.id == user_to_assing).first()
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario al que se le asignara el ticket no encontrado")
+    
+    ticket.assigned_to = user.id
+    db.commit()
+    db.refresh(ticket)
+    
+    return  TicketSearchResponse(
+        id=ticket.id,
+        description=ticket.description,
+        state=ticket.state,
+        priority=ticket.priority,
+        created_by_id= ticket.created_by,
+        assigned_to_id= ticket.assigned_to,
+        created_at=ticket.created_at,
+    )
 
 @ticket_router.patch("/tickets/{ticket_id}/assign", response_model=TicketData)
-async def assign_ticket(ticket_id: int, ticket_assign: TicketAssign, db: Session = Depends(get_db)):
+async def assign_ticket1(ticket_id: int, ticket_assign: TicketAssign, db: Session = Depends(get_db)):
     """
     Operario de Mantenimeinto o Jefe de Mantenimiento asigna o cede un ticket a un operario de mantenimiento.
     
@@ -255,8 +315,8 @@ async def assign_ticket(ticket_id: int, ticket_assign: TicketAssign, db: Session
         state=ticket.state,
         priority=ticket.priority,
         machine_serial=ticket.machine.serial,
-        created_by=created_by_name,  # Nombre completo del creador
-        assigned_to=assigned_to_name,  # Nombre completo del asignado
+        created_by=created_by_name,
+        assigned_to=assigned_to_name, 
         created_at=ticket.created_at,
         deadline=ticket.deadline
     )
