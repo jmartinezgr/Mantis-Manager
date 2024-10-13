@@ -2,16 +2,17 @@ from datetime import timedelta, datetime
 from sqlalchemy import case
 
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, Path
 from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer
+
 from config.db import get_db
 from models.ticket_model import Ticket
 from models.machine_model import Machine 
 from models.user_model import User, Role
-from schemas.ticket_schema import TicketCreate, TicketData, TicketAssign, TicketStateUpdate
+from schemas.ticket_schema import TicketCreate, TicketData, TicketAssign, TicketStateUpdate, TicketResponse, TicketSearchResponse
 
 bearer_scheme = HTTPBearer()
 
@@ -21,8 +22,9 @@ ticket_router = APIRouter(tags=["Tickets"])
 # Crear un ticket (POST)
 @ticket_router.post(
     "/ticket",
-    summary="",
-    response_model=TicketData
+    summary="Crear un ticket como solicitud de revision",
+    description="Solicitar una revisión de una maquina a traves de un ticket",
+    response_model=TicketResponse
 )
 async def create_ticket(
     request: Request = None,
@@ -34,20 +36,18 @@ async def create_ticket(
     Crea un nuevo ticket con el estado predeterminado 'pendiente'.
     
     Parámetros:
-    - ticket: Los datos del ticket a crear, descripción, serial de la máquina a la que 
-      pertenece el ticket y prioridad (description, machine, priority).
-    - db: Sesión de la base de datos. (Dependencia)
+        ticket: Los datos del ticket a crear, descripción, id de la máquina a la que 
+            pertenece el ticket y prioridad (description, machine, priority).
     
     Retorna:
-    - Datos del ticket creado.
+        Datos del ticket creado.
     """
     # Verificar si la máquina existe en la base de datos
-    machine = db.query(Machine).filter(Machine.serial == ticket.machine).first()
+    machine = db.query(Machine).filter(Machine.id == ticket.machine).first()
     if not machine:
         raise HTTPException(status_code=404, detail="La máquina con el serial proporcionado no existe.")
 
-    # Obtener el ID del usuario desde el token
-    user_info = request.state.user  # Asegúrate de que tu middleware de autenticación coloca esta información
+    user_info = request.state.user  
     user_id = user_info.get("sub")
     
     # Validar que el usuario existe en la base de datos
@@ -55,7 +55,7 @@ async def create_ticket(
     if not creator:
         raise HTTPException(status_code=404, detail="Usuario creador no encontrado.")
 
-    # Establecer el deadline basado en la prioridad
+
     priority_deadlines = {
         'baja': timedelta(weeks=1),
         'media': timedelta(days=3),
@@ -74,8 +74,8 @@ async def create_ticket(
         state="pendiente",  
         machine_id=machine.id,
         priority=ticket.priority,
-        created_by=user_id,  # Asignar el creador desde el token
-        created_at=func.now(),  # Usar SQLAlchemy para la fecha/hora actual
+        created_by=user_id,
+        created_at=func.now(), 
         deadline=deadline
     )
 
@@ -84,58 +84,65 @@ async def create_ticket(
     db.refresh(new_ticket)
     
     # Retornar la información del ticket creado
-    return TicketData(
+    return TicketResponse(
         id=new_ticket.id,
         description=new_ticket.description,
         state=new_ticket.state,
-        priority=new_ticket.priority,  
-        machine_serial=machine.serial,  
-        created_by=creator.id,
-        assigned_to=new_ticket.assigned_to,  
         created_at=new_ticket.created_at,
-        deadline=new_ticket.deadline
+        priority=new_ticket.priority, 
+        deadline=new_ticket.deadline,
+        machine_id=machine.id,  
+        created_by=creator.id
     )
 
-@ticket_router.get("/tickets/{ticket_id}", response_model=TicketData)
-async def get_ticket(ticket_id: int, db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
+@ticket_router.get(
+    "/tickets/{ticket_id}", 
+    summary="Obtener un ticket por su ID",
+    description="Obtener la información de un ticket por su ID",
+    response_model=TicketSearchResponse
+)
+async def get_ticket(
+    ticket_id: int = Path(..., title="ID del ticket a buscar"), 
+    db: Session = Depends(get_db), 
+    dependencies=Depends(bearer_scheme)
+):
     """
-    Obtiene un ticket por su ID.
-    
-    Parámetros:
-    - ticket_id: ID del ticket a buscar.
-    
-    Retorna:
-    - Datos del ticket encontrado.
+    Obtiene un ticket por su ID, incluyendo los nombres completos y los IDs de las personas involucradas.
     """
     # Unimos el ticket con la máquina y los usuarios (creador y asignado) para obtener la información necesaria
-    ticket = db.query(Ticket, User).join(Ticket.machine).join(User, Ticket.created_by == User.id).filter(Ticket.id == ticket_id).first()
+    ticket = db.query(Ticket).filter(Ticket.id == ticket_id).first()
 
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
 
-    ticket_info, creator = ticket
-
-    # Obtener el nombre completo del creador del ticket
+    # Obtener el creador del ticket
+    creator = db.query(User).filter(User.id == ticket.created_by).first()
+    if not creator:
+        raise HTTPException(status_code=404, detail="Usuario creador no encontrado")
     created_by_name = f"{creator.first_name} {creator.last_name}"
 
-    # Obtener el nombre completo de la persona asignada (si existe)
+    # Obtener el usuario asignado (si existe)
     assigned_to_name = None
-    if ticket_info.assigned_to:
-        assigned_user = db.query(User).filter(User.id == ticket_info.assigned_to).first()
+    assigned_to_id = None
+    if ticket.assigned_to:
+        assigned_user = db.query(User).filter(User.id == ticket.assigned_to).first()
         if assigned_user:
             assigned_to_name = f"{assigned_user.first_name} {assigned_user.last_name}"
+            assigned_to_id = assigned_user.id
 
-    # Devolver la respuesta con los nombres completos en lugar de los IDs
-    return TicketData(
-        id=ticket_info.id,
-        description=ticket_info.description,
-        state=ticket_info.state,
-        priority=ticket_info.priority,
-        machine_serial=ticket_info.machine.serial,
-        created_by=created_by_name,  # Nombre completo del creador
-        assigned_to=assigned_to_name,  # Nombre completo del asignado (si existe)
-        created_at=ticket_info.created_at,
-        deadline=ticket_info.deadline
+    # Devolver la respuesta con los nombres completos y los IDs
+    return TicketSearchResponse(
+        id=ticket.id,
+        description=ticket.description,
+        state=ticket.state,
+        priority=ticket.priority,
+        machine_serial=ticket.machine.serial,
+        created_by_id=creator.id, 
+        created_by_name=created_by_name,  
+        assigned_to_id=assigned_to_id, 
+        assigned_to_name=assigned_to_name, 
+        created_at=ticket.created_at,
+        deadline=ticket.deadline
     )
 
 @ticket_router.patch("/tickets/{ticket_id}/self_assign", response_model=TicketData)
