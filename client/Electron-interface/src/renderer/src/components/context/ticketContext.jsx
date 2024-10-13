@@ -44,6 +44,7 @@ export const TicketProvider = ({ children }) => {
     const url = "http://127.0.0.1:8000/tickets"; // URL de la API
 
     try {
+      console.log(ticketData);
       const createdTicket = await fetchApi(url, 'POST', ticketData); // Usar el hook de API
       setTicketsData(prevData => ({
         ...prevData,

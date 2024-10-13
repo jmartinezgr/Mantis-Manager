@@ -9,34 +9,29 @@ export const useApi = () => {
     setError(null);
 
     try {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`; // Añadir token si existe
-      }
-      headers['Content-Type'] = 'application/json';
-
       const options = {
         method,
-        headers,
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token') || ''}`, // Agregar el token si existe
+        },
         ...(body && { body: JSON.stringify(body) }),
       };
 
-      const response = await fetch(url, options);
+      // Usar la función fetchApi expuesta en el preload
+      const response = await window.api.fetchApi(url, method, body, headers);
 
-      if (!response.ok) {
-        throw new Error('Error en la solicitud');
-      }
-
-      const data = await response.json();
-      return data;
+      return response; // Devolver los datos obtenidos
     } catch (error) {
       console.error('Error en la solicitud:', error.message);
       setError(error.message);
-      throw error;
+      throw error; // Lanzar el error para manejarlo en el componente
     } finally {
-      setLoading(false);
+      setLoading(false); // Cambiar loading a false al final
     }
   };
 
-  return { fetchApi, loading, error };
+  return { fetchApi, loading, error }; // Retornar fetchApi, loading y error
 };
+

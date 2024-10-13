@@ -1,38 +1,35 @@
 import React, { createContext, useState, useEffect } from 'react';
-import {useApi} from '../hooks/apiHook';
+import { useApi } from '../hooks/apiHook';
 
 export const MachineContext = createContext();
 
 export const MachineProvider = ({ children }) => {
-  const {fetchApi , loading, error}=useApi();
+  const { fetchApi, loading, error } = useApi();
   const [machines, setMachines] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMachine, setSelectedMachine] = useState(null);
   const [isAddMachineModalOpen, setIsAddMachineModalOpen] = useState(false);
 
+  // Mover getMachines fuera de useEffect para poder reutilizarla.
+  const getMachines = async () => {
+    const url = 'http://127.0.0.1:8000/machines/machines';
+    try {
+      const data = await fetchApi(url, 'GET');
+      console.log(data);
+      setMachines(data.machines || []); // Asegura que data.machines esté definida
+    } catch (e) {
+      console.error(error);
+    }
+  };
 
+  // useEffect que ejecuta getMachines al montar el componente.
   useEffect(() => {
-    const getMachines = async () => { // Cambia a una función asíncrona
-      const url = 'http://127.0.0.1:8000/machines';
-      try {
-        const data = await fetchApi(url, 'GET'); // Espera a que fetchApi complete
-        console.log(data);
-        setMachines(data.machines || []); // Asegúrate de que se maneje el caso en que `machines` no esté definido
-  
-      } catch (e) {
-        console.log(data)
-       
-        console.log(error);
-      }
-    };
-  
     getMachines(); // Llama a la función asíncrona
-  }, []); // Agrega `fetchApi` como dependencia si es necesario
-  
+  }, [isAddMachineModalOpen]); // Asegúrate de agregar fetchApi como dependencia
 
   const addMachine = (newMachine) => {
-    setMachines((prevMachines) => [...prevMachines, newMachine]); // Agrega la nueva máquina a la lista existente
-    setIsAddMachineModalOpen(false); // Cierra el modal después de agregar
+    setMachines((prevMachines) => [...prevMachines, newMachine]);
+    setIsAddMachineModalOpen(false);
   };
 
   const deleteMachine = (index) => {
@@ -46,7 +43,7 @@ export const MachineProvider = ({ children }) => {
         ? { ...machine, status: machine.status === 'Mantenimiento' ? 'Operativa' : 'Mantenimiento' }
         : machine
     );
-    setMachines([]);
+    setMachines(updatedMachines); // Corrige para establecer los valores actualizados
   };
 
   const openDetailsModal = (machine) => {
@@ -60,19 +57,23 @@ export const MachineProvider = ({ children }) => {
   };
 
   return (
-    <MachineContext.Provider value={{
-      machines,
-      addMachine,
-      deleteMachine,
-      toggleMachineStatus,
-      openDetailsModal,
-      closeDetailsModal,
-      isModalOpen,
-      selectedMachine,
-      isAddMachineModalOpen,
-      setIsAddMachineModalOpen
-    }}>
+    <MachineContext.Provider
+      value={{
+        machines,
+        addMachine,
+        deleteMachine,
+        toggleMachineStatus,
+        openDetailsModal,
+        closeDetailsModal,
+        isModalOpen,
+        selectedMachine,
+        isAddMachineModalOpen,
+        setIsAddMachineModalOpen,
+        getMachines, // Añade getMachines al contexto para que pueda ser reutilizada
+      }}
+    >
       {children}
     </MachineContext.Provider>
   );
 };
+

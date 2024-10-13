@@ -30,11 +30,11 @@ const MachineList = () => {
       <table className="min-w-full bg-white border border-gray-300">
         <thead>
           <tr className="bg-indigo-600 text-white">
-            <th className="py-3 px-4">Nombre</th>
-            <th className="py-3 px-4">Modelo</th>
-            <th className="py-3 px-4">Tipo</th>
-            <th className="py-3 px-4">Estado</th>
-            <th className="py-3 px-4">Acciones</th>
+            <th className="py-3 px-4 text-center ">Serial</th>
+            <th className="py-3 px-4 tex-center">Modelo</th>
+            <th className="py-3 px-4 text-center">Tipo</th>
+            <th className="py-3 px-4 text-center">Estado</th>
+            <th className="py-3 px-4 text-center" >Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -42,12 +42,12 @@ const MachineList = () => {
             
             <tr key={index} className="border-b hover:bg-gray-100 cursor-pointer" onClick={() => openDetailsModal(machine)}>
 
-              <td className="py-3 pr-6 pl-10">{machine.name}</td>
-              <td className="py-3 px-6">{machine.model}</td>
-              <td className="py-3 pl-6">{machine.type}</td>
-              <td className="py-3 px-4">{machine.status}</td>
-              <td className="py-3 px-4">
-                <button onClick={(e) => { e.stopPropagation(); deleteMachine(index); }} className="text-white bg-red-500 rounded-lg p-2 gap-4">
+              <td className="py-3  text-center">{machine.serial}</td>
+              <td className="py-3 text-center">{machine.model}</td>
+              <td className="py-3 text-center">{machine.type}</td>
+              <td className="py-3 text-center">None</td>
+              <td className="py-3 text-right">
+                <button onClick={(e) => { e.stopPropagation(); deleteMachine(index); }} className="text-white bg-red-500 rounded-lg p-2 gap-4 ">
                   Eliminar
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); toggleMachineStatus(index); }} className={`ml-2 bg-blue-500 rounded-lg p-2 text-white ${machine.status === 'Mantenimiento' ? 'text-green-600' : 'text-yellow-900'}`}>
@@ -66,7 +66,7 @@ const MachineList = () => {
       
       <button
         onClick={() => setIsAddMachineModalOpen(true)}
-        className="mb-8 p-4 bg-indigo-600 text-white"
+        className="mb-8 p-4 bg-indigo-600 text-white text-right"
       >
         Agregar Máquina
       </button>
