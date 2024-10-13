@@ -44,7 +44,7 @@ async def create_ticket(
     # Verificar si la máquina existe en la base de datos
     machine = db.query(Machine).filter(Machine.serial == ticket.machine).first()
     if not machine:
-        raise HTTPException(status_code=405, detail="La máquina con el serial proporcionado no existe.")
+        raise HTTPException(status_code=404, detail="La máquina con el serial proporcionado no existe.")
 
     # Obtener el ID del usuario desde el token
     user_info = request.state.user  # Asegúrate de que tu middleware de autenticación coloca esta información
@@ -53,7 +53,7 @@ async def create_ticket(
     # Validar que el usuario existe en la base de datos
     creator = db.query(User).filter(User.id == user_id).first()
     if not creator:
-        raise HTTPException(status_code=405, detail="Usuario creador no encontrado.")
+        raise HTTPException(status_code=404, detail="Usuario creador no encontrado.")
 
     # Establecer el deadline basado en la prioridad
     priority_deadlines = {
@@ -63,7 +63,7 @@ async def create_ticket(
     }
 
     if ticket.priority not in priority_deadlines:
-        raise HTTPException(status_code=405, detail="Prioridad no válida.")
+        raise HTTPException(status_code=404, detail="Prioridad no válida.")
 
     # Calcular el deadline según la prioridad
     deadline = datetime.now() + priority_deadlines[ticket.priority]
