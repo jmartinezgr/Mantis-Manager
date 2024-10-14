@@ -39,6 +39,7 @@ class PaginatedUsers(BaseModel):
     page: int
     limit: int
     total_users: int
+    is_last_page: bool
     users: List[UserData]
 
 class InfoUser(BaseModel):

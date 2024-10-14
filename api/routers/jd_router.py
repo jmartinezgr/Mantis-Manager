@@ -21,12 +21,10 @@ jd_router = APIRouter(
 @jd_router.get(
     "/user_info",
     summary="Obtener información paginada de los usuarios",
-    description="""
-        Este endpoint devuelve información paginada de los usuarios
-        como el nombre completo, correo electrónico, rol y teléfono,
-        Requiere autenticación con un token válido y permisos adecuados.
-    """,
-    response_model=PaginatedUsers,  
+    description="""Este endpoint devuelve información paginada de los usuarios
+                   como el nombre completo, correo electrónico, rol y teléfono,
+                   Requiere autenticación con un token válido y permisos adecuados.""",
+    response_model=PaginatedUsers,
     response_description="Un JSON con la información de los usuarios paginados."
 )
 async def get_user_info(
@@ -34,28 +32,24 @@ async def get_user_info(
     token: str = Depends(HTTPBearer()), 
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="Número de la página que se desea obtener. Comienza en 1."),  
-    limit: int = Query(10, ge=1, description="Cantidad de usuarios por página. Valor predeterminado: 10.") 
+    limit: int = Query(10, ge=1, description="Cantidad de usuarios por página. Valor predeterminado: 10."),
+    role_id: int = Query(None, description="ID del rol para filtrar los usuarios. Opcional.")
 ):
-    """
-    Devuelve la información de los usuarios en formato paginado.
-
-    Args:
-        page: Número de la página que se desea obtener (empieza en 1).
-        limit: Cantidad de usuarios por página (el valor predeterminado es 10).
+    """ Devuelve la información de los usuarios en formato paginado. """
     
-    Returns: 
-        page: Número de la página solicitada.
-        limit: Cantidad de usuarios devueltos en la página.
-        total_users: Número total de usuarios en la base de datos.
-        users: Lista de usuarios con su información filtrada.
-    """
     # Calcular el offset en base al número de página
     offset = (page - 1) * limit
 
     # Consultar los usuarios con límite y offset para paginación
-    users = db.query(User).offset(offset).limit(limit).all()
+    query = db.query(User)
 
-    # Mapeo de los datos de los usuarios utilizando UserOut
+    # Si se proporciona role_id, agregarlo a la consulta
+    if role_id is not None:
+        query = query.filter(User.role_id == role_id)
+
+    users = query.offset(offset).limit(limit).all()
+
+    # Mapeo de los datos de los usuarios utilizando UserData
     users_data = [
         UserData(
             id=user.id,
@@ -68,18 +62,23 @@ async def get_user_info(
         for user in users
     ]
 
-    # Total de usuarios en la base de datos
-    total_users = db.query(User).count()
+    # Total de usuarios en la base de datos considerando el filtro
+    total_users = query.count()
+
+    # Determinar si es la última página
+    is_last_page = len(users) < limit or (page * limit >= total_users)
 
     # Retornar los datos de paginación y los usuarios
     paginated_response = PaginatedUsers(
         page=page,
         limit=limit,
         total_users=total_users,
-        users=users_data
+        users=users_data,
+        is_last_page=is_last_page  # Añadir el nuevo atributo
     )
 
     return paginated_response
+
 
 @jd_router.patch(
     "/user_info/{user_id}", 
