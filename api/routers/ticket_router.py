@@ -322,6 +322,7 @@ async def assign_ticket(
         if aux_user.get("scopes") != 4:
             raise HTTPException(status_code=400,detail="No tienes permiso para realizar esta accion (No eres jefe de mantenimiento)")
         user_to_assing = user_id
+        
     else:
         user_to_assing = req.state.user.get("sub")
         
@@ -333,6 +334,10 @@ async def assign_ticket(
     if ticket.state == "finalizado":
         raise HTTPException(status_code=400, detail="No se puede asignar otro estado a un ticket finalizado")
     
+    if ticket.assignee:
+        if user_id == None:
+            raise HTTPException(status_code=400, detail="No puedes asignarte un ticket que ya tiene un responsable asignado")
+            
     user = db.query(User).filter(User.id == user_to_assing).first()
     
     if not user:
@@ -341,6 +346,15 @@ async def assign_ticket(
     ticket.assigned_to = user.id
     db.commit()
     db.refresh(ticket)
+    
+    new_registro = Registro(
+        description=f"Se asigna {ticket.assignee.first_name} {ticket.assignee.last_name}(id: {ticket.assignee.id}).",
+        event_type="asignacion",
+        ticket_id=ticket.id
+    )  
+    
+    db.add(new_registro)
+    db.commit()
     
     related_open_requests = []
     for solicitud in ticket.solicitudes:
