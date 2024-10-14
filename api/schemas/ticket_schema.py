@@ -1,6 +1,7 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator,  Field
 from typing import Optional
 from datetime import datetime
+from typing import List
 
 class TicketData(BaseModel):
     description: str
@@ -58,3 +59,25 @@ class TicketAssign(BaseModel):
         if not v:
             raise ValueError('El ID del operario no puede estar vacío')
         return v
+
+class TicketCloseInfo(BaseModel):
+    time_spent: float = Field(..., example=5.5, description="Tiempo empleado en horas")
+    days_used: int = Field(..., example=2, description="Días que se emplearon")
+    parts_used: List[str] = Field(..., example=["Repuesto1", "Repuesto2"], description="Lista de repuestos utilizados")
+    procedure: str = Field(..., example="Procedimiento detallado realizado", description="Procedimiento empleado")
+    final_description: str = Field(..., example="La máquina está funcionando correctamente.", description="Descripción general del estado final de la máquina")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "time_spent": 5.5,
+                "days_used": 2,
+                "parts_used": ["Repuesto1", "Repuesto2"],
+                "procedure": "Procedimiento detallado realizado",
+                "final_description": "La máquina está funcionando correctamente.",
+            }
+        }
+
+class TicketSolicitudInfo(BaseModel):
+    detail: str
+    id_solicitud: int

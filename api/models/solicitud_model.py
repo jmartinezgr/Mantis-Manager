@@ -23,7 +23,7 @@ class Solicitud(Base):
 
     __tablename__ = 'solicitud'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(),
                         nullable=False)
     description = Column(String, nullable=False)
