@@ -18,7 +18,8 @@ from schemas.ticket_schema import (
     TicketCreate, 
     TicketStandartResponse, 
     TicketSolicitudInfo,
-    TicketCloseInfo
+    TicketCloseInfo,
+    PaginatedTickets
 )
 
 bearer_scheme = HTTPBearer()
@@ -26,7 +27,112 @@ bearer_scheme = HTTPBearer()
 # Crear un router para los tickets
 ticket_router = APIRouter(tags=["Tickets"],prefix="/tickets")
 
-# Crear un ticket (POST)
+@ticket_router.get(
+    "/tickets", 
+    summary="Obtener todos los tickets",
+    description="Obtiene una lista de todos los tickets. Se pueden filtrar por estado, id del creador o id del usuario asignado.",
+    response_model=PaginatedTickets,
+    response_description="Un JSON con la información de los tickets paginados."
+)
+async def get_all_tickets(
+    state: Optional[str] = Query(None, title="Estado del ticket a filtrar", description="Puede ser 'pendiente', 'asignado', 'en proceso', o 'finalizado'"),
+    creator_id: Optional[int] = Query(None, title="ID del creador del ticket a filtrar"),
+    assignee_id: Optional[int] = Query(None, title="ID del usuario asignado del ticket a filtrar"),
+    page: int = Query(1, ge=1, description="Número de la página que se desea obtener. Comienza en 1."),  
+    limit: int = Query(10, ge=1, description="Cantidad de tickets por página. Valor predeterminado: 10."),
+    db: Session = Depends(get_db),
+    token: str = Depends(bearer_scheme)
+):
+    """
+    Obtiene todos los tickets, con opción de filtrar por estado, ID del creador o ID del usuario asignado.
+
+    Parámetros:
+    - state: Estado del ticket a filtrar.
+    - creator_id: ID del creador del ticket a filtrar.
+    - assignee_id: ID del usuario asignado a los tickets a filtrar.
+    - page: Número de la página que se desea obtener.
+    - limit: Cantidad de tickets por página.
+
+    Retorna:
+    - Un objeto de PaginatedTickets que incluye los tickets y detalles de paginación.
+    """
+
+    # Calcular el offset en base al número de página
+    offset = (page - 1) * limit
+
+    query = db.query(Ticket)
+
+    # Filtrar por estado
+    if state:
+        query = query.filter(Ticket.state == state)
+
+    # Filtrar por ID del creador
+    if creator_id:
+        query = query.filter(Ticket.created_by == creator_id)
+
+    # Filtrar por ID del usuario asignado
+    if assignee_id:
+        query = query.filter(Ticket.assigned_to == assignee_id)
+
+    # Total de tickets en la base de datos considerando el filtro
+    total_tickets = query.count()
+
+    # Consultar los tickets con límite y offset para paginación
+    tickets = query.offset(offset).limit(limit).all()
+
+    if not tickets:
+        raise HTTPException(status_code=404, detail="No se encontraron tickets que coincidan con los filtros.")
+
+    # Preparar la respuesta
+    ticket_responses = []
+    for ticket in tickets:
+        creator = ticket.creator
+        assigned_user = ticket.assignee
+        ticket_responses.append(
+            TicketStandartResponse(
+                id=ticket.id,
+                description=ticket.description,
+                state=ticket.state,
+                created_at=ticket.created_at,
+                priority=ticket.priority,
+                deadline=ticket.deadline,
+                machine_id=ticket.machine_id,
+                created_by={
+                    "id": creator.id,
+                    "name": f"{creator.first_name} {creator.last_name}",
+                    "email": creator.email,
+                    "rol_id": creator.role_id
+                },
+                assigned_to=(
+                    {
+                        "id": assigned_user.id,
+                        "name": f"{assigned_user.first_name} {assigned_user.last_name}",
+                        "email": assigned_user.email,
+                        "rol_id": assigned_user.role_id
+                    } if assigned_user else None
+                ),
+                related_open_requests=[{
+                    "id": solicitud.id,
+                    "type": solicitud.type
+                } for solicitud in ticket.solicitudes if solicitud.status == "pendiente"]
+            )
+        )
+
+    # Determinar si es la última página
+    is_last_page = len(tickets) < limit or (page * limit >= total_tickets)
+
+    # Retornar los datos de paginación y los tickets
+    paginated_response = PaginatedTickets(
+        page=page,
+        limit=limit,
+        total_tickets=total_tickets,
+        tickets=ticket_responses,
+        is_last_page=is_last_page
+    )
+
+    return paginated_response
+
+
 @ticket_router.post(
     "/ticket",
     summary="Crear un ticket como solicitud de revision",
@@ -62,7 +168,6 @@ async def create_ticket(
     creator = db.query(User).filter(User.id == user_id).first()
     if not creator:
         raise HTTPException(status_code=404, detail="Usuario creador no encontrado.")
-
 
     priority_deadlines = {
         'baja': timedelta(weeks=1),

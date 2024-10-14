@@ -73,6 +73,13 @@ class TicketStandartResponse(BaseModel):
                 ]
             }
         }
+        
+class PaginatedTickets(BaseModel):
+    page: int
+    limit: int
+    total_tickets: int
+    tickets: List[TicketStandartResponse]
+    is_last_page: bool
     
 class TicketCreate(BaseModel):
     description: str
