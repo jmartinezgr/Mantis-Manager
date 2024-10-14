@@ -20,7 +20,9 @@ machine_router = APIRouter(tags=["Maquinas"], prefix="/machines")
 @machine_router.post(
     "/machine",
     summary="Crear una nueva máquina",
-    description="El jefe de mantenmiento podrá crear una nueva máquina.",
+    description="""El jefe de mantenmiento (rol requerido) podrá crear una nueva máquina.}
+        El ID de la máquina debe ser alfanumérico y tener máximo 3 caracteres.
+        La acción debe ser una de las siguientes: tejer, teñir, urdir, fijar.""",
     response_description="Datos de la máquina creada", 
     response_model=MachineActionResponse
 )
@@ -72,7 +74,7 @@ async def create_machine(
 @machine_router.get(
     "/machines", 
     summary="Obtener todas las máquinas",
-    description="El jefe de mantenimiento podrá obtener todas las máquinas registradas.",
+    description="El jefe de mantenimiento (rol requerido) podrá obtener todas las máquinas registradas.",
     response_model=MachineList
 )
 async def get_all_machines(
@@ -165,7 +167,7 @@ async def update_machine(
 @machine_router.delete(
     "/machine/{machine_id}", 
     summary="Eliminar una maquina por su id",
-    description="Eliminar una maquina por su id",
+    description="El jefe de mantenimiento (rol requerido) elimina una máquina por su ID.",
     response_model=MachineActionResponse
 )
 async def delete_machine(
