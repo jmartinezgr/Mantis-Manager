@@ -21,11 +21,11 @@ jd_router = APIRouter(
 @jd_router.get(
     "/user_info",
     summary="Obtener información paginada de los usuarios",
-    description=(
-        "Este endpoint devuelve información paginada de los usuarios, "
-        "como el nombre completo, correo electrónico, rol y teléfono. "
-        "Requiere autenticación con un token válido y permisos adecuados."
-    ),
+    description="""
+        Este endpoint devuelve información paginada de los usuarios
+        como el nombre completo, correo electrónico, rol y teléfono,
+        Requiere autenticación con un token válido y permisos adecuados.
+    """,
     response_model=PaginatedUsers,  
     response_description="Un JSON con la información de los usuarios paginados."
 )
@@ -84,8 +84,10 @@ async def get_user_info(
 @jd_router.patch(
     "/user_info/{user_id}", 
     summary="Actualizar información de un usuario",
-    description=("Permite al jefe de desarrollo actualizar el correo electrónico"
-                "rol o teléfono de un usuario específico."),
+    description="""
+        Permite al jefe de desarrollo actualizar la información de un usuario específico.
+        Los campos que se pueden actualizar son: nombre, apellido, contraseña, correo electrónico, rol y teléfono.
+    """,
     response_model=InfoUser
 )
 async def update_user_info(
@@ -137,49 +139,11 @@ async def update_user_info(
 
     return response
 
-@jd_router.delete(
-    "/user_info/{user_id}",
-    summary="Eliminar un usuario específico",
-    description="Permite al jefe de desarrollo eliminar un usuario específico.",
-    response_model=InfoUser
-)
-async def delete_user(
-    user_id: int = Path(..., title="ID del usuario", description="ID del usuario a eliminar."),
-    token: str = Depends(HTTPBearer()),
-    db: Session = Depends(get_db)
-):
-    """
-    Elimina un usuario específicicando su id.
-
-    Args:
-        user_id (int): ID del usuario a eliminar.
-        token (str): Token de autenticación requerido.
-        db (Session): Sesión de la base de datos.
-
-    Returns:
-        UserData: Un JSON con la información del usuario eliminado.
-    """
-    # Obtener el usuario a eliminar
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
-
-    # Eliminar el usuario de la base de datos
-    db.delete(user)
-
-    # Preparar la respuesta
-    response = InfoUser(
-        detail="Usuario eliminado con exito" 
-    )
-    
-    db.commit()
-
-    return response
 
 @jd_router.post(
     "/register",
     summary="Registrar un nuevo usuario",
-    description="Permite al jefe de desarrollo crear un nuevo usuario.", 
+    description="Permite al jefe de desarrollo crear un nuevo usuario. Requiere un token de autenticación.", 
     response_model=InfoUser
 )
 async def register(
@@ -234,4 +198,44 @@ async def register(
         detail="Usuario creado con éxito"
     )
     
+    return response
+
+
+@jd_router.delete(
+    "/user_info/{user_id}",
+    summary="Eliminar un usuario específico",
+    description="Permite al jefe de desarrollo eliminar un usuario específico pasando su ID especifico.",
+    response_model=InfoUser
+)
+async def delete_user(
+    user_id: int = Path(..., title="ID del usuario", description="ID del usuario a eliminar."),
+    token: str = Depends(HTTPBearer()),
+    db: Session = Depends(get_db)
+):
+    """
+    Elimina un usuario específicicando su id.
+
+    Args:
+        user_id (int): ID del usuario a eliminar.
+        token (str): Token de autenticación requerido.
+        db (Session): Sesión de la base de datos.
+
+    Returns:
+        UserData: Un JSON con la información del usuario eliminado.
+    """
+    # Obtener el usuario a eliminar
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+
+    # Eliminar el usuario de la base de datos
+    db.delete(user)
+
+    # Preparar la respuesta
+    response = InfoUser(
+        detail="Usuario eliminado con exito" 
+    )
+    
+    db.commit()
+
     return response
