@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator,  Field
+from pydantic import BaseModel, field_validator, Field, EmailStr
 from typing import Optional
 from datetime import datetime
 from typing import List
@@ -9,7 +9,36 @@ class TicketData(BaseModel):
     machine_id: str
     created_by: str
     
-class TicketResponse(BaseModel):
+class RelacionatedRequest(BaseModel):
+    id: int
+    type: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": 101,
+                "type": "cierre"
+            }
+        }
+
+    
+class UserBaseInfo(BaseModel):
+    id: str
+    name: str
+    email: EmailStr
+    rol_id: int
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": "12345",
+                "name": "Juan José Martinez",
+                "email": "jjmartinez@example.com",
+                "rol_id": 2
+            }
+        }
+
+class TicketStandartResponse(BaseModel):
     id: int
     description: str
     state: str
@@ -17,9 +46,40 @@ class TicketResponse(BaseModel):
     priority: str   
     deadline: datetime
     machine_id: str
-    created_by: str
-    assigned_to: Optional[str] = None
-    
+    created_by: UserBaseInfo
+    assigned_to: Optional[UserBaseInfo] = None
+    related_open_requests: Optional[List[RelacionatedRequest]] = None
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "description": "Reparación de máquina X",
+                "state": "pendiente",
+                "created_at": "2024-10-13T12:34:56.789Z",
+                "priority": "alta",
+                "deadline": "2024-10-20T12:00:00Z",
+                "machine_id": "T10",
+                "created_by": {
+                    "id": "1018224606",
+                    "name": "Juan José Martinez",
+                    "email": "jjmartinez@example.com",
+                    "rol_id": 2
+                },
+                "assigned_to": {
+                    "id": "1036252622",
+                    "name": "Manuela Valencia",
+                    "email": "mvalencia@example.com",
+                    "rol_id": 3
+                },
+                "related_open_requests": [
+                    {
+                        "id": 101,
+                        "type": "cierre"
+                    }
+                ]
+            }
+        }
     
 class TicketSearchResponse(BaseModel):
     id: int

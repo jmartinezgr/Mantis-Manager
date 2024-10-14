@@ -19,7 +19,7 @@ from schemas.ticket_schema import (
     TicketData, 
     TicketAssign, 
     TicketStateUpdate, 
-    TicketResponse, 
+    TicketStandartResponse, 
     TicketSearchResponse,
     TicketSolicitudInfo,
     TicketCloseInfo
@@ -36,7 +36,7 @@ ticket_router = APIRouter(tags=["Tickets"],prefix="/tickets")
     summary="Crear un ticket como solicitud de revision",
     description="""Solicitar una revisión de una maquina a traves de un ticket, 
     crea un nuevo ticket con el estado predeterminado 'pendiente'.""",
-    response_model=TicketResponse
+    response_model=TicketStandartResponse
 )
 async def create_ticket(
     request: Request = None,
@@ -94,9 +94,9 @@ async def create_ticket(
     db.add(new_ticket)
     db.commit()
     db.refresh(new_ticket)
-    
+        
     # Retornar la información del ticket creado
-    return TicketResponse(
+    return TicketStandartResponse(
         id=new_ticket.id,
         description=new_ticket.description,
         state=new_ticket.state,
@@ -104,14 +104,19 @@ async def create_ticket(
         priority=new_ticket.priority, 
         deadline=new_ticket.deadline,
         machine_id=machine.id,  
-        created_by=creator.id
+        created_by={
+            "id": creator.id, 
+            "name": f"{creator.first_name} {creator.last_name}", 
+            "email": creator.email,
+            "rol_id": creator.role_id
+        }
     )
 
 @ticket_router.get(
     "/ticket/{ticket_id}", 
     summary="Obtener un ticket por su ID",
     description="Obtiene un ticket por su ID, incluyendo los nombres completos y los IDs de las personas involucradas.",
-    response_model=TicketSearchResponse
+    response_model=TicketStandartResponse
 )
 async def get_ticket(
     ticket_id: int = Path(..., title="ID del ticket a buscar"), 
@@ -133,28 +138,43 @@ async def get_ticket(
         raise HTTPException(status_code=404, detail="Usuario creador no encontrado")
     created_by_name = f"{creator.first_name} {creator.last_name}"
 
-    # Obtener el usuario asignado (si existe)
-    assigned_to_name = None
-    assigned_to_id = None
-    if ticket.assigned_to:
-        assigned_user = db.query(User).filter(User.id == ticket.assigned_to).first()
-        if assigned_user:
-            assigned_to_name = f"{assigned_user.first_name} {assigned_user.last_name}"
-            assigned_to_id = assigned_user.id
+    responsable = db.query(User).filter(User.id == ticket.assigned_to).first()
 
-    # Devolver la respuesta con los nombres completos y los IDs
-    return TicketSearchResponse(
+    if responsable:
+        responsable_info = {
+            "id": responsable.id,
+            "name": f"{responsable.first_name} {responsable.last_name}",
+            "email": responsable.email,
+            "rol_id": responsable.role_id
+        }
+    else:
+        responsable_info = None
+        
+    related_open_requests = []
+    for solicitud in ticket.solicitudes:
+        if solicitud.status == "pendiente":
+            solicitud_data = {
+                "id": solicitud.id,
+                "type": solicitud.type
+            }
+            related_open_requests.append(solicitud_data)
+    
+    return TicketStandartResponse(
         id=ticket.id,
         description=ticket.description,
         state=ticket.state,
-        priority=ticket.priority,
-        machine_serial=ticket.machine.serial,
-        created_by_id=creator.id, 
-        created_by_name=created_by_name,  
-        assigned_to_id=assigned_to_id, 
-        assigned_to_name=assigned_to_name, 
         created_at=ticket.created_at,
-        deadline=ticket.deadline
+        priority=ticket.priority,
+        deadline=ticket.deadline,
+        machine_id=ticket.machine_id,
+        created_by={
+            "id": creator.id,
+            "name": created_by_name,
+            "email": creator.email,
+            "rol_id": creator.role_id
+        },
+        assigned_to=responsable_info,
+        related_open_requests=related_open_requests
     )
 
 @ticket_router.patch(

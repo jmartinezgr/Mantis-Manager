@@ -59,4 +59,4 @@ class Ticket(Base):
                             back_populates="assigned_tickets")
 
     # Relación bidireccional con Solicitud
-    solicitud = relationship("Solicitud", back_populates="ticket", uselist=False)
+    solicitudes = relationship("Solicitud", back_populates="ticket", cascade="all, delete-orphan")
