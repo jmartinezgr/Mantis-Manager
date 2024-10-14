@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator, Field, EmailStr
 from typing import Optional
 from datetime import datetime
 from typing import List, Literal
+from enum import Enum
 
 class RelacionatedRequest(BaseModel):
     id: int
@@ -107,3 +108,26 @@ class TicketCloseInfo(BaseModel):
 class TicketSolicitudInfo(BaseModel):
     detail: str
     id_solicitud: int
+    
+class EventType(str, Enum):
+    CREATION = "creación"
+    STATE_CHANGE = "cambio de estado"
+    CLOSE_REQUEST = "solicitud de cierre"
+    CLOSURE = "cierre"
+    ASIGNATION = "asignacion"
+
+class Record(BaseModel):
+    id: int
+    description: str
+    created_at: datetime
+    event_type: EventType
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "description": "Creación del ticket por el usuario Juan José Martinez.",
+                "created_at": "2024-10-14T10:00:00Z",
+                "event_type": "creación"
+            }
+        }

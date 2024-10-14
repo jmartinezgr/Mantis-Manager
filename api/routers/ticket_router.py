@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from sqlalchemy import case
 import json
 
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, Request, Path,Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -19,7 +19,8 @@ from schemas.ticket_schema import (
     TicketStandartResponse, 
     TicketSolicitudInfo,
     TicketCloseInfo,
-    PaginatedTickets
+    PaginatedTickets,
+    Record
 )
 
 bearer_scheme = HTTPBearer()
@@ -397,8 +398,8 @@ async def assign_ticket(
 )
 async def change_ticket_state(
     req:Request,
-    ticket_id: int = Path(..., title="ID del ticket a editar"),
-    ticket_state: str = Path(..., title="Estado al que se va a cambiar el ticket"), 
+    ticket_id: int = Path(..., title="ID del ticket a editar", description="ID del ticket a editar"),
+    ticket_state: str = Path(..., title="Estado al que se va a cambiar el ticket", description="Estado al que se va a cambiar el ticket"), 
     db: Session = Depends(get_db),
     dependencies = Depends(bearer_scheme)    
 ):
@@ -483,7 +484,7 @@ async def change_ticket_state(
 )
 async def request_ticket_closure(
     req: Request,
-    ticket_id: int = Path(..., title="ID del ticket a solicitar cierre"),
+    ticket_id: int = Path(..., title="ID del ticket a solicitar cierre", description="ID del ticket a solicitar cierre"),
     close_info: TicketCloseInfo = None,
     db: Session = Depends(get_db),
     token: str = Depends(bearer_scheme)
@@ -550,3 +551,35 @@ async def request_ticket_closure(
         detail="Solicitud de cierre enviada correctamente. Sera notificado con la respuesta.",
         id_solicitud=nueva_solicitud.id
     )
+    
+@ticket_router.get(
+    "/ticket/seguimiento/{ticket_id}",
+    summary="Obtener el seguimiento historico de un ticket",
+    description="""Obtiene el historial de un ticket, incluyendo los nombres completos y los IDs de las personas involucradas.
+    Se retorna en orden cronologico descendente.""",
+    response_model=List[Record]
+)
+def records(
+    req: Request,
+    ticket_id: int = Path(..., title="ID del ticket a solicitar cierre", description="ID del ticket a obtener el historial"),
+    db: Session = Depends(get_db),
+    token: str = Depends(bearer_scheme)
+):
+    history = db.query(Registro).filter(Registro.ticket_id == ticket_id).order_by(Registro.created_at.asc()).all()
+    
+    if not history:
+        raise HTTPException(status_code=404, detail="No se encontraron registros para el ticket.")
+    
+    records = []
+    
+    for record in history:
+        records.append(
+            Record(
+                id=record.id,
+                description=record.description,
+                event_type=record.event_type,
+                created_at=record.created_at
+            )
+        )
+        
+    return records
