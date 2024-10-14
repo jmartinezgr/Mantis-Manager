@@ -421,6 +421,9 @@ async def change_ticket_state(
     if ticket_state not in ["asignado", "en proceso", "pendiente"]:
         raise HTTPException(status_code=400, detail="Estado no válido para cambio directo.")
 
+    if ticket.state == "finalizado" or ticket.state == "pendiente a revision":
+        raise HTTPException(status_code=400, detail="No se puede cambiar el estado de un ticket finalizado o en espera de aprobación de cierre.")
+
     user  = req.state.user
     
     if ticket.assigned_to != user.get("sub"):
@@ -430,6 +433,15 @@ async def change_ticket_state(
     ticket.state = ticket_state
     db.commit()
     db.refresh(ticket)
+            
+    new_registro = Registro(
+        description=f"Se ha cambiado el estado del ticket a {ticket_state}",
+        event_type="cambio de estado",
+        ticket_id=ticket.id
+    )  
+    
+    db.add(new_registro)
+    db.commit()     
             
     related_open_requests = []
     for solicitud in ticket.solicitudes:
@@ -523,6 +535,7 @@ async def request_ticket_closure(
     db.add(nueva_solicitud)
     ticket.state = "pendiente a revision"
     db.commit()
+    
 
     new_registro = Registro(
         description=f"Se ha solicitado aprobación para el cierre del ticket. Id de la solicitud: {nueva_solicitud.id}",
