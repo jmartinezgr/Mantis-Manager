@@ -35,7 +35,7 @@ ticket_router = APIRouter(tags=["Tickets"],prefix="/tickets")
     response_description="Un JSON con la información de los tickets paginados."
 )
 async def get_all_tickets(
-    state: Optional[str] = Query(None, title="Estado del ticket a filtrar", description="Puede ser 'pendiente', 'asignado', 'en proceso', o 'finalizado'"),
+    state: Optional[str] = Query(None, title="Estado del ticket a filtrar", description="Puede ser 'pendiente', 'asignado', 'en proceso', o 'finalizado','pendiente a revision','cerrado'"),
     creator_id: Optional[int] = Query(None, title="ID del creador del ticket a filtrar"),
     assignee_id: Optional[int] = Query(None, title="ID del usuario asignado del ticket a filtrar"),
     page: int = Query(1, ge=1, description="Número de la página que se desea obtener. Comienza en 1."),  
