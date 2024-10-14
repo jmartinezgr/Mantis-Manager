@@ -17,7 +17,6 @@ from models.solicitud_model import Solicitud
 from schemas.ticket_schema import (
     TicketCreate, 
     TicketStandartResponse, 
-    TicketSearchResponse,
     TicketSolicitudInfo,
     TicketCloseInfo
 )
@@ -266,7 +265,7 @@ async def assign_ticket(
     summary="Cambiar el estado de un ticket",
     description="""Cambia el estado de un ticket (a excepción de finalizado o en caso de que ya esté finalizado)
     Los estados validos son: asignado, en proceso, pendiente""",
-    response_model=TicketSearchResponse
+    response_model=TicketStandartResponse
 )
 async def change_ticket_state(
     req:Request,
@@ -299,23 +298,41 @@ async def change_ticket_state(
     if ticket.assigned_to != user.get("sub"):
         raise HTTPException(status_code=400, detail="No tienes permiso para realizar esta accion (No eres el responsable del ticket)")
 
-
-    # Obtener el nombre completo del creador del ticket
-    creator = db.query(User).filter(User.id == ticket.created_by).first()
-
     # Actualizar el estado del ticket
     ticket.state = ticket_state
     db.commit()
     db.refresh(ticket)
-
-    return  TicketSearchResponse(
+            
+    related_open_requests = []
+    for solicitud in ticket.solicitudes:
+        if solicitud.status == "pendiente":
+            solicitud_data = {
+                "id": solicitud.id,
+                "type": solicitud.type
+            }
+            related_open_requests.append(solicitud_data)
+    
+    return TicketStandartResponse(
         id=ticket.id,
         description=ticket.description,
         state=ticket.state,
-        priority=ticket.priority,
-        created_by_id= ticket.created_by,
-        assigned_to_id= ticket.assigned_to,
         created_at=ticket.created_at,
+        priority=ticket.priority, 
+        deadline=ticket.deadline,
+        machine_id=ticket.machine_id,  
+        created_by={
+            "id": ticket.creator.id, 
+            "name": f"{ticket.creator.first_name} {ticket.creator.last_name}", 
+            "email": ticket.creator.email,
+            "rol_id": ticket.creator.role_id
+        },
+        assigned_to={
+            "id": ticket.assignee.id, 
+            "name": f"{ticket.assignee.first_name} {ticket.assignee.last_name}", 
+            "email": ticket.assignee.email,
+            "rol_id": ticket.assignee.role_id
+        },
+        related_open_requests=related_open_requests
     )
     
 @ticket_router.post(
