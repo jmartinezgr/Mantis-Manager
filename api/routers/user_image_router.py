@@ -1,21 +1,28 @@
 import os
 import shutil
-
-from fastapi import APIRouter, Depends, File, HTTPException, Path, Request, UploadFile
+from uuid import uuid4
+from fastapi import APIRouter, Depends, File, HTTPException, Path, Request, UploadFile, Form
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
-
+from pydantic import BaseModel
 from config.db import get_db
 from models.user_model import User
 from schemas.user_schema import ImageResponse
 
-
 # Crear directorio 'images' si no existe
-os.makedirs("images", exist_ok=True)
+IMAGE_DIRECTORY = "images"
+os.makedirs(IMAGE_DIRECTORY, exist_ok=True)
 
 # Crear el router para manejar las imágenes de los usuarios
 user_image_router = APIRouter(tags=["Users Images"])
+
+# Definir el esquema de respuesta si no lo tienes
+class ImageResponse(BaseModel):
+    path: str
+
+    class Config:
+        orm_mode = True
 
 @user_image_router.post(
     "/users/upload/{user_id}",
@@ -25,14 +32,14 @@ user_image_router = APIRouter(tags=["Users Images"])
         "tiene una imagen guardada, esta se eliminará antes de almacenar la nueva."
     ),
     response_model=ImageResponse,
-    response_description="path donde se encuentra la imagen.",
+    response_description="URL donde se encuentra la imagen.",
 )
 async def upload_user_image(
     user_id: int = Path(..., title="ID del usuario", description="ID del usuario al que corresponde la imagen"),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     token: str = Depends(HTTPBearer()),
-    req: Request = None
+    request: Request = None
 ):
     """
     Sube una imagen de perfil para un usuario específico.
@@ -45,11 +52,11 @@ async def upload_user_image(
         file: Imagen que se va a subir (debe ser un archivo de tipo imagen).
 
     Returns: 
-        Mensaje de éxito y el path donde se encuentra la imagen.
+        Mensaje de éxito y la URL donde se encuentra la imagen.
     """
 
     # Obtener el ID del usuario desde el token
-    token_id = req.state.user["sub"]
+    token_id = request.state.user["sub"]
 
     # Verificar que el usuario autenticado coincida con el ID de la ruta
     if user_id != token_id:
@@ -64,15 +71,26 @@ async def upload_user_image(
     if not file.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="El archivo no es una imagen")
 
+    # Opcional: Verificar el tamaño del archivo
+    contents = await file.read()
+    MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+    if len(contents) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="El archivo excede el tamaño máximo permitido de 5MB.")
+    # Resetear el cursor del archivo
+    file.file.seek(0)
+
     # Eliminar la imagen anterior si existe
     if user.image_field and os.path.exists(user.image_field):
         os.remove(user.image_field)
 
     # Extraer la extensión del archivo
-    extension = file.filename.split(".")[-1]
+    extension = os.path.splitext(file.filename)[1].lower()
+    if extension not in [".jpg", ".jpeg", ".png", ".gif"]:
+        raise HTTPException(status_code=400, detail="Extensión de archivo no soportada.")
 
-    # Definir la ubicación del archivo con la extensión correcta
-    file_location = f"images/{user_id}.{extension}"
+    # Generar un nombre de archivo único para evitar colisiones
+    unique_filename = f"{uuid4().hex}{extension}"
+    file_location = os.path.join(IMAGE_DIRECTORY, unique_filename)
 
     # Guardar la imagen en el servidor
     with open(file_location, "wb+") as file_object:
@@ -83,11 +101,16 @@ async def upload_user_image(
     db.commit()
     db.refresh(user)
 
-    # Retornar la respuesta con el path de la imagen
-    return ImageResponse(path = f'/users/image/{user_id}')
+    # Generar la URL de acceso a la imagen
+    image_url = request.url_for("get_user_image", user_id=user_id)
+
+    # Retornar la respuesta con la URL de la imagen
+    return ImageResponse(path=image_url)
+
 
 @user_image_router.get(
     "/users/image/{user_id}",
+    name="get_user_image",  # Añadir nombre para generar URLs
     summary="Obtener la imagen de perfil de un usuario específico",
     description="Obtiene la imagen de perfil de un usuario específico.",
     response_description="Archivo de imagen.",
@@ -97,7 +120,7 @@ async def get_user_image(
     user_id: int = Path(..., title="ID del usuario", description="ID del usuario al que corresponde la imagen"),
     db: Session = Depends(get_db),
     token: str = Depends(HTTPBearer()),
-    req: Request = None
+    request: Request = None
 ):
     """
     Obtiene la imagen de perfil de un usuario específico.
@@ -111,7 +134,7 @@ async def get_user_image(
     """
 
     # Obtener el ID del usuario desde el token
-    token_id = req.state.user["sub"]
+    token_id = request.state.user["sub"]
 
     # Verificar que el usuario autenticado coincida con el ID de la ruta
     if user_id != token_id:
