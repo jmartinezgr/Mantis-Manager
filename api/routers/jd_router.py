@@ -49,8 +49,6 @@ async def get_user_info(
         total_users: Número total de usuarios en la base de datos.
         users: Lista de usuarios con su información filtrada.
     """
-    current_user = req.state.user
-    
     # Calcular el offset en base al número de página
     offset = (page - 1) * limit
 
@@ -204,7 +202,7 @@ async def register(
     existing_user = db.query(User).filter(User.id == data.id).first()
     if existing_user:
         return JSONResponse(status_code=400, content={
-            "error": "El email ya está registrado"
+            "error": "El id ya está registrado"
         })
 
     # Normalizar los nombres de los roles en la consulta
