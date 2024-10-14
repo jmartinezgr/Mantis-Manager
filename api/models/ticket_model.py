@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, func, Enum
+from sqlalchemy import Column, Integer, String, DateTime, func, Enum, Identity
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.schema import ForeignKey
 from config.db import Base, engine
@@ -35,7 +35,7 @@ class Ticket(Base):
 
     __tablename__ = 'ticket'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, Identity(start=1, increment=1), primary_key=True)  
     description = Column(String, nullable=False)
     state = Column(String, default='pendiente', nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(),
