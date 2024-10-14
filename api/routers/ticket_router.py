@@ -524,6 +524,15 @@ async def request_ticket_closure(
     ticket.state = "pendiente a revision"
     db.commit()
 
+    new_registro = Registro(
+        description=f"Se ha solicitado aprobación para el cierre del ticket. Id de la solicitud: {nueva_solicitud.id}",
+        event_type="solicitud de cierre",
+        ticket_id=ticket.id
+    )  
+    
+    db.add(new_registro)
+    db.commit()    
+
     return TicketSolicitudInfo(
         detail="Solicitud de cierre enviada correctamente. Sera notificado con la respuesta.",
         id_solicitud=nueva_solicitud.id

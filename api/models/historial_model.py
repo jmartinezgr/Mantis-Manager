@@ -10,6 +10,7 @@ class EventType(str, Enum):
     CLOSE_REQUEST = "solicitud de cierre"
     CLOSURE = "cierre"
     ASIGNATION = "asignacion"
+    
 
 class Registro(Base):
     __tablename__ = 'records'
