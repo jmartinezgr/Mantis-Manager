@@ -22,7 +22,7 @@ class ImageResponse(BaseModel):
     path: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 @user_image_router.post(
     "/users/upload/{user_id}",
