@@ -4,7 +4,6 @@ import json
 
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Request, Path,Query
-from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from fastapi.security import HTTPBearer
@@ -12,7 +11,8 @@ from fastapi.security import HTTPBearer
 from config.db import get_db
 from models.ticket_model import Ticket
 from models.machine_model import Machine 
-from models.user_model import User, Role
+from models.user_model import User
+from models.historial_model import Registro
 from models.solicitud_model import Solicitud
 from schemas.ticket_schema import (
     TicketCreate, 
@@ -191,11 +191,20 @@ async def create_ticket(
         created_at=func.now(), 
         deadline=deadline
     )
-
-    db.add(new_ticket)
+    
+    db.add(new_ticket) 
     db.commit()
     db.refresh(new_ticket)
-        
+    # Crear un registro de creación del ticket
+    new_registro = Registro(
+        description=f"Creación del ticket {new_ticket.id} por el usuario con nombre {creator.first_name} {creator.last_name} y con id: {user_id}",
+        event_type="creación",
+        ticket_id=new_ticket.id
+    )  
+    
+    db.add(new_registro)
+    db.commit()
+    
     # Retornar la información del ticket creado
     return TicketStandartResponse(
         id=new_ticket.id,

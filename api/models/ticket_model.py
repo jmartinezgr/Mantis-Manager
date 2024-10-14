@@ -60,3 +60,6 @@ class Ticket(Base):
 
     # Relación bidireccional con Solicitud
     solicitudes = relationship("Solicitud", back_populates="ticket", cascade="all, delete-orphan")
+    
+    # Relación inversa con Registro
+    records = relationship("Registro", back_populates="ticket")  
