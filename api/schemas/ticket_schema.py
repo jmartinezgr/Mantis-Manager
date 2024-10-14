@@ -13,7 +13,7 @@ class TicketResponse(BaseModel):
     description: str
     state: str
     created_at: datetime
-    priority: str
+    priority: str   
     deadline: datetime
     machine_id: str
     created_by: str

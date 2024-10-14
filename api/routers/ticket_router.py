@@ -12,7 +12,14 @@ from config.db import get_db
 from models.ticket_model import Ticket
 from models.machine_model import Machine 
 from models.user_model import User, Role
-from schemas.ticket_schema import TicketCreate, TicketData, TicketAssign, TicketStateUpdate, TicketResponse, TicketSearchResponse
+from schemas.ticket_schema import (
+    TicketCreate, 
+    TicketData, 
+    TicketAssign, 
+    TicketStateUpdate, 
+    TicketResponse, 
+    TicketSearchResponse
+)
 
 bearer_scheme = HTTPBearer()
 
@@ -23,7 +30,8 @@ ticket_router = APIRouter(tags=["Tickets"])
 @ticket_router.post(
     "/ticket",
     summary="Crear un ticket como solicitud de revision",
-    description="Solicitar una revisión de una maquina a traves de un ticket",
+    description="""Solicitar una revisión de una maquina a traves de un ticket, 
+    crea un nuevo ticket con el estado predeterminado 'pendiente'.""",
     response_model=TicketResponse
 )
 async def create_ticket(
@@ -98,7 +106,7 @@ async def create_ticket(
 @ticket_router.get(
     "/tickets/{ticket_id}", 
     summary="Obtener un ticket por su ID",
-    description="Obtener la información de un ticket por su ID",
+    description="Obtiene un ticket por su ID, incluyendo los nombres completos y los IDs de las personas involucradas.",
     response_model=TicketSearchResponse
 )
 async def get_ticket(
@@ -148,7 +156,9 @@ async def get_ticket(
 @ticket_router.patch(
     "/tickets/assing/{ticket_id}",
     summary="Asignar un responsable a un ticket",
-    description="Puede autoasignarse el ticket o asignarlo a otra persona si es un jefe de mantenimiento"
+    description="""Puede autoasignarse el ticket o asignarlo a otra persona si es un jefe de mantenimiento
+    si no es omitido se verifica que el usuario sea un jefe de mantenimiento, que es el 
+    unico con el poder de asignarle un ticket a otro usuario."""
 )
 async def assign_ticket(
     req : Request,
@@ -166,7 +176,6 @@ async def assign_ticket(
     Parámetros:
         ticket_id: ID del ticket a editar
         user_id: el id de la persona a la cual se le asiganara el ticket (assigned_to).
-    
     
     Retorna:
        Información del ticket actualizado.
@@ -188,6 +197,9 @@ async def assign_ticket(
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
     
+    if ticket.state == "finalizado":
+        raise HTTPException(status_code=400, detail="No se puede asignar otro estado a un ticket finalizado")
+    
     user = db.query(User).filter(User.id == user_to_assing).first()
     
     if not user:
@@ -207,8 +219,20 @@ async def assign_ticket(
         created_at=ticket.created_at,
     )
 
-@ticket_router.patch("/tickets/{ticket_id}/state", response_model=TicketData)
-async def change_ticket_state(ticket_id: int, ticket_update: TicketStateUpdate, db: Session = Depends(get_db)):
+@ticket_router.patch(
+    "/tickets/{ticket_id}/{ticket_state}",
+    summary="Cambiar el estado de un ticket",
+    description="""Cambia el estado de un ticket (a excepción de finalizado o en caso de que ya esté finalizado)
+    Los estados validos son: asignado, en proceso, pendiente""",
+    response_model=TicketSearchResponse
+)
+async def change_ticket_state(
+    req:Request,
+    ticket_id: int = Path(..., title="ID del ticket a editar"),
+    ticket_state: str = Path(..., title="Estado al que se va a cambiar el ticket"), 
+    db: Session = Depends(get_db),
+    dependencies = Depends(bearer_scheme)    
+):
     """
     Cambia el estado de un ticket (a excepción de finalizado o en caso de que ya esté finalizado) 
 
@@ -225,38 +249,31 @@ async def change_ticket_state(ticket_id: int, ticket_update: TicketStateUpdate, 
     if not ticket:
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
 
-    if ticket_update.state not in ["asignado", "en proceso", "pendiente"]:
+    if ticket_state not in ["asignado", "en proceso", "pendiente"]:
         raise HTTPException(status_code=400, detail="Estado no válido para cambio directo.")
 
-    # Actualizar el estado del ticket
-    ticket.state = ticket_update.state
-    db.commit()
-    db.refresh(ticket)
+    user  = req.state.user
+    
+    if ticket.assigned_to != user.get("sub"):
+        raise HTTPException(status_code=400, detail="No tienes permiso para realizar esta accion (No eres el responsable del ticket)")
+
 
     # Obtener el nombre completo del creador del ticket
     creator = db.query(User).filter(User.id == ticket.created_by).first()
-    if not creator:
-        raise HTTPException(status_code=404, detail="Creador del ticket no encontrado")
 
-    created_by_name = f"{creator.first_name} {creator.last_name}"
+    # Actualizar el estado del ticket
+    ticket.state = ticket_state
+    db.commit()
+    db.refresh(ticket)
 
-    # Obtener el nombre completo de la persona asignada, si está asignado
-    assigned_to_name = None
-    if ticket.assigned_to:
-        assigned_user = db.query(User).filter(User.id == ticket.assigned_to).first()
-        if assigned_user:
-            assigned_to_name = f"{assigned_user.first_name} {assigned_user.last_name}"
-
-    return TicketData(
+    return  TicketSearchResponse(
         id=ticket.id,
         description=ticket.description,
         state=ticket.state,
         priority=ticket.priority,
-        machine_serial=ticket.machine.serial,
-        created_by=created_by_name,  # Nombre completo del creador
-        assigned_to=assigned_to_name,  # Nombre completo del asignado, si existe
+        created_by_id= ticket.created_by,
+        assigned_to_id= ticket.assigned_to,
         created_at=ticket.created_at,
-        deadline=ticket.deadline
     )
 
 
@@ -333,7 +350,6 @@ async def get_my_tickets(request: Request, db: Session = Depends(get_db), depend
         )
         for ticket in tickets
     ]
-
 
 @ticket_router.get("/my-tickets", response_model=List[TicketData])
 async def get_assigned_tickets(request: Request, db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
