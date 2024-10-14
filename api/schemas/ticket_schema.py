@@ -1,14 +1,8 @@
 from pydantic import BaseModel, field_validator, Field, EmailStr
 from typing import Optional
 from datetime import datetime
-from typing import List
+from typing import List, Literal
 
-class TicketData(BaseModel):
-    description: str
-    priority: str
-    machine_id: str
-    created_by: str
-    
 class RelacionatedRequest(BaseModel):
     id: int
     type: str
@@ -21,7 +15,6 @@ class RelacionatedRequest(BaseModel):
             }
         }
 
-    
 class UserBaseInfo(BaseModel):
     id: str
     name: str
@@ -97,28 +90,7 @@ class TicketSearchResponse(BaseModel):
 class TicketCreate(BaseModel):
     description: str
     machine: str
-    priority: str
-
-
-class TicketStateUpdate(BaseModel):
-    state: str  # Estado al que se quiere cambiar el ticket
-
-    @field_validator('state')
-    def validate_state(cls, v):
-        valid_states = ["asignado", "en proceso", "pendiente"]
-        if v not in valid_states:
-            raise ValueError('El estado debe ser uno de los siguientes: asignado, en proceso, pendiente')
-        return v
-
-
-class TicketAssign(BaseModel):
-    assigned_to: str  # ID del usuario a asignar al ticket
-
-    @field_validator('assigned_to')
-    def validate_assigned_to(cls, v):
-        if not v:
-            raise ValueError('El ID del operario no puede estar vacío')
-        return v
+    priority: Literal["baja", "media", "alta"]
 
 class TicketCloseInfo(BaseModel):
     time_spent: float = Field(..., example=5.5, description="Tiempo empleado en horas")

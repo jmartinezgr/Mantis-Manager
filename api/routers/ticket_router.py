@@ -16,9 +16,6 @@ from models.user_model import User, Role
 from models.solicitud_model import Solicitud
 from schemas.ticket_schema import (
     TicketCreate, 
-    TicketData, 
-    TicketAssign, 
-    TicketStateUpdate, 
     TicketStandartResponse, 
     TicketSearchResponse,
     TicketSolicitudInfo,
@@ -133,13 +130,12 @@ async def get_ticket(
         raise HTTPException(status_code=404, detail="Ticket no encontrado")
 
     # Obtener el creador del ticket
-    creator = db.query(User).filter(User.id == ticket.created_by).first()
+    creator = ticket.creator
     if not creator:
         raise HTTPException(status_code=404, detail="Usuario creador no encontrado")
     created_by_name = f"{creator.first_name} {creator.last_name}"
 
-    responsable = db.query(User).filter(User.id == ticket.assigned_to).first()
-
+    responsable = ticket.assignee
     if responsable:
         responsable_info = {
             "id": responsable.id,
@@ -233,14 +229,36 @@ async def assign_ticket(
     db.commit()
     db.refresh(ticket)
     
-    return  TicketSearchResponse(
+    related_open_requests = []
+    for solicitud in ticket.solicitudes:
+        if solicitud.status == "pendiente":
+            solicitud_data = {
+                "id": solicitud.id,
+                "type": solicitud.type
+            }
+            related_open_requests.append(solicitud_data)
+    
+    return TicketStandartResponse(
         id=ticket.id,
         description=ticket.description,
         state=ticket.state,
-        priority=ticket.priority,
-        created_by_id= ticket.created_by,
-        assigned_to_id= ticket.assigned_to,
         created_at=ticket.created_at,
+        priority=ticket.priority, 
+        deadline=ticket.deadline,
+        machine_id=ticket.machine_id,  
+        created_by={
+            "id": ticket.creator.id, 
+            "name": f"{ticket.creator.first_name} {ticket.creator.last_name}", 
+            "email": ticket.creator.email,
+            "rol_id": ticket.creator.role_id
+        },
+        assigned_to={
+            "id": user.id, 
+            "name": f"{user.first_name} {user.last_name}", 
+            "email": user.email,
+            "rol_id": user.role_id
+        },
+        related_open_requests=related_open_requests
     )
 
 @ticket_router.patch(
@@ -365,103 +383,3 @@ async def request_ticket_closure(
         detail="Solicitud de cierre enviada correctamente. Sera notificado con la respuesta.",
         id_solicitud=nueva_solicitud.id
     )
-
-"""
-
-TODO: A la espera de tomar una decision sobre que hacer con estos endpoints
-
-@ticket_router.get("/seguimiento", response_model=List[TicketData])
-async def get_my_tickets(request: Request, db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
-    ""
-    Obtiene todos los tickets creados por el usuario autenticado.
-    
-    Parámetros:.
-    - db: Sesión de la base de datos. (Dependencia)
-    
-    Retorna:
-    - Una lista de tickets creados por el usuario autenticado.
-
-    ""
-    # Extraer el ID del usuario autenticado desde el token
-    user_info = request.state.user  
-    user_id = user_info.get("sub")  
-    
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Problema con la autenticacion de usuario.")
-    
-    # Consultar los tickets creados por el usuario autenticado
-    tickets = db.query(Ticket).filter(Ticket.created_by == user_id).all()
-    
-    if not tickets:
-        raise HTTPException(status_code=404, detail="No has creado ningún ticket.")
-    
-    # Devolver los tickets con los nombres completos
-    return [
-        TicketData(
-            id=ticket.id,
-            description=ticket.description,
-            state=ticket.state,
-            priority=ticket.priority,
-            machine_serial=ticket.machine.serial,
-            created_by=f"{db.query(User).filter(User.id == ticket.created_by).first().first_name} {db.query(User).filter(User.id == ticket.created_by).first().last_name}",  # Nombre completo del creador
-            assigned_to=(f"{db.query(User).filter(User.id == ticket.assigned_to).first().first_name} {db.query(User).filter(User.id == ticket.assigned_to).first().last_name}" if ticket.assigned_to else None),  # Nombre completo del asignado si existe
-            created_at=ticket.created_at,
-            deadline=ticket.deadline
-        )
-        for ticket in tickets
-    ]
-
-@ticket_router.get("/my-tickets", response_model=List[TicketData])
-async def get_assigned_tickets(request: Request, db: Session = Depends(get_db), dependencies=Depends(bearer_scheme)):
-    ""
-    Obtiene todos los tickets asignados al usuario autenticado, ordenados por prioridad
-    y antigüedad.
-    
-    Orden:
-    - Primero los de prioridad 'alta', luego 'media', luego 'baja', y por último los 'finalizados'.
-    - Dentro de cada grupo, de los más antiguos a los más nuevos.
-    ""
-    # Extraer el ID del usuario autenticado desde el token
-    user_info = request.state.user  
-    user_id = user_info.get("sub")  
-    
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Problema con la autenticacion de usuario.")
-    
-    # Consultar los tickets asignados al usuario autenticado y ordenarlos según estado, prioridad y fecha de creación
-    
-    tickets = db.query(Ticket).filter(Ticket.assigned_to == user_id).order_by(
-        # Primero los tickets que no están finalizados, luego los finalizados
-        case(
-            (Ticket.state != 'finalizado', 1),
-            else_=2  # Los tickets finalizados tienen menor prioridad en el orden
-        ).asc(),
-        # Luego dentro de los que no están finalizados, se ordenan por prioridad
-        case(
-            (Ticket.priority == 'alta', 1),
-            (Ticket.priority == 'media', 2),
-            (Ticket.priority == 'baja', 3),
-            else_=4  # En caso de otros valores
-        ).asc(),
-        # Finalmente, ordenamos por la fecha de creación para cada grupo
-        Ticket.created_at.asc()
-    ).all()
-    
-    if not tickets:
-        raise HTTPException(status_code=404, detail="No tienes tickets asignados.")
-    
-    # Devolver los tickets con los nombres completos
-    return [
-        TicketData(
-            id=ticket.id,
-            description=ticket.description,
-            state=ticket.state,
-            priority=ticket.priority,
-            machine_serial=ticket.machine.serial,
-            created_by=f"{db.query(User).filter(User.id == ticket.created_by).first().first_name} {db.query(User).filter(User.id == ticket.created_by).first().last_name}",
-            assigned_to=f"{db.query(User).filter(User.id == ticket.assigned_to).first().first_name} {db.query(User).filter(User.id == ticket.assigned_to).first().last_name}" if ticket.assigned_to else None,
-            created_at=ticket.created_at,
-            deadline=ticket.deadline
-        )
-        for ticket in tickets
-    ]"""
