@@ -178,7 +178,7 @@ async def create_ticket(
     }
 
     if ticket.priority not in priority_deadlines:
-        raise HTTPException(status_code=400, detail="Prioridad no válida.")
+        raise HTTPException(status_code=404, detail="Prioridad no válida.")
 
     # Calcular el deadline según la prioridad
     deadline = datetime.now() + priority_deadlines[ticket.priority]

@@ -18,6 +18,7 @@ from config.db import init_roles
 
 from config.db import get_db, init_roles
 from services.ticket_service import actualizar_prioridad_y_deadline
+from passlib.context import CryptContext
 
 # Crear las tablas en la base de datos
 create_tables()
