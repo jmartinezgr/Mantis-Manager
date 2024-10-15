@@ -32,13 +32,13 @@ class User(Base):
 
     __tablename__ = 'user'
 
-    id = Column(String(12), primary_key=True)
+    id = Column(String(500), primary_key=True)
     password = Column(String(500), nullable=False)
-    first_name = Column(String(50), nullable=False)
-    last_name = Column(String(50), nullable=False)
-    email = Column(String(14), nullable=False)
-    phone = Column(String(14), nullable=False)
-    image_field = Column(String(50), nullable=True, default=None)
+    first_name = Column(String(500), nullable=False)
+    last_name = Column(String(500), nullable=False)
+    email = Column(String(500), nullable=False)
+    phone = Column(String(500), nullable=False)
+    image_field = Column(String(500), nullable=True, default=None)
     role_id = Column(Integer, ForeignKey('role.id'))
     role = relationship("Role", back_populates="user")
 
