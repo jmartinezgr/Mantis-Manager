@@ -32,5 +32,5 @@ class Solicitud(Base):
     ticket_id = Column(Integer, ForeignKey('ticket.id'), nullable=False)
     ticket = relationship("Ticket", back_populates="solicitudes")
 
-    status = Column(String, default='pendiente', nullable=False)
-    type = Column(String, nullable=False)
+    status = Column(String(20), default='pendiente', nullable=False)
+    type = Column(String(20), nullable=False)
