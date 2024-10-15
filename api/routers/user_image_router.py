@@ -45,7 +45,7 @@ class ImageResponse(BaseModel):
     response_description="URL donde se encuentra la imagen.",
 )
 async def upload_user_image(
-    user_id: int = Path(..., title="ID del usuario", description="ID del usuario al que corresponde la imagen"),
+    user_id: str = Path(..., title="ID del usuario", description="ID del usuario al que corresponde la imagen"),
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     token: str = Depends(HTTPBearer()),
@@ -115,7 +115,7 @@ async def upload_user_image(
     image_url = request.url_for("get_user_image", user_id=user_id)
 
     # Retornar la respuesta con la URL de la imagen
-    return ImageResponse(path=image_url)
+    return ImageResponse(path=str(image_url))
 
 
 @user_image_router.get(
@@ -127,7 +127,7 @@ async def upload_user_image(
     response_class=FileResponse 
 )
 async def get_user_image(
-    user_id: int = Path(..., title="ID del usuario", description="ID del usuario al que corresponde la imagen"),
+    user_id: str = Path(..., title="ID del usuario", description="ID del usuario al que corresponde la imagen"),
     db: Session = Depends(get_db),
     token: str = Depends(HTTPBearer()),
     request: Request = None
