@@ -1,27 +1,28 @@
-from datetime import timedelta, datetime
-from sqlalchemy import case
+from datetime import datetime, timedelta
 import json
 
-from typing import Optional, List
-from fastapi import APIRouter, Depends, HTTPException, Request, Path,Query
+from typing import List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
+from fastapi.security import HTTPBearer
 from sqlalchemy import func
 from sqlalchemy.orm import Session
-from fastapi.security import HTTPBearer
 
 from config.db import get_db
-from models.ticket_model import Ticket
-from models.machine_model import Machine 
-from models.user_model import User
 from models.historial_model import Registro
+from models.machine_model import Machine
 from models.solicitud_model import Solicitud
+from models.ticket_model import Ticket
+from models.user_model import User
 from schemas.ticket_schema import (
-    TicketCreate, 
-    TicketStandartResponse, 
-    TicketSolicitudInfo,
-    TicketCloseInfo,
+    Record,
     PaginatedTickets,
-    Record
+    TicketCloseInfo,
+    TicketCreate,
+    TicketStandartResponse,
+    TicketSolicitudInfo
 )
+
 
 bearer_scheme = HTTPBearer()
 

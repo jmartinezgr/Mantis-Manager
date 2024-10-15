@@ -1,11 +1,21 @@
 import os
 import shutil
 from uuid import uuid4
-from fastapi import APIRouter, Depends, File, HTTPException, Path, Request, UploadFile, Form
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Path,
+    Request,
+    UploadFile,
+)
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPBearer
-from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
+
 from config.db import get_db
 from models.user_model import User
 from schemas.user_schema import ImageResponse

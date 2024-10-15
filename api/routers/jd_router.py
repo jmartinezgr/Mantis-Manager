@@ -1,8 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, Query, status, Path
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, HTTPException, Request, Query, Path
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from passlib.context import CryptContext
 
 from schemas.user_schema import UserUpdate, PaginatedUsers, UserData
@@ -112,7 +110,7 @@ async def update_user_info(
     # Obtener el usuario a actualizar
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+        return HTTPException(status_code=404, detail="Usuario no encontrado")
         
     # Actualizar los campos proporcionados
     if user_update.first_name:
@@ -164,18 +162,14 @@ async def register(
     # Verificar si el id ya está registrado
     existing_user = db.query(User).filter(User.id == data.id).first()
     if existing_user:
-        return JSONResponse(status_code=400, content={
-            "error": "El id ya está registrado"
-        })
+        return HTTPException(status_code=400, detail="El ID de usuario ya está registrado")
 
     # Normalizar los nombres de los roles en la consulta
     role = db.query(Role).filter(Role.id == data.role).first()
     
     if not role:
-        return JSONResponse(status_code=404, content={
-            "error": "El rol no existe"
-        })
-        
+        return HTTPException(status_code=404, detail="Rol no encontrado")
+
     # Crear el nuevo usuario con los datos proporcionados
     new_user = User(
         id=data.id,
@@ -225,7 +219,7 @@ async def delete_user(
     # Obtener el usuario a eliminar
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
-        return JSONResponse(status_code=404, content={"error": "Usuario no encontrado"})
+        return HTTPException(status_code=404, detail="Usuario no encontrado")
 
     # Eliminar el usuario de la base de datos
     db.delete(user)
