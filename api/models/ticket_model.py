@@ -36,8 +36,8 @@ class Ticket(Base):
     __tablename__ = 'ticket'
 
     id = Column(Integer, Identity(start=1, increment=1), primary_key=True)  
-    description = Column(String, nullable=False)
-    state = Column(String, default='pendiente', nullable=False)
+    description = Column(String(2000), nullable=False)
+    state = Column(String(2000), default='pendiente', nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(),
                         nullable=False)
     priority = Column(Enum('alta', 'media', 'baja', name='ticket_priority'),
@@ -49,12 +49,12 @@ class Ticket(Base):
     machine = relationship("Machine", back_populates="tickets")
 
     # Relación con el creador del ticket
-    created_by = Column(String, ForeignKey('user.id'), nullable=False)
+    created_by = Column(String(12), ForeignKey('user.id'), nullable=False)
     creator = relationship("User", foreign_keys=[created_by],
                            back_populates="created_tickets")
 
     # Relación con el trabajador asignado al ticket
-    assigned_to = Column(String, ForeignKey('user.id'), nullable=True)
+    assigned_to = Column(String(12), ForeignKey('user.id'), nullable=True)
     assignee = relationship("User", foreign_keys=[assigned_to],
                             back_populates="assigned_tickets")
 
