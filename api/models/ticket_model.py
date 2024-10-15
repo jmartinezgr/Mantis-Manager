@@ -45,7 +45,7 @@ class Ticket(Base):
     deadline = Column(DateTime, nullable=True)
 
     # Relación con la tabla Machine
-    machine_id = Column(Integer, ForeignKey('machine.id'), nullable=False)
+    machine_id = Column(String(3), ForeignKey('machine.id'), nullable=False)
     machine = relationship("Machine", back_populates="tickets")
 
     # Relación con el creador del ticket
